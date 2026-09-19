@@ -20,6 +20,7 @@ env/
 .pytest_cache/
 .coverage
 htmlcov/
+.tox/
 
 # Database
 *.db
@@ -32,7 +33,7 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Models (كبيرة)
+# Models
 ai/detection/models/*.pt
 *.h5
 *.onnx
@@ -41,5 +42,5 @@ ai/detection/models/*.pt
 storage/*
 !storage/.gitkeep
 
-# GitHub workflows (مؤقتًا حتى تحصل على توكن صحيح)
-.github/workflows/
+# GitHub workflows (مؤقتًا)
+.github/
