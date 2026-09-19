@@ -1,0 +1,14 @@
+<<<<<<< HEAD
+pre-commit==3.8.0
+ruff==0.6.9
+pytest==8.3.3
+=======
+fastapi
+uvicorn[standard]
+python-multipart
+opencv-python
+onnxruntime
+pytesseract
+sqlalchemy
+pydantic-settings
+>>>>>>> f2d72cbd4e3f9478b21a8bd5746d3ae28b8b53ce

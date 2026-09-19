@@ -1,0 +1,27 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-ra -q --strict-markers --disable-warnings"
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration",
+    "ai: marks tests related to AI service",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["backend/app", "ai"]
+omit = [
+    "*/tests/*",
+    "*/alembic/*",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]

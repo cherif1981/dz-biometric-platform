@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+<<<<<<< HEAD
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  ai-service:
+    build:
+      context: ./ai
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./ai:/app
+      - ./storage:/app/storage
+
+  backend:
+    build:
+      context: ./backend
+=======
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: dz-biometric-backend
+>>>>>>> f2d72cbd4e3f9478b21a8bd5746d3ae28b8b53ce
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+<<<<<<< HEAD
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      ai-service:
+        condition: service_started
+    volumes:
+      - ./storage:/app/storage
+
+volumes:
+  pgdata:
+=======
+    volumes:
+      - ./backend:/app/backend
+      - ./ai:/app/ai
+      - storage:/app/storage
+    restart: unless-stopped
+
+volumes:
+  storage:
+>>>>>>> f2d72cbd4e3f9478b21a8bd5746d3ae28b8b53ce

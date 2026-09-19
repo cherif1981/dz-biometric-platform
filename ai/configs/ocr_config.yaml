@@ -1,0 +1,13 @@
+fields:
+  nin:
+    pattern: "\\b\\d{18}\\b"
+    label: "NIN"
+  nom:
+    pattern: "(?:Nom|اللقب)[:\\s]+([A-Z\\u0600-\\u06FF\\s]+)"
+    label: "Nom"
+  prenom:
+    pattern: "(?:Pr[eé]nom|الاسم)[:\\s]+([A-Z\\u0600-\\u06FF\\s]+)"
+    label: "Prénom"
+  date_naissance:
+    pattern: "\\b\\d{2}[/.-]\\d{2}[/.-]\\d{4}\\b"
+    label: "Date de naissance"

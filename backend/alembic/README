@@ -1,0 +1,7 @@
+# Alembic migrations
+
+## Commands
+
+- Generate a new migration (autogenerate):
+  ```bash
+  alembic revision --autogenerate -m "description"

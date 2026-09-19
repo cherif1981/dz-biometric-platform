@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Database
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Models (كبيرة)
+ai/detection/models/*.pt
+*.h5
+*.onnx
+
+# Storage
+storage/*
+!storage/.gitkeep
+
+# GitHub workflows (مؤقتًا حتى تحصل على توكن صحيح)
+.github/workflows/

@@ -1,0 +1,21 @@
+detection:
+  model_path: "detection/models/card_detection.pt"
+  confidence_threshold: 0.5
+  device: "cpu"
+
+ocr:
+  languages: ["fra", "ara"]
+  psm: 6
+  oem: 3
+  min_confidence: 60
+
+face:
+  detector_model: "hog"
+  embedding_model: "large"
+  tolerance: 0.6
+  liveness_threshold: 0.7
+
+preprocessing:
+  target_width: 1000
+  denoise_strength: 10
+  contrast_clip: 2.0
