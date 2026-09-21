@@ -1,24 +1,12 @@
-<<<<<<< HEAD
 fastapi==0.115.0
-uvicorn[standard]==0.30.6
-python-multipart==0.0.9
+uvicorn[standard]==0.32.0
+python-multipart==0.0.12
 pydantic==2.9.2
-pydantic-settings==2.5.2
-numpy==2.1.1
+pydantic-settings==2.6.0
 opencv-python-headless==4.10.0.84
 Pillow==10.4.0
+numpy==1.26.4
 pytesseract==0.3.13
-PyYAML==6.0.2
-torch==2.4.1
-torchvision==0.19.1
 face-recognition==1.3.0
-=======
-fastapi
-uvicorn[standard]
-python-multipart
-opencv-python
-onnxruntime
-pytesseract
-sqlalchemy
-pydantic-settings
->>>>>>> f2d72cbd4e3f9478b21a8bd5746d3ae28b8b53ce
+dlib==19.24.6
+python-dotenv==1.0.1

@@ -1,74 +1,75 @@
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import Dict, List, Optional
 
-from detection.card_detector import CardDetector
-from face.face_detector import FaceDetector
-from face.face_embedding import FaceEmbedder
-from face.face_verification import verify_faces
-from ocr.ocr_engine import OCREngine
-from ocr.parser import parse_fields
-from preprocessing import (
-    correct_perspective,
-    denoise_image,
-    enhance_contrast,
-    resize_image,
+from ai.inference.pipeline import pipeline
+
+app = FastAPI(
+    title="DZ Biometric AI Service",
+    version="1.0.0",
+    description="خدمة OCR والتحقق من الوجه للبطاقات البيومترية الجزائرية"
 )
-from validation.document_validator import validate_document
 
-app = FastAPI(title="DZ Biometric AI Service", version="0.1.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
+)
 
-detector = CardDetector()
-ocr = OCREngine()
-face_det = FaceDetector()
-face_emb = FaceEmbedder()
+class HealthResponse(BaseModel):
+    status: str
+    version: str
 
+class OCRResponse(BaseModel):
+    success: bool
+    text: Optional[str] = None
+    confidence: Optional[float] = None
+    fields: Optional[Dict] = None
+    validation: Optional[Dict] = None
+    processing_time: Optional[float] = None
+    error: Optional[str] = None
 
-class FaceCompareRequest(BaseModel):
-    encoding1: list[float]
-    encoding2: list[float]
+class FaceDetectResponse(BaseModel):
+    count: int
+    locations: List[List[int]]
+    processing_time: float
 
+class FaceVerifyResponse(BaseModel):
+    success: bool
+    verified: bool
+    similarity: float
+    distance: float
+    message: str
+    processing_time: Optional[float] = None
 
-@app.get("/health")
+@app.get("/", response_model=HealthResponse)
 def health():
-    return {"status": "ok", "service": "ai"}
+    return {"status": "healthy", "version": "1.0.0"}
 
+@app.post("/api/v1/ocr/extract", response_model=OCRResponse)
+async def ocr_extract(file: UploadFile = File(...)):
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(400, "يجب رفع صورة صالحة")
+    try:
+        contents = await file.read()
+        return pipeline.process_card(contents)
+    except Exception as e:
+        raise HTTPException(500, f"خطأ: {str(e)}")
 
-@app.post("/process")
-async def process(file: UploadFile = File(...)):
-    import cv2
-    import numpy as np
+@app.post("/api/v1/face/detect", response_model=FaceDetectResponse)
+async def face_detect(file: UploadFile = File(...)):
+    contents = await file.read()
+    return pipeline.detect_faces(contents)
 
-    data = await file.read()
-    arr = np.frombuffer(data, np.uint8)
-    img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-    if img is None:
-        raise HTTPException(400, "Image invalide")
+@app.post("/api/v1/face/verify", response_model=FaceVerifyResponse)
+async def face_verify(
+    card_image: UploadFile = File(...),
+    selfie_image: UploadFile = File(...)
+):
+    img1 = await card_image.read()
+    img2 = await selfie_image.read()
+    return pipeline.verify_faces(img1, img2)
 
-    img = resize_image(img)
-    img = denoise_image(img)
-    img = enhance_contrast(img)
-
-    corners = detector.detect(img)
-    if corners is not None:
-        img = correct_perspective(img, corners)
-
-    text = ocr.extract_text(img)
-    fields = parse_fields(text)
-    validation = validate_document(fields)
-
-    locations = face_det.detect(img)
-    face_encoding = None
-    if locations:
-        face_encoding = face_emb.embed(img, locations[0])
-
-    return {
-        "fields": fields,
-        "validation": validation,
-        "raw_text": text,
-        "face_encoding": face_encoding,
-    }
-
-
-@app.post("/face/compare")
-def face_compare(req: FaceCompareRequest):
-    return verify_faces(req.encoding1, req.encoding2)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

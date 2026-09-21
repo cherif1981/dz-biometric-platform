@@ -1,15 +1,16 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    tesseract-ocr tesseract-ocr-fra tesseract-ocr-ara \
-    libgl1 libglib2.0-0 cmake build-essential \
+    tesseract-ocr tesseract-ocr-ara tesseract-ocr-fra \
+    cmake build-essential libopenblas-dev liblapack-dev \
+    libx11-dev libgtk-3-dev libboost-python-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY requirements.txt .
+COPY ai/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+COPY ai/ ./ai/
+COPY .env* ./
 
-COPY . .
-
-EXPOSE 8001
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+EXPOSE 8000
+CMD ["uvicorn", "ai.main:app", "--host", "0.0.0.0", "--port", "8000"]
