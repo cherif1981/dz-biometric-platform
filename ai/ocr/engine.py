@@ -1,27 +1,33 @@
+"""محرك OCR للنصوص العربية والفرنسية"""
 import pytesseract
-import numpy as np
-from typing import Dict
-from ai.configs.settings import settings
 
-class OCREngine:
-    def extract(self, image: np.ndarray) -> Dict:
-        config = f"--oem {settings.OCR_OEM} --psm {settings.OCR_PSM}"
-        data = pytesseract.image_to_data(
-            image, lang=settings.OCR_LANGUAGES,
-            config=config, output_type=pytesseract.Output.DICT
-        )
-        words, confs = [], []
-        for i, txt in enumerate(data["text"]):
-            if txt.strip():
-                words.append(txt)
-                try:
-                    confs.append(float(data["conf"][i]))
-                except (ValueError, TypeError):
-                    pass
-        text = " ".join(words)
-        avg_conf = sum(confs) / len(confs) if confs else 0.0
-        return {
-            "text": text,
-            "confidence": round(avg_conf, 2),
-            "word_count": len(words),
-        }
+
+def run_ocr(image, lang='ara+fra', psm=6):
+    """تشغيل OCR على الصورة"""
+    config = f'--oem 1 --psm {psm}'
+    return pytesseract.image_to_string(image, lang=lang, config=config)
+
+
+def get_ocr_data(image, lang='ara+fra', psm=6, min_confidence=30):
+    """استخراج النص مع مستويات الثقة"""
+    config = f'--oem 1 --psm {psm}'
+    data = pytesseract.image_to_data(
+        image, lang=lang, config=config,
+        output_type=pytesseract.Output.DICT
+    )
+
+    results = []
+    n = len(data['text'])
+    for i in range(n):
+        text = data['text'][i].strip()
+        conf = int(data['conf'][i])
+        if text and conf > min_confidence:
+            results.append({
+                'text': text,
+                'confidence': conf,
+                'x': data['left'][i],
+                'y': data['top'][i],
+                'w': data['width'][i],
+                'h': data['height'][i]
+            })
+    return results
