@@ -1,28 +1,23 @@
-from ai.face.alignment import align_face
+import face_recognition
+import numpy as np
+import cv2
+from typing import Dict, Optional, Tuple
+from ai.configs.settings import settings
+
+# محاولة استخدام MediaPipe للمحاذاة
+try:
+    from ai.face.mediapipe_alignment import align_face, get_aligner
+    HAS_MEDIAPIPE = True
+except ImportError:
+    HAS_MEDIAPIPE = False
+
 
 class FaceRecognizer:
-    # ... (الكود السابق)
-
-    def encode(self, image: np.ndarray) -> Optional[Tuple[np.ndarray, float]]:
-        # أولاً: حاول المحاذاة
-        aligned = align_face(image, output_size=(160, 160))  # dlib يفضل \~160
-        
-        if aligned is not None:
-            image_to_encode = aligned
-            # الوجه أصبح محاذاً، نعتبر الجودة أعلى
-            quality_bonus = 0.15
-        else:
-            image_to_encode = self._to_rgb(image)
-            quality_bonus = 0.0
-
-        # باقي الكود كما هو (face_locations + face_encodings)
-        # ...
     def __init__(self):
         self.threshold = settings.FACE_THRESHOLD
-        self.num_jitters = settings.FACE_NUM_JITTERS
+        self.num_jitters = getattr(settings, "FACE_NUM_JITTERS", 2)
         self.encoding_model = getattr(settings, "FACE_ENCODING_MODEL", "large")
         self.detection_model = getattr(settings, "FACE_MODEL", "hog")
-        self.min_face_size = getattr(settings, "FACE_MIN_SIZE", 80)
 
     def _to_rgb(self, image: np.ndarray) -> np.ndarray:
         if image.ndim == 2:
@@ -31,54 +26,49 @@ class FaceRecognizer:
             return cv2.cvtColor(image, cv2.COLOR_BGRA2RGB)
         return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    def _face_quality(self, image: np.ndarray, location: Tuple[int, int, int, int]) -> float:
-        """تقييم جودة الوجه (حجم + وضوح)."""
-        top, right, bottom, left = location
-        h, w = bottom - top, right - left
-        if h < self.min_face_size or w < self.min_face_size:
-            return 0.0
-
-        face = image[top:bottom, left:right]
-        if face.size == 0:
-            return 0.0
-
-        gray = cv2.cvtColor(face, cv2.COLOR_RGB2GRAY) if face.ndim == 3 else face
-        # وضوح (Laplacian variance)
-        sharpness = cv2.Laplacian(gray, cv2.CV_64F).var()
-        size_score = min(1.0, (h * w) / (150 * 150))
-        sharp_score = min(1.0, sharpness / 300.0)
-        return round(0.6 * size_score + 0.4 * sharp_score, 3)
-
     def encode(self, image: np.ndarray) -> Optional[Tuple[np.ndarray, float]]:
-        """يرجع (embedding, quality_score) أو None."""
-        rgb = self._to_rgb(image)
+        """
+        Returns (embedding, quality_score) or None.
+        Uses MediaPipe alignment when available.
+        """
+        quality = 0.5
 
+        # ===== 1. محاولة المحاذاة بـ MediaPipe =====
+        if HAS_MEDIAPIPE:
+            aligned = align_face(image, output_size=(160, 160))
+            if aligned is not None:
+                rgb = aligned
+                quality = get_aligner().face_quality_score(image)
+                quality = max(quality, 0.6)  # المحاذاة الناجحة تعني جودة أفضل
+            else:
+                rgb = self._to_rgb(image)
+        else:
+            rgb = self._to_rgb(image)
+
+        # ===== 2. استخراج الـ Embedding =====
         locations = face_recognition.face_locations(
-            rgb,
-            model=self.detection_model,
-            number_of_times_to_upsample=getattr(settings, "FACE_UPSAMPLE", 1),
+            rgb, model=self.detection_model
         )
         if not locations:
             return None
 
-        # اختيار أكبر وجه (الأكثر احتمالاً أنه الوجه الرئيسي)
-        locations = sorted(locations, key=lambda loc: (loc[2] - loc[0]) * (loc[1] - loc[3]), reverse=True)
-        best_loc = locations[0]
-
-        quality = self._face_quality(rgb, best_loc)
-        if quality < 0.25:
-            return None  # وجه رديء الجودة
+        # أكبر وجه
+        locations = sorted(
+            locations,
+            key=lambda loc: (loc[2] - loc[0]) * (loc[1] - loc[3]),
+            reverse=True,
+        )
 
         encodings = face_recognition.face_encodings(
             rgb,
-            known_face_locations=[best_loc],
+            known_face_locations=[locations[0]],
             num_jitters=self.num_jitters,
             model=self.encoding_model,
         )
         if not encodings:
             return None
 
-        return encodings[0], quality
+        return encodings[0], round(quality, 3)
 
     def verify(self, img1: np.ndarray, img2: np.ndarray) -> Dict:
         res1 = self.encode(img1)
@@ -93,6 +83,7 @@ class FaceRecognizer:
                 "quality_card": 0.0 if res1 is None else res1[1],
                 "quality_selfie": 0.0 if res2 is None else res2[1],
                 "message": "لم يتم العثور على وجه واضح في إحدى الصورتين",
+                "alignment": "mediapipe" if HAS_MEDIAPIPE else "none",
             }
 
         enc1, q1 = res1
@@ -101,8 +92,6 @@ class FaceRecognizer:
         distance = float(face_recognition.face_distance([enc1], enc2)[0])
         similarity = max(0.0, 1.0 - distance)
         verified = distance < self.threshold
-
-        # تقليل الثقة إذا كانت جودة إحدى الصورتين منخفضة
         confidence = similarity * min(q1, q2)
 
         return {
@@ -114,4 +103,5 @@ class FaceRecognizer:
             "quality_card": q1,
             "quality_selfie": q2,
             "message": "✅ تطابق" if verified else "❌ لا يوجد تطابق",
+            "alignment": "mediapipe" if HAS_MEDIAPIPE else "none",
         }
