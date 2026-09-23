@@ -12,3 +12,4 @@ dlib==19.24.6
 python-dotenv==1.0.1
 insightface==0.7.3
 onnxruntime==1.19.2
+mediapipe>=0.10.9
