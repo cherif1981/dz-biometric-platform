@@ -1,23 +1,26 @@
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, File, HTTPException, UploadFile
 
-from app.api.dependencies import get_db
-from app.services.face_service import FaceService
 from app.services.verification_service import VerificationService
 
-router = APIRouter(prefix="/api/verification", tags=["verification"])
+router = APIRouter(prefix="/api/v1/verification", tags=["verification"])
 
 
-@router.post("/face")
-async def verify_face(
-    selfie: UploadFile = File(...),
-    db: Session = Depends(get_db),
+@router.post("")
+async def verify_identity(
+    identity_document: UploadFile = File(..., description="صورة البطاقة البيومترية"),
+    selfie: UploadFile = File(..., description="صورة السيلفي"),
 ):
-    data = await selfie.read()
-    if not data:
-        raise HTTPException(400, "Fichier vide")
-    face = FaceService()
-    encoding = await face.encode(data)
-    if not encoding:
-        raise HTTPException(422, "Aucun visage détecté")
-    return {"encoding": encoding}
+    card_data = await identity_document.read()
+    selfie_data = await selfie.read()
+
+    if not card_data or not selfie_data:
+        raise HTTPException(status_code=400, detail="يجب رفع الصورتين")
+
+    service = VerificationService()
+    result = await service.full_verify(
+        card_bytes=card_data,
+        selfie_bytes=selfie_data,
+        card_filename=identity_document.filename or "card.jpg",
+        selfie_filename=selfie.filename or "selfie.jpg",
+    )
+    return result
