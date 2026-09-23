@@ -10,10 +10,13 @@ class Settings:
     OCR_PSM = 6
     OCR_OEM = 3
 
-    # الوجه
-    FACE_MODEL = "hog"
-    FACE_THRESHOLD = 0.6
-    FACE_NUM_JITTERS = 1
+    # ===== Face Recognition (محسّن) =====
+    FACE_MODEL = "cnn"              # أدق من hog (يحتاج GPU أفضل، أو يبقى hog)
+    FACE_ENCODING_MODEL = "large"   # أدق من small
+    FACE_THRESHOLD = 0.55           # أكثر تشدداً (كان 0.6)
+    FACE_NUM_JITTERS = 3            # زيادة الدقة (كان 1)
+    FACE_MIN_SIZE = 80              # أقل حجم مقبول للوجه بالبكسل
+    FACE_UPSAMPLE = 1               # يساعد في اكتشاف الوجوه الصغيرة
 
     # البطاقة
     CARD_ASPECT_RATIO_MIN = 1.3
