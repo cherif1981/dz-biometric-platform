@@ -1,11 +1,22 @@
-import face_recognition
-import numpy as np
-import cv2
-from typing import Dict, Optional, Tuple
-from ai.configs.settings import settings
-
+from ai.face.alignment import align_face
 
 class FaceRecognizer:
+    # ... (الكود السابق)
+
+    def encode(self, image: np.ndarray) -> Optional[Tuple[np.ndarray, float]]:
+        # أولاً: حاول المحاذاة
+        aligned = align_face(image, output_size=(160, 160))  # dlib يفضل \~160
+        
+        if aligned is not None:
+            image_to_encode = aligned
+            # الوجه أصبح محاذاً، نعتبر الجودة أعلى
+            quality_bonus = 0.15
+        else:
+            image_to_encode = self._to_rgb(image)
+            quality_bonus = 0.0
+
+        # باقي الكود كما هو (face_locations + face_encodings)
+        # ...
     def __init__(self):
         self.threshold = settings.FACE_THRESHOLD
         self.num_jitters = settings.FACE_NUM_JITTERS
