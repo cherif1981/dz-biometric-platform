@@ -3,12 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import auth, documents, ocr, users, verification
 from app.core.config import settings
-from app.core.logging import setup_logging
 
-setup_logging()
+app = FastAPI(
+    title=settings.app_name,
+    version="0.1.0",
+    description="DZ Biometric Platform - Algerian Identity Verification API",
+)
 
-app = FastAPI(title=settings.app_name, version="0.1.0")
-
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,6 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Routers
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(documents.router)
@@ -26,4 +29,13 @@ app.include_router(verification.router)
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "backend"}
+    return {"status": "ok", "service": "backend", "version": "0.1.0"}
+
+
+@app.get("/")
+def root():
+    return {
+        "message": "DZ Biometric Platform API",
+        "docs": "/docs",
+        "health": "/health",
+    }
