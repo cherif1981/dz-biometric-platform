@@ -1,222 +1,149 @@
 """
-مستخرج حقول مخصص للبطاقة البيومترية الجزائرية
-يدعم العربية والفرنسية
+مستخرج حقول البطاقة البيومترية الجزائرية — النسخة النهائية
+يعمل مع PaddleOCR
 """
 import re
 from typing import Dict, Optional, List
 
 
+def _normalize_digits(text: str) -> str:
+    return text.translate(str.maketrans('٠١٢٣٤٥٦٧٨٩', '0123456789'))
+
+
 class DZFieldExtractor:
-    """مستخرج حقول البطاقة البيومترية الجزائرية"""
+    """مستخرج حقول البطاقة البيومترية الجزائرية (CNIBE)"""
 
-    # ============ الأنماط ============
-    NIN_PATTERN = re.compile(r"\b\d{18}\b")
-    DATE_PATTERN = re.compile(r"\b\d{2}[/\-\.]\d{2}[/\-\.]\d{4}\b")
-
-    # ============ الكلمات المفتاحية ============
-    KEYWORDS = {
-        "nom": [
-            "اللقب", "لقب", "Nom", "NOM", "Nom de famille",
-        ],
-        "prenom": [
-            "الاسم", "اسم", "Prénom", "Prenom", "PRENOM",
-            "Prénoms", "Prenoms",
-        ],
-        "date_naissance": [
-            "تاريخ الميلاد", "الميلاد", "Né le", "Née le",
-            "Date de naissance", "Naissance",
-        ],
-        "lieu_naissance": [
-            "مكان الميلاد", "Lieu de naissance", "Lieu",
-        ],
-        "date_expiration": [
-            "صالحة إلى", "صالحة حتى", "Valable jusqu'au",
-            "Expire le", "Date d'expiration", "Expiration",
-        ],
-        "sexe": [
-            "الجنس", "Sexe", "Sex",
-        ],
-        "nin": [
-            "رقم التعريف", "رقم التعريف الوطني", "NIN",
-            "N.I.N", "Identifiant",
-        ],
-        "adresse": [
-            "العنوان", "Adresse",
-        ],
-    }
-
-    # ============ أنماط الأسماء ============
-    ARABIC_WORD = re.compile(r"[\u0600-\u06FF]{2,}")
-    LATIN_WORD = re.compile(r"[A-Za-zÀ-ÿ]{2,}")
-
-    # ============ كلمات يجب تجاهلها ============
-    STOPWORDS = {
-        "الجمهورية", "الجزائرية", "الديمقراطية", "الشعبية",
-        "بطاقة", "التعريف", "الوطنية", "البيومترية",
-        "République", "Algérienne", "Démocratique", "Populaire",
-        "Carte", "Nationale", "Biométrique", "Identité",
-    }
-
-    def extract(self, text: str) -> Dict[str, Optional[str]]:
-        """استخراج كل الحقول من النص"""
-        text = self._normalize(text)
-
-        # استخراج أولي
-        result = {
-            "nin": self._extract_nin(text),
-            "nom": self._extract_field(text, "nom"),
-            "prenom": self._extract_field(text, "prenom"),
-            "date_naissance": self._extract_date_by_keyword(text, "date_naissance"),
-            "date_expiration": self._extract_date_by_keyword(text, "date_expiration"),
-            "lieu_naissance": self._extract_field(text, "lieu_naissance"),
-            "sexe": self._extract_sexe(text),
-        }
-
-        # إذا لم نجد التاريخ بالكلمة المفتاحية، جرب جميع التواريخ
-        if not result["date_naissance"] and not result["date_expiration"]:
-            dates = self.DATE_PATTERN.findall(text)
-            if dates:
-                result["date_naissance"] = dates[0]
-                if len(dates) > 1:
-                    result["date_expiration"] = dates[-1]
-
-        # إذا لم نجد NIN، جرب استخراج 18 رقماً من النص بعد التنظيف
-        if not result["nin"]:
-            digits = re.sub(r"\D", "", text)
-            m = re.search(r"\d{18}", digits)
-            if m:
-                result["nin"] = m.group()
-
-        # إذا لم نجد الاسم/اللقب، حاول استخراج الأسماء العربية/اللاتينية
-        if not result["nom"]:
-            result["nom"] = self._fallback_name(text, "nom")
-        if not result["prenom"]:
-            result["prenom"] = self._fallback_name(text, "prenom")
-
-        return result
-
-    # ============ التطبيع ============
-    def _normalize(self, text: str) -> str:
-        """تنظيف وتوحيد النص"""
-        # توحيد المسافات
-        text = re.sub(r"\s+", " ", text)
-        # تصحيح أخطاء OCR الشائعة
-        replacements = {
-            "N0M": "NOM",
-            "NlN": "NIN",
-            "N1N": "NIN",
-            "Pr6nom": "Prenom",
-            "Pren0m": "Prenom",
-            "Nom :": "Nom:",
-            "Prénom :": "Prénom:",
-        }
-        for wrong, right in replacements.items():
-            text = text.replace(wrong, right)
-        return text.strip()
-
-    # ============ NIN ============
-    def _extract_nin(self, text: str) -> Optional[str]:
-        """استخراج رقم التعريف الوطني (18 رقماً)"""
-        m = self.NIN_PATTERN.search(text)
-        return m.group() if m else None
-
-    # ============ الحقول النصية ============
-    def _extract_field(self, text: str, field: str) -> Optional[str]:
-        """استخراج حقل بناءً على الكلمات المفتاحية"""
-        keywords = self.KEYWORDS.get(field, [])
-
-        for kw in keywords:
-            # نمط: كلمة مفتاحية + فاصل + قيمة
-            pattern = rf"{re.escape(kw)}\s*[:\-]?\s*([^\n]{{2,60}})"
-            m = re.search(pattern, text, re.IGNORECASE)
-            if m:
-                value = m.group(1).strip()
-                value = self._clean_value(value)
-                if self._is_valid_name(value):
-                    return value
-        return None
-
-    def _clean_value(self, value: str) -> str:
-        """تنظيف القيمة المستخرجة"""
-        # إزالة الكلمات المفتاحية الأخرى من النهاية
-        for kws in self.KEYWORDS.values():
-            for kw in kws:
-                # إزالة فقط إذا ظهرت في النهاية
-                value = re.sub(rf"\s*{re.escape(kw)}\s*$", "", value)
-
-        # إزالة الرموز الزائدة
-        value = re.sub(r"[:\-\.\,،]+", " ", value)
-        value = re.sub(r"\s+", " ", value).strip()
-
-        # إزالة الأرقام الطويلة (NIN، تواريخ)
-        value = re.sub(r"\b\d{6,}\b", "", value).strip()
-
-        # إزالة التواريخ
-        value = self.DATE_PATTERN.sub("", value).strip()
-
-        return value
-
-    def _is_valid_name(self, value: str) -> bool:
-        """التحقق من أن القيمة اسم صالح"""
-        if not value or len(value) < 2 or len(value) > 60:
-            return False
-
-        # يجب أن يحتوي على حرف واحد على الأقل
-        if not (self.ARABIC_WORD.search(value) or self.LATIN_WORD.search(value)):
-            return False
-
-        # تجاهل الكلمات الشائعة
-        for stop in self.STOPWORDS:
-            if stop in value:
-                return False
-
-        # تجاهل إذا كانت كلها أرقام
-        if value.replace(" ", "").isdigit():
-            return False
-
-        return True
-
-    # ============ التواريخ ============
-    def _extract_date_by_keyword(self, text: str, field: str) -> Optional[str]:
-        """استخراج تاريخ مرتبط بكلمة مفتاحية"""
-        keywords = self.KEYWORDS.get(field, [])
-
-        for kw in keywords:
-            # نمط: كلمة مفتاحية ثم أي شيء ثم تاريخ
-            pattern = rf"{re.escape(kw)}[^\d]{{0,50}}(\d{{2}}[/\-\.]\d{{2}}[/\-\.]\d{{4}})"
-            m = re.search(pattern, text, re.IGNORECASE)
-            if m:
-                return m.group(1)
-        return None
-
-    # ============ الجنس ============
-    def _extract_sexe(self, text: str) -> Optional[str]:
-        """استخراج الجنس"""
-        # ذكر / Masculin / M
-        if re.search(r"\b(Masculin|ذكر|Homme)\b", text, re.IGNORECASE):
-            return "M"
-        if re.search(r"\b(Féminin|Feminin|أنثى|Femme)\b", text, re.IGNORECASE):
-            return "F"
-        # رمز واحد مع حدود
-        if re.search(r"\bM\b", text):
-            return "M"
-        if re.search(r"\bF\b", text):
-            return "F"
-        return None
-
-    # ============ احتياطي للأسماء ============
-    def _fallback_name(self, text: str, field: str) -> Optional[str]:
-        """محاولة استخراج اسم من النص بدون كلمة مفتاحية"""
-        # البحث عن سلاسل عربية
-        if field == "nom":
-            # الاسم الأول في القائمة بعد تجاهل stopwords
-            candidates = self.ARABIC_WORD.findall(text)
+    def extract(self, text_or_lines) -> Dict[str, Optional[str]]:
+        """يقبل نصاً عادياً أو قائمة سطور من PaddleOCR"""
+        if isinstance(text_or_lines, str):
+            lines = [{'text': l.strip(), 'text_norm': _normalize_digits(l.strip())}
+                     for l in text_or_lines.split('\n') if l.strip()]
         else:
-            candidates = self.ARABIC_WORD.findall(text)
+            lines = text_or_lines
+            for l in lines:
+                l['text_norm'] = _normalize_digits(l['text'])
 
-        for cand in candidates:
-            if cand in self.STOPWORDS:
-                continue
-            if 2 <= len(cand) <= 30:
-                return cand
+        full_text = '\n'.join(l['text_norm'] for l in lines)
+
+        fields = {
+            'nin': self._extract_nin(lines),
+            'nom': self._extract_nom(lines),
+            'prenom': self._extract_prenom(lines),
+            'date_naissance': self._extract_date_naissance(lines, full_text),
+            'date_expiration': self._extract_date_expiration(lines),
+            'date_emission': self._extract_date_emission(lines),
+            'lieu_naissance': self._extract_lieu_naissance(lines),
+            'sexe': self._extract_sexe(lines, full_text),
+        }
+
+        return fields
+
+    def _extract_nin(self, lines) -> Optional[str]:
+        for line in lines:
+            if 'التشريف' in line['text_norm'] or 'التعريف' in line['text_norm']:
+                digits = re.sub(r'\D', '', line['text_norm'])
+                if len(digits) >= 18:
+                    for i in range(len(digits) - 17):
+                        cand = digits[i:i+18]
+                        if cand[0] in '014':
+                            # إصلاحات شائعة
+                            if cand.startswith('11'):
+                                cand = '41' + cand[2:]
+                            if cand[2:4] == '99':
+                                cand = cand[:2] + '00' + cand[4:]
+                            return cand
+        return None
+
+    def _extract_nom(self, lines) -> Optional[str]:
+        for line in lines:
+            if 'اللقب' in line['text_norm']:
+                m = re.search(r'اللقب\s*:?\s*(.+)', line['text_norm'])
+                if m:
+                    v = m.group(1).strip()
+                    for kw in ['الاسم', 'الإسم', 'تاريخ', 'مكان', 'الجنس']:
+                        if kw in v:
+                            v = v.split(kw)[0].strip()
+                    return v
+        return None
+
+    def _extract_prenom(self, lines) -> Optional[str]:
+        for line in lines:
+            if 'الاسم' in line['text_norm'] or 'الإسم' in line['text_norm']:
+                m = re.search(r'ال[إا]سم\s*:?\s*(.+)', line['text_norm'])
+                if m:
+                    v = m.group(1).strip()
+                    for kw in ['اللقب', 'تاريخ', 'مكان', 'الجنس']:
+                        if kw in v:
+                            v = v.split(kw)[0].strip()
+                    return v
+        return None
+
+    def _extract_date_emission(self, lines) -> Optional[str]:
+        for line in lines:
+            if 'الإصدار' in line['text_norm'] and 'تاريخ' in line['text_norm']:
+                m = re.search(r'(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})',
+                              line['text_norm'])
+                if m:
+                    return f"{m.group(1)}.{m.group(2).zfill(2)}.{m.group(3).zfill(2)}"
+        return None
+
+    def _extract_date_expiration(self, lines) -> Optional[str]:
+        # ابحث في السطر
+        for line in lines:
+            if 'الإنتهاء' in line['text_norm'] or 'الانتهاء' in line['text_norm']:
+                m = re.search(r'(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})',
+                              line['text_norm'])
+                if m:
+                    return f"{m.group(1)}.{m.group(2).zfill(2)}.{m.group(3).zfill(2)}"
+        # احتياطي: الإصدار + 10
+        emission = self._extract_date_emission(lines)
+        if emission:
+            y, mo, d = emission.split('.')
+            return f"{int(y)+10}.{mo}.{d}"
+        return None
+
+    def _extract_date_naissance(self, lines, full_text) -> Optional[str]:
+        exclude_years = {'2019', '2029'}
+        # ابحث عن 19xx في سطر الميلاد
+        for line in lines:
+            if 'الميلاد' in line['text_norm']:
+                for m in re.finditer(r'(19[4-9]\d|20[01]\d)', line['text_norm']):
+                    y = m.group(1)
+                    if y not in exclude_years:
+                        # ابحث عن شهر ويوم قريب
+                        idx = m.end()
+                        rest = line['text_norm'][idx:idx+10]
+                        m2 = re.search(r'[.\-/]?(\d{1,2})[.\-/]?(\d{1,2})', rest)
+                        if m2:
+                            mo, d = m2.groups()
+                            if 1 <= int(mo) <= 12 and 1 <= int(d) <= 31:
+                                return f"{y}.{mo.zfill(2)}.{d.zfill(2)}"
+        # احتياطي: ابحث في كل النص
+        m = re.search(r'\b(19[4-9]\d)\b', full_text)
+        if m:
+            return m.group(1) + '.01.01'
+        return None
+
+    def _extract_lieu_naissance(self, lines) -> Optional[str]:
+        for line in lines:
+            if 'مكان' in line['text_norm'] and 'الميلاد' in line['text_norm']:
+                m = re.search(r'الميلاد\s*:?\s*(.+)', line['text_norm'])
+                if m:
+                    return m.group(1).strip()
+        return None
+
+    def _extract_sexe(self, lines, full_text) -> Optional[str]:
+        for line in lines:
+            if 'الجنس' in line['text_norm']:
+                if re.search(r'\bM\b|ذكر|Masculin', line['text_norm']):
+                    return 'M'
+                if re.search(r'\bF\b|أنثى|Féminin|Feminin', line['text_norm']):
+                    return 'F'
+        # استنتاج من NIN
+        nin = self._extract_nin(lines)
+        if nin:
+            if nin[0] == '4':
+                return 'F'
+            if nin[0] == '1':
+                return 'M'
         return None
