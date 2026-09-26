@@ -1,41 +1,83 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import auth, documents, ocr, users, verification
+from app.api.routes import (
+    auth,
+    documents,
+    ocr,
+    users,
+    verification,
+)
 from app.core.config import settings
+
+API_V1_PREFIX = "/api/v1"
 
 app = FastAPI(
     title=settings.app_name,
-    version="0.1.0",
-    description="DZ Biometric Platform - Algerian Identity Verification API",
+    version=settings.app_version,
+    description=(
+        "DZ Biometric Platform - "
+        "Algerian Identity Verification API"
+    ),
 )
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=[
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+    ],
+    allow_headers=[
+        "Authorization",
+        "Content-Type",
+    ],
 )
 
-# Routers
-app.include_router(auth.router)
-app.include_router(users.router)
-app.include_router(documents.router)
-app.include_router(ocr.router)
-app.include_router(verification.router)
+app.include_router(
+    auth.router,
+    prefix=f"{API_V1_PREFIX}/auth",
+)
+
+app.include_router(
+    users.router,
+    prefix=f"{API_V1_PREFIX}/users",
+)
+
+app.include_router(
+    documents.router,
+    prefix=f"{API_V1_PREFIX}/documents",
+)
+
+app.include_router(
+    ocr.router,
+    prefix=f"{API_V1_PREFIX}/ocr",
+)
+
+app.include_router(
+    verification.router,
+    prefix=f"{API_V1_PREFIX}/verification",
+)
 
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "service": "backend", "version": "0.1.0"}
-
-
-@app.get("/")
-def root():
+@app.get("/health", tags=["system"])
+async def health():
     return {
-        "message": "DZ Biometric Platform API",
+        "status": "ok",
+        "service": settings.app_name,
+        "version": settings.app_version,
+    }
+
+
+@app.get("/", tags=["system"])
+async def root():
+    return {
+        "message": settings.app_name,
         "docs": "/docs",
         "health": "/health",
+        "api": API_V1_PREFIX,
     }
