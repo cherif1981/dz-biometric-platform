@@ -8,40 +8,47 @@ env/
 venv/
 .venv/
 ENV/
-build/
-dist/
-*.egg-info/
 
 # Jupyter
 .ipynb_checkpoints/
-*.ipynb
 
-# Models & Data
-ai/models/
-ai/storage/
-*.pth
-*.h5
+# Data & Models (لا ترفع بيانات حساسة!)
+*.jpg
+*.jpeg
+*.png
+*.pdf
+!docs/**/*.png   # استثناء الصور التوثيقية إن وُجدت
+*.task
 *.onnx
 *.pt
+*.pth
+*.h5
+
+# Logs
+*.log
+logs/
 
 # Environment
 .env
-.env.local
-*.env
+.env.*
+!.env.example
 
-# IDE
-.vscode/
-.idea/
-*.swp
+# Secrets
+*secret*
+*credentials*
+*.key
+*.pem
+
+# Cloudflare / ngrok
+cloudflared*
+*.deb
+ngrok*
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Colab
-sample_data/
-
-# Test images
-test_*.png
-test_*.jpg
-temp_*.jpg
+# IDE
+.vscode/
+.idea/
+*.swp
