@@ -1,17 +1,12 @@
-import httpx
-from app.core.config import settings
+"""OCR service — يستدعي AI Service."""
+from app.services.ai_client import AIService
 
 
 class OCRService:
-    def __init__(self):
-        self.base_url = settings.ai_service_url.rstrip("/")
+    @staticmethod
+    async def process(image_bytes: bytes) -> dict:
+        """Placeholder — يُستبدل في الاختبارات."""
+        return AIService.scan_card(image_bytes)
 
-    async def process(self, file_bytes: bytes, filename: str = "card.jpg") -> dict:
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            files = {"file": (filename, file_bytes, "image/jpeg")}
-            response = await client.post(
-                f"{self.base_url}/api/v1/ocr/extract",
-                files=files,
-            )
-            response.raise_for_status()
-            return response.json()
+
+ocr_service = OCRService()

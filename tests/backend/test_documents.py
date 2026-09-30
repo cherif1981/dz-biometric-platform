@@ -25,7 +25,7 @@ def test_upload_document(client, auth_headers, fake_ocr_response):
         new=AsyncMock(return_value=fake_ocr_response),
     ):
         r = client.post(
-            "/api/documents/upload",
+            "/api/v1/documents/upload",
             headers=auth_headers,
             files={"file": ("card.jpg", io.BytesIO(b"fake"), "image/jpeg")},
         )
@@ -38,7 +38,7 @@ def test_upload_document(client, auth_headers, fake_ocr_response):
 
 def test_upload_empty_file(client, auth_headers):
     r = client.post(
-        "/api/documents/upload",
+        "/api/v1/documents/upload",
         headers=auth_headers,
         files={"file": ("empty.jpg", io.BytesIO(b""), "image/jpeg")},
     )

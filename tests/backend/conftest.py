@@ -12,6 +12,7 @@ from sqlalchemy.pool import StaticPool
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["SECRET_KEY"] = "test-secret-key"
 os.environ["AI_SERVICE_URL"] = "http://test-ai"
+os.environ["REDIS_URL"] = "redis://localhost:6379/0"
 
 from app.core.database import Base  # noqa: E402
 from app.api.dependencies import get_db  # noqa: E402
@@ -80,7 +81,7 @@ def test_user(db: Session) -> User:
 @pytest.fixture
 def auth_headers(client: TestClient, test_user: User) -> dict:
     r = client.post(
-        "/api/auth/login",
+        "/api/v1/auth/login",
         data={"username": test_user.email, "password": "secret123"},
     )
     assert r.status_code == 200, r.text

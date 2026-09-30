@@ -1,6 +1,6 @@
 def test_register_success(client):
     r = client.post(
-        "/api/users/register",
+        "/api/v1/users/register",
         json={"email": "new@dz.dz", "password": "secret123"},
     )
     assert r.status_code == 200
@@ -12,7 +12,7 @@ def test_register_success(client):
 
 def test_register_duplicate(client, test_user):
     r = client.post(
-        "/api/users/register",
+        "/api/v1/users/register",
         json={"email": test_user.email, "password": "secret123"},
     )
     assert r.status_code == 400
@@ -20,7 +20,7 @@ def test_register_duplicate(client, test_user):
 
 def test_register_invalid_email(client):
     r = client.post(
-        "/api/users/register",
+        "/api/v1/users/register",
         json={"email": "not-an-email", "password": "secret123"},
     )
     assert r.status_code == 422

@@ -52,3 +52,17 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Added by Colab session
+.pytest_cache/
+.coverage
+htmlcov/
+storage/
+*.db
+*.sqlite3
+/content/

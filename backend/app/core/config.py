@@ -31,7 +31,14 @@ class Settings(BaseSettings):
     storage_path: str = "/app/storage"
 
     # CORS
-    cors_origins: list[str] = []
+    cors_origins: str = ""
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """تحليل CORS_ORIGINS من نص مفصول بفواصل."""
+        if not self.cors_origins:
+            return []
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
 
 settings = Settings()
