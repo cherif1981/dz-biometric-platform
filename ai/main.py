@@ -43,6 +43,7 @@ class FaceVerifyResponse(BaseModel):
     processing_time: Optional[float] = None
 
 @app.get("/", response_model=HealthResponse)
+@app.get("/internal/health", response_model=HealthResponse)
 def health():
     return {"status": "healthy", "version": "1.0.0"}
 
