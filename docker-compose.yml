@@ -39,23 +39,21 @@ services:
     image: redis:7-alpine
     container_name: dz-redis
 
-    command: >
-      redis-server
-      --requirepass ${REDIS_PASSWORD}
-      --appendonly yes
+    env_file:
+      - .env
+
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - ${REDIS_PASSWORD}
 
     expose:
       - "6379"
 
     healthcheck:
-      test:
-        [
-          "CMD",
-          "redis-cli",
-          "-a",
-          "${REDIS_PASSWORD}",
-          "ping"
-        ]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -75,8 +73,13 @@ services:
 
     container_name: dz-ai-service
 
+    env_file:
+      - .env
+
     environment:
       PYTHONUNBUFFERED: "1"
+      STORAGE_PATH: ${STORAGE_PATH}
+      ENVIRONMENT: ${ENVIRONMENT}
 
     volumes:
       - storage:/app/storage
@@ -100,11 +103,6 @@ services:
     security_opt:
       - no-new-privileges:true
 
-    read_only: true
-
-    tmpfs:
-      - /tmp
-
     restart: unless-stopped
 
     networks:
@@ -125,9 +123,35 @@ services:
 
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
-      AI_SERVICE_URL: http://ai-service:8001
-      STORAGE_PATH: /app/storage
+
+      REDIS_URL: ${REDIS_URL}
+
+      AI_SERVICE_URL: ${AI_SERVICE_URL}
+      AI_SERVICE_TIMEOUT: ${AI_SERVICE_TIMEOUT}
+
+      STORAGE_PATH: ${STORAGE_PATH}
+
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
+
+      FILE_ENCRYPTION_KEY: ${FILE_ENCRYPTION_KEY}
+
+      DOCUMENT_RETENTION_DAYS: ${DOCUMENT_RETENTION_DAYS}
+      SELFIE_RETENTION_DAYS: ${SELFIE_RETENTION_DAYS}
+      AUDIT_RETENTION_DAYS: ${AUDIT_RETENTION_DAYS}
+
+      DEBUG: ${DEBUG}
+      ENVIRONMENT: ${ENVIRONMENT}
+      LOG_LEVEL: ${LOG_LEVEL}
+
+      APP_NAME: ${APP_NAME}
+
+      CORS_ORIGINS: ${CORS_ORIGINS}
+
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE}
 
     volumes:
       - storage:/app/storage
@@ -135,8 +159,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
       redis:
         condition: service_healthy
+
       ai-service:
         condition: service_healthy
 
