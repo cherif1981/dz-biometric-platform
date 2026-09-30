@@ -50,29 +50,37 @@ class BiometricPipeline:
         return result
 
     def verify_faces(self, source1, source2) -> Dict:
-        start = time.time()
-        img1 = load_image(source1)
-        img2 = load_image(source2)
+    start = time.time()
+    img1 = load_image(source1)
+    img2 = load_image(source2)
 
-        faces1 = self.face_app.get(img1)
-        faces2 = self.face_app.get(img2)
+    faces1 = self.face_app.get(img1)
+    faces2 = self.face_app.get(img2)
 
-        if not faces1 or not faces2:
-            return {
-                "verified": False,
-                "error": "لم يتم اكتشاف وجه في إحدى الصورتين",
-                "processing_time": round(time.time() - start, 3),
-            }
-
-        e1 = faces1[0].embedding
-        e2 = faces2[0].embedding
-        sim = float(np.dot(e1, e2) / (np.linalg.norm(e1) * np.linalg.norm(e2)))
-
+    if not faces1 or not faces2:
         return {
-            "verified": sim >= 0.5,
-            "similarity": round(sim, 4),
+            "success": False,
+            "verified": False,
+            "similarity": 0.0,
+            "distance": 1.0,
+            "message": "لم يتم اكتشاف وجه في إحدى الصورتين",
             "processing_time": round(time.time() - start, 3),
         }
+
+    e1 = faces1[0].embedding
+    e2 = faces2[0].embedding
+    sim = float(np.dot(e1, e2) / (np.linalg.norm(e1) * np.linalg.norm(e2) + 1e-8))
+    distance = 1.0 - sim
+    verified = sim >= 0.5
+
+    return {
+        "success": True,
+        "verified": verified,
+        "similarity": round(sim, 4),
+        "distance": round(distance, 4),
+        "message": "✅ تطابق" if verified else "❌ لا يوجد تطابق",
+        "processing_time": round(time.time() - start, 3),
+    }
 
 
 pipeline = BiometricPipeline()
