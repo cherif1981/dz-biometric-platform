@@ -66,3 +66,6 @@ storage/
 *.db
 *.sqlite3
 /content/
+
+BIOMETRIC_ENCRYPTION_KEY
+*.pyc

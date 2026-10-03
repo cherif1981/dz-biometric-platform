@@ -1,5 +1,6 @@
+"""Database — SQLAlchemy engine + session + get_db dependency."""
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 
 from app.core.config import settings
 
@@ -9,7 +10,10 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
-def init_db() -> None:
-    from app.models import document, user, verification  # noqa: F401
-
-    Base.metadata.create_all(bind=engine)
+def get_db():
+    """Dependency لإرجاع جلسة DB لكل request."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

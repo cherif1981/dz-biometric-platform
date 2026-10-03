@@ -1,4 +1,4 @@
-"""Auth routes — POST /api/auth/login."""
+"""Auth routes — POST /api/v1/auth/login."""
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -23,5 +23,10 @@ async def login(
             detail="Email ou mot de passe incorrect",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    token = create_access_token({"sub": user.email})
+
+    # ✅ نُضيف role في الـtoken
+    token = create_access_token({
+        "sub": user.email,
+        "role": getattr(user, "role", "OPERATOR"),
+    })
     return {"access_token": token, "token_type": "bearer"}

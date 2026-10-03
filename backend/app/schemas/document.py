@@ -1,23 +1,21 @@
+"""Pydantic schemas للوثائق — بدون حقول حساسة."""
+from pydantic import BaseModel
+from typing import Optional
 from datetime import datetime
 
-from pydantic import BaseModel
 
-
-class DocumentCreate(BaseModel):
-    filename: str
-    nin: str | None = None
-    nom: str | None = None
-    prenom: str | None = None
-    raw_text: str | None = None
-
-
-class DocumentOut(BaseModel):
+class DocumentSafe(BaseModel):
+    """عرض آمن — لا يحتوي على nin أو raw_text أو face_encoding."""
     id: int
-    filename: str | None = None
-    nin: str | None = None
-    nom: str | None = None
-    prenom: str | None = None
-    created_at: datetime
+    filename: Optional[str] = None
+    nom: Optional[str] = None
+    prenom: Optional[str] = None
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
+
+
+class DocumentWithNIN(DocumentSafe):
+    """عرض موسّع — للـVERIFIER أو ADMIN فقط."""
+    nin: Optional[str] = None

@@ -50,7 +50,7 @@ class BiometricPipeline:
         return result
 
     def verify_faces(self, source1, source2) -> Dict:
-    start = time.time()
+        start = time.time()
     img1 = load_image(source1)
     img2 = load_image(source2)
 

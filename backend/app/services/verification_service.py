@@ -9,7 +9,15 @@ class VerificationService:
         self.face = FaceService()
 
     async def verify_face(self, image_bytes: bytes) -> dict:
+        """
+        يُرجع نتيجة التحقق — بدون تسريب face_encoding.
+        """
         encoding = await self.face.encode(image_bytes)
         if not encoding:
-            return {"success": False, "encoding": []}
-        return {"success": True, "encoding": encoding}
+            return {"success": False, "face_detected": False}
+
+        return {
+            "success": True,
+            "face_detected": True,
+            # "encoding" محذوف عمدًا
+        }

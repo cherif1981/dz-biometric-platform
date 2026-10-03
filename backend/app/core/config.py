@@ -18,6 +18,14 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
 
+    # Biometric Encryption
+    biometric_encryption_key: str | None = None
+
+    # Data Retention
+    verification_retention_days: int = 30
+    document_retention_days: int = 7
+    face_encoding_retention_days: int = 90
+
     # Database
     database_url: str
 
@@ -35,7 +43,6 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins_list(self) -> list[str]:
-        """تحليل CORS_ORIGINS من نص مفصول بفواصل."""
         if not self.cors_origins:
             return []
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
