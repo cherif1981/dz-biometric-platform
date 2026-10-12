@@ -35,4 +35,9 @@ logs/*
 Thumbs.db
 
 # Jupyter
-.ipynb_checkpoints/
+.ipynb_checkpoints/# === Secrets (SEC-09) ===
+secrets/
+*.secret
+db_password.txt
+redis_password.txt
+certs/
