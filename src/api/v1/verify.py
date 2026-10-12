@@ -1,8 +1,15 @@
-from fastapi import APIRouter, UploadFile, File, Form, Request
+from fastapi import APIRouter, UploadFile, File, Form, Request, Depends
 from typing import Optional
+
+from src.core.security import get_current_user
 from src.services.verification_service import VerificationEngine
 
-router = APIRouter(prefix="/verify", tags=["verification"])
+router = APIRouter(
+    prefix="/verify",
+    tags=["verification"],
+    dependencies=[Depends(get_current_user)],
+)
+
 engine = VerificationEngine()
 
 
@@ -22,7 +29,14 @@ async def verify_identity(
     if nin:
         exp["nin"] = nin
     r = engine.verify(ib, sb, exp or None, client_ip=request.client.host)
-    return {"status": r.status.value, "confidence": r.confidence,
-            "face_similarity": r.face_similarity, "liveness_score": r.liveness_score,
-            "antispoof_score": r.antispoof_score, "ocr_fields": r.ocr_fields,
-            "reasons": r.reasons, "scores": r.scores, "audit_id": r.audit_id}
+    return {
+        "status": r.status.value,
+        "confidence": r.confidence,
+        "face_similarity": r.face_similarity,
+        "liveness_score": r.liveness_score,
+        "antispoof_score": r.antispoof_score,
+        "ocr_fields": r.ocr_fields,
+        "reasons": r.reasons,
+        "scores": r.scores,
+        "audit_id": r.audit_id,
+    }
