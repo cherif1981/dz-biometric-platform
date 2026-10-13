@@ -4,7 +4,7 @@ from typing import Optional, List, Dict, Any
 from loguru import logger
 import time
 # === AI Risk Engine (Phase 1) ===
-from src.modules.ai import RiskEngine, DecisionEngine
+from src.modules.ai import RiskEngine, DecisionEngine, DocumentAI
 # === end ===
 
 
@@ -41,6 +41,9 @@ class VerificationEngine:
         from src.services.antispoofing_service import AntiSpoofing
         from src.services.audit_db import AuditDB
         self.face = FaceService.get()
+        # Phase 2: Document AI
+        self.document_ai = DocumentAI(ocr_service=getattr(self, 'ocr', None))
+
         self.liveness = LivenessService()
         self.ocr = OCRService()
         self.antispoof = AntiSpoofing(ast)

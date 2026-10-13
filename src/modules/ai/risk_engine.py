@@ -21,6 +21,7 @@ class RiskEngine:
         "antispoof": 0.25,
         "ocr_confidence": 0.10,
         "document_tampering": 0.05,
+        "document_quality": 0.05,
     }
 
     # الإشارات التي القيمة الأعلى فيها = أفضل (تُقلب عند حساب المخاطر)
