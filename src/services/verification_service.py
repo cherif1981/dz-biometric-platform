@@ -3,6 +3,10 @@ from enum import Enum
 from typing import Optional, List, Dict, Any
 from loguru import logger
 import time
+# === AI Risk Engine (Phase 1) ===
+from src.modules.ai import RiskEngine, DecisionEngine
+# === end ===
+
 
 
 class VerificationStatus(str, Enum):
@@ -85,7 +89,10 @@ class VerificationEngine:
             for k, v in expected.items():
                 if (ocr_fields.get(k) or "").strip().upper() != v.strip().upper():
                     reasons.append(f"FIELD:{k}")
-        conf = sum(scores.values()) / max(len(scores), 1)
+        # AI Risk Engine
+        _risk_engine = RiskEngine()
+        _risk_result = _risk_engine.compute(scores)
+        conf = 1.0 - _risk_result.score
         if not reasons:
             st = VerificationStatus.VERIFIED
         elif (fs >= self.ft - self.band and ls >= self.lt - self.band
@@ -99,6 +106,7 @@ class VerificationEngine:
         r = VerificationResult(st, conf, fs, ls, asc, ocr, reasons, scores)
         try:
             from src.services.audit_db import AuditRecord
+
             r.audit_id = self.db.log(AuditRecord(
                 None, time.time(), st.value, conf, fs, ls, asc, ocr, reasons, ip))
         except Exception as e:
