@@ -4,7 +4,7 @@ from typing import Optional, List, Dict, Any
 from loguru import logger
 import time
 # === AI Risk Engine (Phase 1) ===
-from src.modules.ai import RiskEngine, DecisionEngine, DocumentAI
+from src.modules.ai import RiskEngine, DecisionEngine, DocumentAI, BiometricAI
 # === end ===
 
 
@@ -43,6 +43,10 @@ class VerificationEngine:
         self.face = FaceService.get()
         # Phase 2: Document AI
         self.document_ai = DocumentAI(ocr_service=getattr(self, 'ocr', None))
+
+        # Phase 3: Biometric AI
+
+        self.biometric_ai = BiometricAI(face_app=getattr(self, 'face', None))
 
         self.liveness = LivenessService()
         self.ocr = OCRService()

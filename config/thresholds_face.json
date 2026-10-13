@@ -1,0 +1,9 @@
+{
+  "threshold": 1.0,
+  "far_at_threshold": 0.0,
+  "frr_at_threshold": 0.968,
+  "eer": 0.003,
+  "auc": 0.9999,
+  "n_positive": 1000,
+  "n_negative": 2000
+}
