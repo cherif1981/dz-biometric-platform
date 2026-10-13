@@ -8,6 +8,7 @@ from .biometric_ai import (
     BiometricAI, FaceQualityResult, LivenessResult, AntiSpoofResult,
 )
 from .threshold_calibrator import ThresholdCalibrator, CalibrationResult
+from .report_builder import ReportBuilder, AIReport, REPORT_SCHEMA_VERSION
 
 __all__ = [
     "RiskScore", "RiskLevel", "Decision", "DecisionResult",
@@ -15,4 +16,5 @@ __all__ = [
     "DocumentAI", "DocumentAnalysis",
     "BiometricAI", "FaceQualityResult", "LivenessResult", "AntiSpoofResult",
     "ThresholdCalibrator", "CalibrationResult",
+    "ReportBuilder", "AIReport", "REPORT_SCHEMA_VERSION",
 ]

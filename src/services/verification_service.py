@@ -4,7 +4,7 @@ from typing import Optional, List, Dict, Any
 from loguru import logger
 import time
 # === AI Risk Engine (Phase 1) ===
-from src.modules.ai import RiskEngine, DecisionEngine, DocumentAI, BiometricAI
+from src.modules.ai import RiskEngine, DecisionEngine, DocumentAI, BiometricAI, ReportBuilder
 # === end ===
 
 
@@ -47,6 +47,12 @@ class VerificationEngine:
         # Phase 3: Biometric AI
 
         self.biometric_ai = BiometricAI(face_app=getattr(self, 'face', None))
+
+
+        # Phase 4: AI Report Builder
+
+
+        self.report_builder = ReportBuilder()
 
         self.liveness = LivenessService()
         self.ocr = OCRService()
@@ -118,4 +124,18 @@ class VerificationEngine:
                 None, time.time(), st.value, conf, fs, ls, asc, ocr, reasons, ip))
         except Exception as e:
             logger.warning(f"audit: {e}")
+        # Phase 4: build unified AI report
+        try:
+            _ai_report = self.report_builder.build(
+                decision_result=type('DR', (), {
+                    'decision': VerificationStatus.VERIFIED,  # placeholder
+                    'risk': _risk_result,
+                    'reasons': reasons,
+                    'raw_scores': scores,
+                })(),
+                signals=scores,
+            ).to_dict()
+        except Exception as _e:
+            _ai_report = {'error': str(_e)}
+
         return r
