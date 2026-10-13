@@ -105,7 +105,7 @@ class BiometricAI:
         pose_score = 0.5
         if self.face_app is not None:
             try:
-                faces = self.face_app.get(img)
+                faces = self._call_face_app(img)
                 if faces:
                     f = faces[0]
                     x1, y1, x2, y2 = f.bbox
