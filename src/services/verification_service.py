@@ -53,6 +53,8 @@ class VerificationEngine:
 
 
         self.report_builder = ReportBuilder()
+        self.risk_engine = RiskEngine()
+        self.decision_engine = DecisionEngine()
 
         self.liveness = LivenessService()
         self.ocr = OCRService()
@@ -103,8 +105,8 @@ class VerificationEngine:
                 if (ocr_fields.get(k) or "").strip().upper() != v.strip().upper():
                     reasons.append(f"FIELD:{k}")
         # AI Risk Engine
-        _risk_engine = RiskEngine()
-        _risk_result = _risk_engine.compute(scores)
+        # self.risk_engine already initialized
+        _risk_result = self.risk_engine.compute(scores)
         conf = 1.0 - _risk_result.score
         if not reasons:
             st = VerificationStatus.VERIFIED
