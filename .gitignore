@@ -35,4 +35,4 @@ logs/*
 Thumbs.db
 
 # Jupyter
-.ipynb_checkpoints/
+.ipynb_checkpoints/models/Silent-Face-Anti-Spoofing/
