@@ -22,7 +22,14 @@ try:
     import torch
     if str(_AS_SRC) not in sys.path:
         sys.path.insert(0, str(_AS_SRC))
-    from models.MiniFASNet import MiniFASNetV2, MiniFASNetV1SE
+    # ── استيراد مباشر من ملف Silent-Face الأصلي (يتجاوز أي حزمة محلية) ──
+    import importlib.util as _ilu, os as _os
+    _minifas_path = _os.path.join(str(_AS_SRC), "model_lib", "MiniFASNet.py")
+    _minifas_spec = _ilu.spec_from_file_location("_minifasnet_orig", _minifas_path)
+    _minifas_mod = _ilu.module_from_spec(_minifas_spec)
+    _minifas_spec.loader.exec_module(_minifas_mod)
+    MiniFASNetV2 = _minifas_mod.MiniFASNetV2
+    MiniFASNetV1SE = _minifas_mod.MiniFASNetV1SE
 
     _MODEL_CONFIGS = [
         ("2.7_80x80_MiniFASNetV2.pth", MiniFASNetV2, (5, 5)),
@@ -35,7 +42,7 @@ try:
             logger.warning(f"⚠️  Missing weights: {wpath}")
             continue
         m = cls(conv6_kernel=kernel)
-        m.load_state_dict(torch.load(str(wpath), map_location="cpu"))
+        m.load_state_dict(torch.load(str(wpath, weights_only=True), map_location="cpu"))
         m.eval()
         _models.append(m)
 
@@ -46,6 +53,18 @@ try:
         logger.warning("❌ No weights loaded — falling back to heuristic")
 except Exception as e:
     logger.warning(f"MiniFASNet unavailable: {e}")
+
+
+
+def _strip_module_prefix(state_dict):
+    """Strip nn.DataParallel `module.` prefix from state_dict keys."""
+    from collections import OrderedDict
+    if any(k.startswith("module.") for k in state_dict):
+        return OrderedDict(
+            (k[7:] if k.startswith("module.") else k, v)
+            for k, v in state_dict.items()
+        )
+    return state_dict
 
 
 class AntiSpoofing:

@@ -2,7 +2,7 @@ import sqlite3, json
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
 
-DB_PATH = "/tmp/dz_biometric.db"
+DB_PATH = "data/audit_log.db"
 
 
 @dataclass

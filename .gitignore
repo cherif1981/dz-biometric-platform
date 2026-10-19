@@ -3,37 +3,50 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
-.venv/
-venv/
-build/
-dist/
+.ruff_cache/
 
-# Data & Models
+# Databases & runtime data
 *.db
 *.sqlite
 *.sqlite3
-*.pth
-*.onnx
-data/*
-!data/.gitkeep
+data/
+biometric.db
 
-# Environment
+# Secrets — NEVER commit
 .env
-.env.local
+.env.*
+!.env.example
+
+# Encryption keys
+*.key
+*.pem
+
+# Model weights (large binaries)
+models/**/*.pth
+models/**/*.onnx
+models/**/*.pt
+models/Silent-Face-Anti-Spoofing/
+
+# Backups created during fixes
+*.bak
+*.bak2
+*.bak3
+*.bak4
+*.bak5
+*.bak_b614
+*.bak_b108
+*.bak_db
+*.bak_prod
+
+# Reports (optional — remove if you want to commit them)
+bandit_report.json
+pip_audit.json
+safety_report.json
+locust_report*.csv
 
 # Logs
 *.log
-logs/*
-
-# IDE
-.vscode/
-.idea/
-*.swp
+logs/
 
 # OS
 .DS_Store
-Thumbs.db
-
-# Jupyter
-.ipynb_checkpoints/models/Silent-Face-Anti-Spoofing/
-models/Silent-Face-Anti-Spoofing/

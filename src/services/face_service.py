@@ -1,5 +1,6 @@
 import cv2, numpy as np
 from loguru import logger
+from src.core.config import settings
 
 try:
     from insightface.app import FaceAnalysis
@@ -66,4 +67,4 @@ class FaceService:
         if e1 is None or e2 is None:
             return {"similarity": 0.0, "is_match": False, "error": "no_face_detected"}
         sim = float(np.dot(e1, e2))
-        return {"similarity": sim, "is_match": sim >= 0.45}
+        return {"similarity": sim, "is_match": sim >= settings.FACE_MATCH_THRESHOLD}

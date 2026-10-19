@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-10-19T15:45:20.575199+00:00",
+  "n_bona": 50,
+  "n_attacks": 100,
+  "input_format": "RGB",
+  "bona_mean": 0.0152,
+  "bona_std": 0.0004,
+  "attack_mean": 0.0151,
+  "attack_std": 0.0004,
+  "best_threshold": 0.1,
+  "ACER_percent": 50.0,
+  "BPCER_percent": 100.0,
+  "APCER_percent": 0.0,
+  "caveat": "Synthetic attacks (JPEG q=20, blur, moiré). Not physical PAD. For iBeta certification use CelebA-Spoof/Oulu-NPU."
+}
