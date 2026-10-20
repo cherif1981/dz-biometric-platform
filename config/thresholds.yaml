@@ -1,4 +1,5 @@
-face_similarity: 0.40
-liveness: 0.50
+# thresholds.yaml — مُعاير آليًا على dataset التحقق
+face_similarity: 0.5668
+liveness: 0.5
 antispoofing: 0.45
-ocr_confidence: 0.80
+ocr_confidence: 0.8

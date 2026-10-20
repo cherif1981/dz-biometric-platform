@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-10-20T12:45:14.970902+00:00",
+  "thresholds": {
+    "version": "v1.0.0",
+    "path": "config/thresholds.yaml",
+    "hash": "ea26c697ea611c25"
+  },
+  "models": {
+    "face_embedding": {
+      "version": "v1.0.0",
+      "path": "models/face_embedding.onnx",
+      "hash": null
+    },
+    "liveness": {
+      "version": "v1.0.0",
+      "path": "models/liveness.onnx",
+      "hash": null
+    },
+    "antispoofing": {
+      "version": "v1.0.0",
+      "path": "models/antispoofing.onnx",
+      "hash": null
+    },
+    "ocr": {
+      "version": "v1.0.0",
+      "path": "models/ocr.bin",
+      "hash": null
+    }
+  },
+  "git_commit": "4a1182ed185b01d1d90c3829d1325f973c7f7d0a"
+}

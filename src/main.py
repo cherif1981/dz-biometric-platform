@@ -1,14 +1,49 @@
-from fastapi import FastAPI
-from src.api.v1 import verify, liveness, audit
-from src.core.upload_limits import UploadLimitMiddleware
+"""FastAPI entrypoint — يربط DecisionEngine و ReportBuilder و metrics."""
+import os
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
-app = FastAPI(title="DZ Biometric Platform", version="0.2.0")
-app.add_middleware(UploadLimitMiddleware)
-app.include_router(verify.router)
-app.include_router(liveness.router)
-app.include_router(audit.router)
+from src.core.decision_engine import DecisionEngine
+from src.services.report_builder import ReportBuilder
+
+try:
+    from prometheus_fastapi_instrumentator import Instrumentator
+    METRICS_OK = True
+except ImportError:
+    METRICS_OK = False
+
+app = FastAPI(title="dz-biometric-platform", version="1.0.0")
+
+from src.review_api import router as review_router
+app.include_router(review_router)
+
+engine = DecisionEngine("config/thresholds.yaml")
+builder = ReportBuilder(engine)
+
+if METRICS_OK:
+    Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+
+
+class VerifyPayload(BaseModel):
+    subject_id: str = "anonymous"
+    face_score: float = 0.0
+    liveness_score: float = 0.0
+    antispoofing_score: float = 0.0
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "DZ Biometric Platform"}
+    return {"status": "ok", "version": app.version}
+
+
+@app.post("/verify")
+def verify(payload: VerifyPayload):
+    scores = {
+        "face_similarity": payload.face_score,
+        "liveness": payload.liveness_score,
+        "antispoofing": payload.antispoofing_score,
+    }
+    try:
+        return builder.build(payload.subject_id, scores)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
