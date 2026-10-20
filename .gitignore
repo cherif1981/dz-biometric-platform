@@ -37,3 +37,11 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/models/Silent-Face-Anti-Spoofing/
 models/Silent-Face-Anti-Spoofing/
+
+# P0 cleanup
+*.bak
+*.bak.*
+*pre_*
+*_old.*
+*.orig
+*~

@@ -1,0 +1,4 @@
+face_similarity: 0.40
+liveness: 0.50
+antispoofing: 0.45
+ocr_confidence: 0.80
