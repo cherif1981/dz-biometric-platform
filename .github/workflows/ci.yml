@@ -11,17 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install ruff
+      - name: Install ruff (version épinglée)
         run: pip install "ruff==0.4.10"
 
       - name: Show ruff version
         run: ruff --version
 
-      - name: Show effective config
+      - name: Validate pyproject.toml
+        run: python -c "import tomllib; tomllib.load(open('pyproject.toml','rb')); print('TOML OK')"
+
+      - name: Show effective ruff config
         run: ruff check src/ --show-settings || true
 
       - name: Run ruff (lint)
@@ -35,6 +39,7 @@ jobs:
     needs: lint
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -74,6 +79,7 @@ jobs:
     needs: lint
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
