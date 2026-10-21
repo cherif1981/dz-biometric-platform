@@ -16,7 +16,11 @@ jobs:
           python-version: "3.11"
       - name: Install ruff
         run: pip install ruff
-      - name: Run ruff
+      - name: Run ruff (auto-fix)
+        run: |
+          ruff check src/ --fix
+          ruff format src/
+      - name: Run ruff (verify)
         run: ruff check src/
 
   test:
