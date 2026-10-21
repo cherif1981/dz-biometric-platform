@@ -11,15 +11,28 @@ def health():
 @router.get("/ready")
 def ready():
     checks = {}
-    try:
-        from src.core.config import settings
-        from sqlalchemy import create_engine, text
-        url = settings.DATABASE_URL.replace("+asyncpg","").replace("+aiosqlite","")
-        eng = create_engine(url, pool_pre_ping=True)
-        with eng.connect() as c: c.execute(text("SELECT 1"))
-        checks["db"] = {"ok": True}
-    except Exception as e:
-        checks["db"] = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+    db_error = None
+    for driver in ("postgresql+psycopg2", "postgresql+psycopg", "sqlite"):
+        try:
+            from src.core.config import settings
+            from sqlalchemy import create_engine, text
+            base = settings.DATABASE_URL.replace("+asyncpg","").replace("+aiosqlite","")
+            if driver == "sqlite":
+                url = "sqlite:///./.ready_probe.db"
+            elif base.startswith("postgresql"):
+                url = driver + base[len("postgresql"):]
+            else:
+                continue
+            eng = create_engine(url, pool_pre_ping=True)
+            with eng.connect() as c:
+                c.execute(text("SELECT 1"))
+            checks["db"] = {"ok": True, "driver": driver}
+            db_error = None
+            break
+        except Exception as e:
+            db_error = f"{driver}: {type(e).__name__}: {e}"
+    if "db" not in checks:
+        checks["db"] = {"ok": False, "error": db_error}
     try:
         import redis
         from src.core.config import settings
