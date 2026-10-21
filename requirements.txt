@@ -13,6 +13,7 @@ pyyaml>=6.0
 sqlalchemy>=2.0
 alembic>=1.13
 asyncpg>=0.29
+psycopg2-binary>=2.9
 aiosqlite>=0.19
 redis>=5.0
 celery>=5.3

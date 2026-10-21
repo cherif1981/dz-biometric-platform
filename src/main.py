@@ -33,9 +33,6 @@ class VerifyPayload(BaseModel):
     antispoofing_score: float = 0.0
 
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "version": app.version}
 
 # === P0-2.6b: mount verify router ===
 from src.api.v1.verify import router as verify_router
