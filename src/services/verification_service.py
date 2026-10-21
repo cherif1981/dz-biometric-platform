@@ -3,8 +3,10 @@ from enum import Enum
 from typing import Optional, List, Dict, Any
 from loguru import logger
 import time
-# === AI Risk Engine (Phase 1) ===
-from src.modules.ai import RiskEngine, DecisionEngine, DocumentAI, BiometricAI, ReportBuilder
+
+# === AI Risk Engine : imports déplacés dans __init__ pour éviter de charger cv2
+#     au moment de la collecte pytest ===
+# from src.modules.ai import RiskEngine, DecisionEngine, DocumentAI, BiometricAI, ReportBuilder
 # === end ===
 
 
@@ -25,33 +27,39 @@ class VerificationResult:
     reasons: List[str] = field(default_factory=list)
     scores: Dict[str, float] = field(default_factory=dict)
     audit_id: Optional[int] = None
-    ai_report: Optional[Dict[str, Any]] = None  # ← أُضيف: التقرير يُعاد الآن
+    ai_report: Optional[Dict[str, Any]] = None
 
 
 class VerificationEngine:
     def __init__(self, ft=None, lt=None, ast=None):
+        # === Imports lourds déplacés ici (lazy loading) ===
+        from src.modules.ai import (
+            RiskEngine,
+            DecisionEngine,
+            DocumentAI,
+            BiometricAI,
+            ReportBuilder,
+        )
         from src.core.config import settings
         from src.core.thresholds import get_thresholds
-        _t = get_thresholds()
-        ft = ft if ft is not None else _t.face_similarity
-        lt = lt if lt is not None else _t.liveness
-        ast = ast if ast is not None else _t.antispoofing
-
         from src.services.face_service import FaceService
         from src.services.liveness_service import LivenessService
         from src.services.ocr_service import OCRService
         from src.services.antispoofing_service import AntiSpoofing
         from src.services.audit_db import AuditDB
+        # === end ===
+
+        _t = get_thresholds()
+        ft = ft if ft is not None else _t.face_similarity
+        lt = lt if lt is not None else _t.liveness
+        ast = ast if ast is not None else _t.antispoofing
+
         self.face = FaceService.get()
-        # Phase 2: Document AI
-        self.document_ai = DocumentAI(ocr_service=getattr(self, 'ocr', None))
-        # Phase 3: Biometric AI
-        self.biometric_ai = BiometricAI(face_app=getattr(self, 'face', None))
-        # Phase 4: AI Report Builder
+        self.document_ai = DocumentAI(ocr_service=getattr(self, "ocr", None))
+        self.biometric_ai = BiometricAI(face_app=getattr(self, "face", None))
         self.report_builder = ReportBuilder()
         self.risk_engine = RiskEngine()
         self.decision_engine = DecisionEngine()
-
         self.liveness = LivenessService()
         self.ocr = OCRService()
         self.antispoof = AntiSpoofing(ast)
@@ -61,6 +69,7 @@ class VerificationEngine:
     def verify(self, id_bytes, selfie_bytes, expected=None, client_ip=None):
         reasons, scores, ocr_fields = [], {}, {}
         fs = ls = asc = None
+
         try:
             o = self.ocr.extract(id_bytes)
             ocr_fields = o.get("fields", {})
@@ -68,8 +77,11 @@ class VerificationEngine:
             if not ocr_fields:
                 reasons.append("OCR_FAILED")
         except Exception as e:
-            return self._fin(VerificationStatus.REJECTED, 0, None, None, None,
-                             {}, [f"OCR_ERROR:{e}"], {}, client_ip)
+            return self._fin(
+                VerificationStatus.REJECTED, 0, None, None, None,
+                {}, [f"OCR_ERROR:{e}"], {}, client_ip,
+            )
+
         try:
             ar = self.antispoof.check(selfie_bytes)
             asc = float(ar.get("score", 0))
@@ -78,6 +90,7 @@ class VerificationEngine:
                 reasons.append(f"SPOOF:{asc:.3f}")
         except Exception as e:
             reasons.append(f"ANTISPOOF_ERR:{e}")
+
         try:
             fr = self.face.verify(id_bytes, selfie_bytes)
             fs = float(fr.get("similarity", 0))
@@ -85,8 +98,11 @@ class VerificationEngine:
             if fs < self.ft:
                 reasons.append(f"FACE:{fs:.3f}")
         except Exception as e:
-            return self._fin(VerificationStatus.REJECTED, 0, None, None, asc,
-                             ocr_fields, [f"FACE_ERR:{e}"], scores, client_ip)
+            return self._fin(
+                VerificationStatus.REJECTED, 0, None, None, asc,
+                ocr_fields, [f"FACE_ERR:{e}"], scores, client_ip,
+            )
+
         try:
             lr = self.liveness.check(selfie_bytes)
             ls = float(lr.get("score", 0))
@@ -94,48 +110,66 @@ class VerificationEngine:
             if ls < self.lt:
                 reasons.append(f"LIVE:{ls:.3f}")
         except Exception as e:
-            return self._fin(VerificationStatus.REJECTED, 0, fs, None, asc,
-                             ocr_fields, [f"LIVE_ERR:{e}"], scores, client_ip)
+            return self._fin(
+                VerificationStatus.REJECTED, 0, fs, None, asc,
+                ocr_fields, [f"LIVE_ERR:{e}"], scores, client_ip,
+            )
+
         if expected:
             for k, v in expected.items():
                 if (ocr_fields.get(k) or "").strip().upper() != v.strip().upper():
                     reasons.append(f"FIELD:{k}")
-        # AI Risk Engine
+
         _risk_result = self.risk_engine.compute(scores)
         conf = 1.0 - _risk_result.score
+
         if not reasons:
             st = VerificationStatus.VERIFIED
-        elif (fs >= self.ft - self.band and ls >= self.lt - self.band
-              and (asc or 0) >= self.ast - self.band and len(reasons) <= 1):
+        elif (
+            fs >= self.ft - self.band
+            and ls >= self.lt - self.band
+            and (asc or 0) >= self.ast - self.band
+            and len(reasons) <= 1
+        ):
             st = VerificationStatus.MANUAL_REVIEW
         else:
             st = VerificationStatus.REJECTED
-        # ← تمرير _risk_result إلى _fin (كان مفقودًا)
-        return self._fin(st, conf, fs, ls, asc, ocr_fields, reasons, scores,
-                         client_ip, risk_result=_risk_result)
+
+        return self._fin(
+            st, conf, fs, ls, asc, ocr_fields, reasons, scores, client_ip,
+            risk_result=_risk_result,
+        )
 
     def _fin(self, st, conf, fs, ls, asc, ocr, reasons, scores, ip, risk_result=None):
         r = VerificationResult(st, conf, fs, ls, asc, ocr, reasons, scores)
+
         try:
             from src.services.audit_db import AuditRecord
-            r.audit_id = self.db.log(AuditRecord(
-                None, time.time(), st.value, conf, fs, ls, asc, ocr, reasons, ip))
+            r.audit_id = self.db.log(
+                AuditRecord(
+                    None, time.time(), st.value, conf, fs, ls, asc, ocr, reasons, ip
+                )
+            )
         except Exception as e:
             logger.warning(f"audit: {e}")
 
         # Phase 4: build unified AI report
-        # قرار التقرير = القرار الفعلي (st)، وليس قيمة ثابتة.
         try:
-            dr = type('DR', (), {
-                'decision': st,             # ← القرار الفعلي، لا VERIFIED ثابتة
-                'risk': risk_result,        # ← معامل مُمرَّر، لا NameError
-                'reasons': reasons,
-                'raw_scores': scores,
-            })()
+            dr = type(
+                "DR",
+                (),
+                {
+                    "decision": st,
+                    "risk": risk_result,
+                    "reasons": reasons,
+                    "raw_scores": scores,
+                },
+            )()
             r.ai_report = self.report_builder.build(
                 decision_result=dr, signals=scores
             ).to_dict()
         except Exception as _e:
-            r.ai_report = {'error': str(_e)}
+            r.ai_report = {"error": str(_e)}
             logger.warning(f"report_builder failed: {_e}")
+
         return r
