@@ -1,6 +1,7 @@
-from fastapi import APIRouter, UploadFile, File, Form, Request
+from fastapi import APIRouter, UploadFile, File, Form, Request, Depends
 from typing import Optional
 from src.services.verification_service import VerificationEngine
+from src.core.permissions import RequireScopes
 
 router = APIRouter(prefix="/verify", tags=["verification"])
 _engine = None
@@ -20,6 +21,7 @@ async def verify_identity(
     selfie: UploadFile = File(...),
     full_name: Optional[str] = Form(None),
     nin: Optional[str] = Form(None),
+    _: dict = Depends(RequireScopes("write")),
 ):
     ib = await id_image.read()
     sb = await selfie.read()
