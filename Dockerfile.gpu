@@ -1,0 +1,41 @@
+# syntax=docker/dockerfile:1.7
+# GPU image — for onnxruntime-gpu + torch CUDA inference.
+# Requires: --gpus all  and  nvidia-container-toolkit on host.
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    DEBIAN_FRONTEND=noninteractive \
+    PYTHONPATH=/app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3.11 python3.11-venv python3-pip \
+        libpq5 libgl1 libglib2.0-0 libsm6 libxext6 libxrender1 \
+        build-essential libpq-dev \
+    && ln -sf /usr/bin/python3.11 /usr/local/bin/python \
+    && ln -sf /usr/bin/python3.11 /usr/local/bin/python3 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir onnxruntime-gpu==1.17.3
+
+COPY . .
+
+RUN mkdir -p /app/logs /app/models \
+    && useradd --create-home --uid 10001 appuser \
+    && chown -R appuser:appuser /app
+
+USER appuser
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD python -c "import urllib.request,sys; \
+        sys.exit(0) if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).status == 200 else sys.exit(1)"
+
+ENV NVIDIA_VISIBLE_DEVICES=all \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
