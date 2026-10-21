@@ -1,0 +1,62 @@
+name: Benchmark
+
+on:
+  push:
+    branches: [main, "fix/**"]
+  pull_request:
+  schedule:
+    - cron: "0 3 * * 1"
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install benchmark deps
+        run: |
+          set -e
+          python -m pip install --upgrade pip
+          pip install numpy
+
+      - name: Run evaluation
+        run: |
+          set -e
+          DATASET=evaluation/synthetic_scores.csv
+          if [ ! -f "$DATASET" ]; then
+            echo "::error::$DATASET missing"; exit 1
+          fi
+          python evaluation/metrics.py "$DATASET" | tee bench.json
+
+      - name: Enforce thresholds
+        run: |
+          set -e
+          python - <<'PY'
+          import json, sys
+          data = json.load(open("bench.json"))
+          auc = data["roc_auc"]
+          eer = data["eer"]["eer"]
+          far = data["metrics"]["far"]
+          frr = data["metrics"]["frr"]
+          print(f"AUC={auc:.4f}  EER={eer:.4f}  FAR={far:.4f}  FRR={frr:.4f}")
+          fails = []
+          if auc < 0.90: fails.append(f"AUC {auc:.4f} < 0.90")
+          if eer > 0.10: fails.append(f"EER {eer:.4f} > 0.10")
+          if far > 0.10: fails.append(f"FAR {far:.4f} > 0.10")
+          if frr > 0.10: fails.append(f"FRR {frr:.4f} > 0.10")
+          if fails:
+              for f in fails:
+                  print(f"::error::benchmark regression: {f}")
+              sys.exit(1)
+          print("::notice::benchmark OK")
+          PY
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-report
+          path: bench.json
+          retention-days: 30
