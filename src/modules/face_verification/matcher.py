@@ -4,7 +4,7 @@ from src.core.config import settings
 
 class FaceMatcher:
     def __init__(self, threshold: float | None = None):
-        self.threshold = threshold if threshold is not None else settings.FACE_MATCH_THRESHOLD
+        self.threshold = threshold if threshold is not None else settings.thresholds['face_similarity']
 
     def compare(self, emb1: np.ndarray | None, emb2: np.ndarray | None) -> dict:
         if emb1 is None or emb2 is None:

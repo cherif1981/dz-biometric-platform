@@ -33,7 +33,7 @@ class PassiveLiveness:
             + 0.3 * min(high_freq / 10.0, 1.0)
         )
         return {
-            "is_live": score >= settings.LIVENESS_THRESHOLD,
+            "is_live": score >= settings.thresholds['liveness'],
             "score": float(score),
-            "threshold": settings.LIVENESS_THRESHOLD,
+            "threshold": settings.thresholds['liveness'],
         }

@@ -1,6 +1,7 @@
 """مسارات المراجعة البشرية — ترتبط بـ DecisionEngine عبر final_status=REVIEW."""
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from src.core.permissions import RequireScopes
+from src.core.rate_limit import limiter
 from pydantic import BaseModel
 from typing import List
 from datetime import datetime, timezone
@@ -28,7 +29,8 @@ def pending(user: dict = Depends(RequireScopes("review:read"))):
 
 
 @router.post("/submit")
-def submit(item: ReviewItem, user: dict = Depends(RequireScopes("review:write"))):
+@limiter.limit("30/minute")
+def submit(request: Request, item: ReviewItem, user: dict = Depends(RequireScopes("review:write"))):
     rid = str(uuid.uuid4())
     _reviews[rid] = {
         "id": rid,

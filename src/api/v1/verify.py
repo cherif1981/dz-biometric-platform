@@ -1,6 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Form, Request, Depends
 from typing import Optional
 from src.services.verification_service import VerificationEngine
+from src.core.rate_limit import limiter
 from src.core.permissions import RequireScopes
 
 router = APIRouter(prefix="/verify", tags=["verification"])
@@ -15,6 +16,7 @@ def _get_engine():
 
 
 @router.post("/")
+@limiter.limit("10/minute")
 async def verify_identity(
     request: Request,
     id_image: UploadFile = File(...),
