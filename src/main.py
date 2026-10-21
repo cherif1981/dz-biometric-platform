@@ -40,3 +40,7 @@ def health():
 # === P0-2.6b: mount verify router ===
 from src.api.v1.verify import router as verify_router
 app.include_router(verify_router)
+
+# === P1.4: health & readiness ===
+from src.api.health import router as health_router
+app.include_router(health_router)
