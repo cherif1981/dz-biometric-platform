@@ -1,5 +1,6 @@
 from functools import lru_cache
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
+from pydantic import model_validator, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -24,11 +25,24 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
 
     # ML
-    FACE_MATCH_THRESHOLD: float = 0.45
-    LIVENESS_THRESHOLD: float = 0.7
     OCR_LANGS: list[str] = ["ar", "fr", "en"]
 
     CORS_ORIGINS: list[str] = ["*"]
+
+    @model_validator(mode="after")
+    def _validate_production_secrets(self):
+        if not getattr(self, "DEBUG", True):
+            if not getattr(self, "FIELD_ENCRYPTION_KEY", None):
+                raise ValueError("FIELD_ENCRYPTION_KEY must be set in production")
+            if getattr(self, "SECRET_KEY", "") in ("", "change-me-in-production"):
+                raise ValueError("SECRET_KEY must be a strong value in production")
+        return self
+
+    @property
+    def thresholds(self) -> dict:
+        import yaml, pathlib
+        f = pathlib.Path(__file__).resolve().parents[2] / "config" / "thresholds.yaml"
+        return yaml.safe_load(f.read_text())
 
 
 @lru_cache

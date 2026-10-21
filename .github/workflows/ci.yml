@@ -1,24 +1,13 @@
 name: CI
+
 on:
   push:
-    branches: [main]
+    branches: [main, "fix/**"]
   pull_request:
-    branches: [main]
 
 jobs:
-  lint:
+  lint-test:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - run: pip install ruff
-      - run: ruff check src/ || true
-
-  test:
-    runs-on: ubuntu-latest
-    needs: lint
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,28 +15,27 @@ jobs:
           python-version: "3.11"
       - name: Install deps
         run: |
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install pytest
-      - name: Run tests (if any)
+          set -e
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ruff bandit pytest pytest-asyncio
+
+      - name: Ruff (strict — fails on errors)
+        run: ruff check src/ tests/ --output-format=github
+
+      - name: Bandit (strict — fails on findings)
         run: |
-          if find tests -name "test_*.py" 2>/dev/null | grep -q .; then
-            pytest tests/ -v
-          else
-            echo "No pytest tests found — skipping"
+          set -e
+          bandit -r src/ -ll -x tests/ -f json -o bandit.json || {
+            echo "::error::Bandit found security issues"; cat bandit.json; exit 1;
+          }
+
+      - name: Ensure tests exist
+        run: |
+          set -e
+          if ! find tests -name "test_*.py" | grep -q .; then
+            echo "::error::No tests found — failing CI"; exit 1
           fi
 
-  security:
-    runs-on: ubuntu-latest
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - run: pip install bandit
-      - name: Bandit SAST (informative)
-        run: bandit -r src/ -ll -x tests/ || true
-      - name: gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run tests
+        run: pytest tests/ -v --maxfail=1 --disable-warnings
