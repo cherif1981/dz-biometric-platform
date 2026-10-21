@@ -16,7 +16,13 @@ jobs:
           python-version: "3.11"
 
       - name: Install ruff
-        run: pip install "ruff==0.4.10"   # version épinglée pour éviter les surprises
+        run: pip install "ruff==0.4.10"
+
+      - name: Show ruff version
+        run: ruff --version
+
+      - name: Show effective config
+        run: ruff check src/ --show-settings || true
 
       - name: Run ruff (lint)
         run: ruff check src/
