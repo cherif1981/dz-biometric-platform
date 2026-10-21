@@ -45,3 +45,9 @@ models/Silent-Face-Anti-Spoofing/
 *_old.*
 *.orig
 *~
+
+# --- Anti-spoofing model (needed in production) ---
+# Small (<2 MB) ONNX model required for real liveness detection.
+# If .gitignore excludes *.onnx or models/, the exceptions below re-include it.
+!models/MiniFASNetV2.onnx
+!models/MiniFASNetV2.onnx.sha256

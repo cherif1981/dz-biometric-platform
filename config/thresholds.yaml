@@ -1,5 +1,19 @@
-# thresholds.yaml — مُعاير آليًا على dataset التحقق
-face_similarity: 0.5668
-liveness: 0.5
-antispoofing: 0.45
+# =============================================================================
+# SINGLE SOURCE OF TRUTH for all decision thresholds.
+# Do NOT duplicate these values in code, .env, or Settings defaults.
+# Overrides for emergencies only, via environment variables (see thresholds.py).
+# =============================================================================
+#
+# Calibration note (2026-10-21):
+#   Values below reconcile 3 conflicting sources previously in use:
+#     - YAML:           face=0.5668, liveness=0.5,  antispoof=0.45
+#     - .env.example:   face=0.45,   liveness=0.60, antispoof=0.55
+#     - Settings class: face=0.45,   liveness=0.7
+#   Security-first choice = strictest value for each metric.
+#   Replace with your calibration results if different — just keep ONE value.
+# =============================================================================
+
+face_similarity: 0.5668   # strictest of {0.5668, 0.45}
+liveness: 0.7             # strictest of {0.5, 0.60, 0.7}
+antispoofing: 0.55        # strictest of {0.45, 0.55}
 ocr_confidence: 0.8
