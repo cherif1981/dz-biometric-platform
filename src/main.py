@@ -69,3 +69,19 @@ try:
 except Exception as _e:  # pragma: no cover
     print(f"[main] api_router NOT mounted: {type(_e).__name__}: {_e}")
 
+# ============================================================
+# CORS — explicit origins from settings (no wildcard)
+# ============================================================
+from fastapi.middleware.cors import CORSMiddleware
+from src.core.config import settings as _cors_settings
+if _cors_settings.CORS_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_cors_settings.CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type"],
+    )
+    print(f"[main] CORS enabled for {len(_cors_settings.CORS_ORIGINS)} origins")
+else:
+    print("[main] CORS disabled (no CORS_ORIGINS configured)")

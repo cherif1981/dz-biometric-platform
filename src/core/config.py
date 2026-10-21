@@ -28,15 +28,28 @@ class Settings(BaseSettings):
     # ML
     OCR_LANGS: list[str] = ["ar", "fr", "en"]
 
-    CORS_ORIGINS: list[str] = ["*"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
 
     @model_validator(mode="after")
     def _validate_production_secrets(self):
-        if not getattr(self, "DEBUG", True):
-            if not getattr(self, "FIELD_ENCRYPTION_KEY", None):
-                raise ValueError("FIELD_ENCRYPTION_KEY must be set in production")
-            if getattr(self, "SECRET_KEY", "") in ("", "change-me-in-production"):
-                raise ValueError("SECRET_KEY must be a strong value in production")
+        """Fail-fast validation for production configuration."""
+        if self.DEBUG:
+            return self
+        errors = []
+        if not self.FIELD_ENCRYPTION_KEY:
+            errors.append("FIELD_ENCRYPTION_KEY must be set")
+        if self.SECRET_KEY in ("", "change-me-in-production"):
+            errors.append("SECRET_KEY must not be default/empty")
+        elif len(self.SECRET_KEY) < 32:
+            errors.append("SECRET_KEY must be >= 32 chars")
+        if not self.CORS_ORIGINS:
+            errors.append("CORS_ORIGINS must be explicit (not empty)")
+        elif "*" in self.CORS_ORIGINS:
+            errors.append("CORS_ORIGINS must not contain '*' in production")
+        if "user:pass@" in self.DATABASE_URL:
+            errors.append("DATABASE_URL must not use placeholder credentials")
+        if errors:
+            raise ValueError("production config invalid: " + "; ".join(errors))
         return self
 
     @property
