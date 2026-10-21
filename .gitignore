@@ -49,3 +49,7 @@ models/Silent-Face-Anti-Spoofing/
 # sensitive
 models/*.onnx
 models/*.pth
+
+# backups / stale (P0 — includes .bak_<timestamp>)
+*.bak*
+*.bak_*
