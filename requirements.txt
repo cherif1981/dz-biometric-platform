@@ -31,6 +31,7 @@ Pillow>=10.2
 pytesseract>=0.3.10
 
 # --- observability ---
+loguru>=0.7
 structlog>=24.1
 slowapi>=0.1.9
 prometheus-fastapi-instrumentator>=7.0
@@ -38,7 +39,7 @@ prometheus-fastapi-instrumentator>=7.0
 # --- misc ---
 nest-asyncio>=1.6
 
-# --- dev / test (يُنقل إلى requirements-dev.txt لاحقًا إن أردت) ---
+# --- dev / test ---
 pytest>=8.0
 pytest-asyncio>=0.23
 ruff>=0.4
