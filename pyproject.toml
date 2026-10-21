@@ -8,9 +8,9 @@ version = "0.2.0"
 description = "Algerian Identity Verification Platform"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = { text = "MIT" }
 authors = [
-    {name = "cherif1981", email = "meddourcherif1981@gmail.com"},
+    { name = "cherif1981", email = "meddourcherif1981@gmail.com" },
 ]
 
 dependencies = [
@@ -53,6 +53,23 @@ target-version = ["py310"]
 line-length = 100
 target-version = "py310"
 
+[tool.ruff.lint]
+# Règles activées : pycodestyle (E, W), Pyflakes (F), isort (I)
+select = ["E", "W", "F", "I"]
+
+# Règles ignorées pour éviter les faux positifs fréquents
+ignore = [
+    "E501",   # longueur de ligne (gérée par black / ruff format)
+    "E402",   # import non en haut du fichier (courant avec FastAPI)
+    "W503",   # saut de ligne avant opérateur binaire (obsolète)
+    "F401",   # import inutilisé (si vous voulez le garder pour la lisibilité)
+]
+
+# Optionnel : forcer l'ordre des imports
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+pythonpath = ["."]   # AJOUT : permet les imports `from src...`
