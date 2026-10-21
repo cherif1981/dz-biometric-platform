@@ -29,9 +29,26 @@ if METRICS_OK:
     Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 
-# ⚠️ L'endpoint POST /verify ci-dessous est SUPPRIMÉ pour éviter le conflit
-# avec verify.router qui expose déjà POST /verify/.
-# Si vous souhaitez le conserver, renommez-le en /verify-legacy.
+# Endpoint legacy (conservé mais renommé pour éviter le conflit avec /verify/ de verify.router)
+class VerifyPayload(BaseModel):
+    subject_id: str = "anonymous"
+    face_score: float = 0.0
+    liveness_score: float = 0.0
+    antispoofing_score: float = 0.0
+
+
+@app.post("/verify-legacy")
+def verify_legacy(payload: VerifyPayload):
+    scores = {
+        "face_similarity": payload.face_score,
+        "liveness": payload.liveness_score,
+        "antispoofing": payload.antispoofing_score,
+    }
+    try:
+        return builder.build(payload.subject_id, scores)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
 
 @app.get("/health")
 def health():
