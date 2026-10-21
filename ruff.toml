@@ -1,0 +1,22 @@
+# ruff.toml — configuration Ruff du projet dz-biometric-platform
+
+line-length = 100
+target-version = "py310"
+exclude = [".git", ".venv", "venv", "__pycache__", "build", "dist"]
+
+[lint]
+# Règles activées : pycodestyle (E, W), Pyflakes (F), isort (I)
+select = ["E", "W", "F", "I"]
+
+# Règles ignorées pour éviter les échecs sur des détails non critiques
+ignore = [
+    "E501",   # ligne trop longue
+    "E402",   # import non en haut du fichier (fréquent avec FastAPI)
+    "F401",   # import inutilisé (parfois nécessaire dans __init__.py)
+    "F841",   # variable assignée mais jamais utilisée
+    "W503",   # saut de ligne avant opérateur binaire (obsolète)
+    "W504",   # saut de ligne après opérateur binaire
+]
+
+[lint.isort]
+known-first-party = ["src"]
