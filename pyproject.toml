@@ -50,8 +50,8 @@ line-length = 100
 target-version = ["py310"]
 
 # ============================================================
-# Configuration Ruff — centralisée dans pyproject.toml
-# (aucun fichier ruff.toml ne doit coexister à la racine)
+# Configuration Ruff — centralisée et au format moderne
+# (supprimez tout fichier ruff.toml à la racine)
 # ============================================================
 [tool.ruff]
 line-length = 100
