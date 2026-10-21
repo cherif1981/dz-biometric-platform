@@ -14,14 +14,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install ruff
-        run: pip install ruff
-      - name: Run ruff (auto-fix)
-        run: |
-          ruff check src/ --fix
-          ruff format src/
-      - name: Run ruff (verify)
+        run: pip install "ruff==0.4.10"   # version épinglée pour éviter les surprises
+
+      - name: Run ruff (lint)
         run: ruff check src/
+
+      - name: Run ruff (format check)
+        run: ruff format --check src/
 
   test:
     runs-on: ubuntu-latest
@@ -70,10 +71,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install bandit
         run: pip install bandit
-      - name: Bandit SAST (informative)
+
+      - name: Bandit SAST
         run: bandit -r src/ -ll -x tests/
+
       - name: gitleaks
         uses: gitleaks/gitleaks-action@v2
         env:
