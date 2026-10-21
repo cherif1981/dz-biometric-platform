@@ -45,3 +45,7 @@ models/Silent-Face-Anti-Spoofing/
 *_old.*
 *.orig
 *~
+
+# sensitive
+models/*.onnx
+models/*.pth
