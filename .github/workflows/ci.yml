@@ -71,9 +71,7 @@ jobs:
       - name: Run tests (if any)
         run: |
           if find tests -name "test_*.py" 2>/dev/null | grep -q .; then
-            pytest tests/ -v --no-header --pythonpath=. --continue-on-collection-errors --tb=short 2>&1 | tee pytest_output.log
-            echo "--- Collection errors (if any) ---"
-            grep -iE "error|modulenotfound|importerror" pytest_output.log || echo "No collection errors found."
+            pytest tests/ -v --no-header --pythonpath=. --continue-on-collection-errors --tb=short
           else
             echo "No pytest tests found — skipping"
           fi
