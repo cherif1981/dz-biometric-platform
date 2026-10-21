@@ -4,10 +4,10 @@ from typing import Optional, List, Dict, Any
 from loguru import logger
 import time
 
-# === AI Risk Engine : imports déplacés dans __init__ pour éviter de charger cv2
-#     au moment de la collecte pytest ===
+# === AI Risk Engine : import déplacé dans __init__ (lazy loading) ===
+# L'import en haut du fichier chargeait cv2 via src.modules.ai,
+# ce qui faisait échouer la collecte pytest si opencv n'était pas installé.
 # from src.modules.ai import RiskEngine, DecisionEngine, DocumentAI, BiometricAI, ReportBuilder
-# === end ===
 
 
 class VerificationStatus(str, Enum):
@@ -40,7 +40,6 @@ class VerificationEngine:
             BiometricAI,
             ReportBuilder,
         )
-        from src.core.config import settings
         from src.core.thresholds import get_thresholds
         from src.services.face_service import FaceService
         from src.services.liveness_service import LivenessService
