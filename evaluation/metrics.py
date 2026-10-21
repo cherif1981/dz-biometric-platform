@@ -1,28 +1,19 @@
-"""Biometric evaluation metrics: FAR, FRR, EER, ROC.
-
-Input CSV columns: score (float), label (1=genuine, 0=impostor).
-"""
+"""Biometric evaluation metrics: FAR, FRR, EER, ROC."""
 from __future__ import annotations
-import csv, json, math, pathlib
+import csv, json, pathlib
 from dataclasses import dataclass, asdict
-from typing import Iterable, Sequence
-
 import numpy as np
-
 
 @dataclass
 class Metrics:
     threshold: float
     far: float
     frr: float
-    tar: float           # 1 - FRR
+    tar: float
     accuracy: float
     n_genuine: int
     n_impostor: int
-
-    def to_dict(self):
-        return asdict(self)
-
+    def to_dict(self): return asdict(self)
 
 @dataclass
 class EERResult:
@@ -30,79 +21,55 @@ class EERResult:
     threshold: float
     far_at_eer: float
     frr_at_eer: float
+    def to_dict(self): return asdict(self)
 
-    def to_dict(self):
-        return asdict(self)
-
-
-def load_csv(path: str | pathlib.Path) -> tuple[np.ndarray, np.ndarray]:
+def load_csv(path):
     scores, labels = [], []
     with open(path, newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            scores.append(float(row["score"]))
-            labels.append(int(row["label"]))
+            scores.append(float(row["score"])); labels.append(int(row["label"]))
     return np.asarray(scores, dtype=float), np.asarray(labels, dtype=int)
 
-
-def compute_metrics(scores: np.ndarray, labels: np.ndarray, threshold: float) -> Metrics:
+def compute_metrics(scores, labels, threshold):
     pred = (scores >= threshold).astype(int)
-    genuine = labels == 1
-    impostor = labels == 0
-    n_g = int(genuine.sum())
-    n_i = int(impostor.sum())
-    frr = float(((pred == 0) & genuine).sum() / n_g) if n_g else 0.0
-    far = float(((pred == 1) & impostor).sum() / n_i) if n_i else 0.0
-    correct = int((pred == labels).sum())
-    acc = float(correct / len(labels)) if len(labels) else 0.0
-    return Metrics(
-        threshold=float(threshold), far=far, frr=frr, tar=1.0 - frr,
-        accuracy=acc, n_genuine=n_g, n_impostor=n_i,
-    )
+    g, i = labels == 1, labels == 0
+    ng, ni = int(g.sum()), int(i.sum())
+    frr = float(((pred == 0) & g).sum() / ng) if ng else 0.0
+    far = float(((pred == 1) & i).sum() / ni) if ni else 0.0
+    acc = float((pred == labels).sum() / len(labels)) if len(labels) else 0.0
+    return Metrics(float(threshold), far, frr, 1.0 - frr, acc, ng, ni)
 
-
-def compute_eer(scores: np.ndarray, labels: np.ndarray, steps: int = 1000) -> EERResult:
+def compute_eer(scores, labels, steps=1000):
     if len(scores) == 0:
-        return EERResult(eer=0.0, threshold=0.5, far_at_eer=0.0, frr_at_eer=0.0)
+        return EERResult(0.0, 0.5, 0.0, 0.0)
     lo, hi = float(scores.min()), float(scores.max())
-    if lo == hi:
-        hi = lo + 1e-9
+    if lo == hi: hi = lo + 1e-9
     grid = np.linspace(lo, hi, steps)
     fars, frrs = [], []
     for t in grid:
         m = compute_metrics(scores, labels, t)
         fars.append(m.far); frrs.append(m.frr)
     fars, frrs = np.asarray(fars), np.asarray(frrs)
-    diff = np.abs(fars - frrs)
-    i = int(np.argmin(diff))
-    eer = float((fars[i] + frrs[i]) / 2.0)
-    return EERResult(eer=eer, threshold=float(grid[i]),
-                     far_at_eer=float(fars[i]), frr_at_eer=float(frrs[i]))
+    d = np.abs(fars - frrs); i = int(np.argmin(d))
+    return EERResult(float((fars[i]+frrs[i])/2), float(grid[i]),
+                     float(fars[i]), float(frrs[i]))
 
-
-def roc_curve(scores: np.ndarray, labels: np.ndarray, steps: int = 200):
+def roc_curve(scores, labels, steps=200):
     lo, hi = float(scores.min()), float(scores.max())
     if lo == hi: hi = lo + 1e-9
     tars, fars = [], []
     for t in np.linspace(lo, hi, steps):
         m = compute_metrics(scores, labels, t)
         tars.append(m.tar); fars.append(m.far)
-    # AUC via trapezoid (sorted by FAR)
-    order = np.argsort(fars)
-    f = np.asarray(fars)[order]; t = np.asarray(tars)[order]
+    o = np.argsort(fars); f = np.asarray(fars)[o]; t = np.asarray(tars)[o]
     auc = float(np.trapz(t, f)) if len(f) > 1 else 0.0
     return {"tars": tars, "fars": fars, "auc": auc}
 
-
-def evaluate(csv_path: str | pathlib.Path, threshold: float | None = None) -> dict:
-    scores, labels = load_csv(csv_path)
-    e = compute_eer(scores, labels)
+def evaluate(csv_path, threshold=None):
+    s, l = load_csv(csv_path)
+    e = compute_eer(s, l)
     thr = e.threshold if threshold is None else threshold
-    m = compute_metrics(scores, labels, thr)
-    r = roc_curve(scores, labels)
+    m = compute_metrics(s, l, thr)
+    r = roc_curve(s, l)
     return {"metrics": m.to_dict(), "eer": e.to_dict(),
-            "roc_auc": r["auc"], "n_samples": int(len(scores))}
-
-
-if __name__ == "__main__":
-    import sys
-    print(json.dumps(evaluate(sys.argv[1]), indent=2))
+            "roc_auc": r["auc"], "n_samples": int(len(s))}
