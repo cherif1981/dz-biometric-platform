@@ -26,40 +26,34 @@ class VerificationResult:
     reasons: List[str] = field(default_factory=list)
     scores: Dict[str, float] = field(default_factory=dict)
     audit_id: Optional[int] = None
+    ai_report: Optional[Dict[str, Any]] = None
 
 
 class VerificationEngine:
     def __init__(self, ft=None, lt=None, ast=None):
         from src.core.config import settings
-        ft = ft if ft is not None else settings.thresholds['face_similarity']
-        lt = lt if lt is not None else settings.thresholds['liveness']
-        ast = ast if ast is not None else settings.thresholds['antispoofing']
+        ft = ft if ft is not None else settings.thresholds["face_similarity"]
+        lt = lt if lt is not None else settings.thresholds["liveness"]
+        ast = ast if ast is not None else settings.thresholds["antispoofing"]
 
         from src.services.face_service import FaceService
         from src.services.liveness_service import LivenessService
         from src.services.ocr_service import OCRService
         from src.services.antispoofing_service import AntiSpoofing
         from src.services.audit_db import AuditDB
+
         self.face = FaceService.get()
-        # Phase 2: Document AI
-        self.document_ai = DocumentAI(ocr_service=getattr(self, 'ocr', None))
-
-        # Phase 3: Biometric AI
-
-        self.biometric_ai = BiometricAI(face_app=getattr(self, 'face', None))
-
-
-        # Phase 4: AI Report Builder
-
-
-        self.report_builder = ReportBuilder()
-        self.risk_engine = RiskEngine()
-        self.decision_engine = DecisionEngine()
-
         self.liveness = LivenessService()
         self.ocr = OCRService()
         self.antispoof = AntiSpoofing(ast)
         self.db = AuditDB()
+
+        self.document_ai = DocumentAI(ocr_service=self.ocr)
+        self.biometric_ai = BiometricAI(face_app=self.face)
+        self.report_builder = ReportBuilder()
+        self.risk_engine = RiskEngine()
+        self.decision_engine = DecisionEngine()
+
         self.ft, self.lt, self.ast, self.band = ft, lt, ast, 0.10
 
     def verify(self, id_bytes, selfie_bytes, expected=None, client_ip=None):
@@ -107,37 +101,59 @@ class VerificationEngine:
         # AI Risk Engine
         # self.risk_engine already initialized
         _risk_result = self.risk_engine.compute(scores)
-        conf = 1.0 - _risk_result.score
-        if not reasons:
-            st = VerificationStatus.VERIFIED
-        elif (fs >= self.ft - self.band and ls >= self.lt - self.band
-              and (asc or 0) >= self.ast - self.band and len(reasons) <= 1):
-            st = VerificationStatus.MANUAL_REVIEW
-        else:
-            st = VerificationStatus.REJECTED
-        return self._fin(st, conf, fs, ls, asc, ocr_fields, reasons, scores, client_ip)
+        _decision_result = self.decision_engine.decide(_risk_result, scores, list(reasons))
+        st = self._map_decision(_decision_result.decision)
+        conf = max(0.0, 1.0 - _risk_result.score)
+        return self._fin(st, conf, fs, ls, asc, ocr_fields, reasons, scores, client_ip,
+                         risk_result=_risk_result, decision_result=_decision_result)
 
-    def _fin(self, st, conf, fs, ls, asc, ocr, reasons, scores, ip):
+    def _fin(self, st, conf, fs, ls, asc, ocr, reasons, scores, ip,
+             risk_result=None, decision_result=None):
         r = VerificationResult(st, conf, fs, ls, asc, ocr, reasons, scores)
         try:
             from src.services.audit_db import AuditRecord
-
             r.audit_id = self.db.log(AuditRecord(
                 None, time.time(), st.value, conf, fs, ls, asc, ocr, reasons, ip))
         except Exception as e:
             logger.warning(f"audit: {e}")
-        # Phase 4: build unified AI report
+
+        # === AI report (decision يعكس st الحقيقي، لا placeholder) ===
+        if risk_result is None:
+            risk_result = self._fallback_risk("no_risk_result")
+        if decision_result is None:
+            from src.modules.ai.models import DecisionResult, Decision
+            try:
+                d = Decision(st.value)
+            except ValueError:
+                d = Decision.REJECTED
+            decision_result = DecisionResult(
+                decision=d, risk=risk_result,
+                reasons=list(reasons or []), raw_scores=dict(scores or {}),
+            )
         try:
-            _ai_report = self.report_builder.build(
-                decision_result=type('DR', (), {
-                    'decision': VerificationStatus.VERIFIED,  # placeholder
-                    'risk': _risk_result,
-                    'reasons': reasons,
-                    'raw_scores': scores,
-                })(),
-                signals=scores,
+            r.ai_report = self.report_builder.build(
+                decision_result=decision_result,
+                signals=scores or {},
             ).to_dict()
         except Exception as _e:
-            _ai_report = {'error': str(_e)}
-
+            logger.error(f"report_builder failed: {_e}")
+            r.ai_report = {"error": str(_e)}
         return r
+
+    @staticmethod
+    def _fallback_risk(reason: str):
+        from src.modules.ai.models import RiskScore, RiskLevel
+        return RiskScore(
+            score=1.0, level=RiskLevel.CRITICAL,
+            components={"error": 1.0, "reason": reason},
+            model_version="fallback", threshold_version="fallback",
+        )
+
+    @staticmethod
+    def _map_decision(d) -> "VerificationStatus":
+        from src.modules.ai.models import Decision
+        if d == Decision.VERIFIED:
+            return VerificationStatus.VERIFIED
+        if d == Decision.MANUAL_REVIEW:
+            return VerificationStatus.MANUAL_REVIEW
+        return VerificationStatus.REJECTED

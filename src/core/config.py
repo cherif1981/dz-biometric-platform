@@ -1,6 +1,7 @@
 from functools import lru_cache
 from pydantic_settings import BaseSettings
-from pydantic import model_validator, SettingsConfigDict
+from pydantic import model_validator
+from pydantic_settings import SettingsConfigDict
 
 
 class Settings(BaseSettings):

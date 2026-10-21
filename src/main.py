@@ -17,6 +17,9 @@ app = FastAPI(title="dz-biometric-platform", version="1.0.0")
 from src.review_api import router as review_router
 app.include_router(review_router)
 
+from src.api.v1.verify import router as verify_router
+app.include_router(verify_router, prefix="/api/v1")
+
 engine = DecisionEngine("config/thresholds.yaml")
 builder = ReportBuilder(engine)
 

@@ -1,0 +1,5 @@
+easyocr
+insightface
+jose
+loguru
+passlib
