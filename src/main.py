@@ -1,6 +1,6 @@
 """FastAPI entrypoint — يربط DecisionEngine و ReportBuilder و metrics."""
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 
 from src.core.decision_engine import DecisionEngine
@@ -17,8 +17,7 @@ app = FastAPI(title="dz-biometric-platform", version="1.0.0")
 from src.review_api import router as review_router
 app.include_router(review_router)
 
-from src.api.v1.verify import router as verify_router
-app.include_router(verify_router, prefix="/api/v1")
+
 
 engine = DecisionEngine("config/thresholds.yaml")
 builder = ReportBuilder(engine)
@@ -38,15 +37,6 @@ class VerifyPayload(BaseModel):
 def health():
     return {"status": "ok", "version": app.version}
 
-
-@app.post("/verify")
-def verify(payload: VerifyPayload):
-    scores = {
-        "face_similarity": payload.face_score,
-        "liveness": payload.liveness_score,
-        "antispoofing": payload.antispoofing_score,
-    }
-    try:
-        return builder.build(payload.subject_id, scores)
-    except ValueError as e:
-        raise HTTPException(400, str(e))
+# === P0-2.6b: mount verify router ===
+from src.api.v1.verify import router as verify_router
+app.include_router(verify_router)

@@ -1,5 +1,6 @@
 """مسارات المراجعة البشرية — ترتبط بـ DecisionEngine عبر final_status=REVIEW."""
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from src.core.permissions import RequireScopes
 from pydantic import BaseModel
 from typing import List
 from datetime import datetime, timezone
@@ -22,12 +23,12 @@ class ReviewDecision(BaseModel):
 
 
 @router.get("/pending")
-def pending():
+def pending(user: dict = Depends(RequireScopes("review:read"))):
     return [v for v in _reviews.values() if v["human_status"] is None]
 
 
 @router.post("/submit")
-def submit(item: ReviewItem):
+def submit(item: ReviewItem, user: dict = Depends(RequireScopes("review:write"))):
     rid = str(uuid.uuid4())
     _reviews[rid] = {
         "id": rid,
@@ -39,7 +40,7 @@ def submit(item: ReviewItem):
 
 
 @router.post("/{review_id}/decide")
-def decide(review_id: str, decision: ReviewDecision):
+def decide(review_id: str, decision: ReviewDecision, user: dict = Depends(RequireScopes("review:decide"))):
     if review_id not in _reviews:
         raise HTTPException(404, "review_id not found")
     if decision.human_status not in ("VERIFIED", "REJECTED"):

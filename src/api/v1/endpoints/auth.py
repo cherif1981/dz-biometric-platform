@@ -31,7 +31,8 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
     user = _FAKE_USERS.get(form.username)
     if not user or not verify_password(form.password, user["password_hash"]):
         # Allow demo bypass
-        if form.username == "demo" and form.password == "demo":
+        from src.core.config import settings
+        if settings.DEBUG and form.username == "demo" and form.password == "demo":
             user = {"id": 999, "scopes": ["read", "write"]}
         else:
             raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")

@@ -142,11 +142,17 @@ class VerificationEngine:
 
     @staticmethod
     def _fallback_risk(reason: str):
+        """RiskScore احتياطي عندما لا يوجد risk_result.
+
+        ملاحظة: components dict[float] فقط — نضع reason في model_version.
+        """
         from src.modules.ai.models import RiskScore, RiskLevel
         return RiskScore(
-            score=1.0, level=RiskLevel.CRITICAL,
-            components={"error": 1.0, "reason": reason},
-            model_version="fallback", threshold_version="fallback",
+            score=1.0,
+            level=RiskLevel.CRITICAL,
+            components={"error": 1.0},
+            model_version=f"fallback:{reason}",
+            threshold_version="fallback",
         )
 
     @staticmethod

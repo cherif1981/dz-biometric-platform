@@ -67,10 +67,16 @@ class ReportBuilder:
         risk = decision_result.risk
 
         # ===== risk =====
+        def _safe_float(v):
+            try:
+                return round(float(v), 4)
+            except (TypeError, ValueError):
+                return 0.0
+
         risk_block = {
-            "score": round(float(risk.score), 4),
+            "score": _safe_float(risk.score),
             "level": risk.level.value,
-            "components": {k: round(float(v), 4) for k, v in risk.components.items()},
+            "components": {k: _safe_float(v) for k, v in (risk.components or {}).items()},
         }
 
         # ===== face =====
