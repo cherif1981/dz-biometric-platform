@@ -8,7 +8,6 @@ from src.modules.ai import RiskEngine, DecisionEngine, DocumentAI, BiometricAI, 
 # === end ===
 
 
-
 class VerificationStatus(str, Enum):
     VERIFIED = "VERIFIED"
     REJECTED = "REJECTED"
@@ -26,6 +25,7 @@ class VerificationResult:
     reasons: List[str] = field(default_factory=list)
     scores: Dict[str, float] = field(default_factory=dict)
     audit_id: Optional[int] = None
+    ai_report: Optional[Dict[str, Any]] = None  # ← أُضيف: التقرير يُعاد الآن
 
 
 class VerificationEngine:
@@ -43,15 +43,9 @@ class VerificationEngine:
         self.face = FaceService.get()
         # Phase 2: Document AI
         self.document_ai = DocumentAI(ocr_service=getattr(self, 'ocr', None))
-
         # Phase 3: Biometric AI
-
         self.biometric_ai = BiometricAI(face_app=getattr(self, 'face', None))
-
-
         # Phase 4: AI Report Builder
-
-
         self.report_builder = ReportBuilder()
         self.risk_engine = RiskEngine()
         self.decision_engine = DecisionEngine()
@@ -105,7 +99,6 @@ class VerificationEngine:
                 if (ocr_fields.get(k) or "").strip().upper() != v.strip().upper():
                     reasons.append(f"FIELD:{k}")
         # AI Risk Engine
-        # self.risk_engine already initialized
         _risk_result = self.risk_engine.compute(scores)
         conf = 1.0 - _risk_result.score
         if not reasons:
@@ -115,29 +108,32 @@ class VerificationEngine:
             st = VerificationStatus.MANUAL_REVIEW
         else:
             st = VerificationStatus.REJECTED
-        return self._fin(st, conf, fs, ls, asc, ocr_fields, reasons, scores, client_ip)
+        # ← تمرير _risk_result إلى _fin (كان مفقودًا)
+        return self._fin(st, conf, fs, ls, asc, ocr_fields, reasons, scores,
+                         client_ip, risk_result=_risk_result)
 
-    def _fin(self, st, conf, fs, ls, asc, ocr, reasons, scores, ip):
+    def _fin(self, st, conf, fs, ls, asc, ocr, reasons, scores, ip, risk_result=None):
         r = VerificationResult(st, conf, fs, ls, asc, ocr, reasons, scores)
         try:
             from src.services.audit_db import AuditRecord
-
             r.audit_id = self.db.log(AuditRecord(
                 None, time.time(), st.value, conf, fs, ls, asc, ocr, reasons, ip))
         except Exception as e:
             logger.warning(f"audit: {e}")
+
         # Phase 4: build unified AI report
+        # قرار التقرير = القرار الفعلي (st)، وليس قيمة ثابتة.
         try:
-            _ai_report = self.report_builder.build(
-                decision_result=type('DR', (), {
-                    'decision': VerificationStatus.VERIFIED,  # placeholder
-                    'risk': _risk_result,
-                    'reasons': reasons,
-                    'raw_scores': scores,
-                })(),
-                signals=scores,
+            dr = type('DR', (), {
+                'decision': st,             # ← القرار الفعلي، لا VERIFIED ثابتة
+                'risk': risk_result,        # ← معامل مُمرَّر، لا NameError
+                'reasons': reasons,
+                'raw_scores': scores,
+            })()
+            r.ai_report = self.report_builder.build(
+                decision_result=dr, signals=scores
             ).to_dict()
         except Exception as _e:
-            _ai_report = {'error': str(_e)}
-
+            r.ai_report = {'error': str(_e)}
+            logger.warning(f"report_builder failed: {_e}")
         return r
