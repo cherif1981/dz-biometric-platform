@@ -1,6 +1,10 @@
-"""Decision Engine — VERIFIED / MANUAL_REVIEW / REJECTED."""
+"""Decision Engine — VERIFIED / MANUAL_REVIEW / REJECTED.
 
-from typing import Dict, List
+Thresholds are loaded from src.core.thresholds (single source of truth).
+The previous hardcoded defaults (0.40 / 0.50 / 0.45 / 0.30) were the most
+lenient of all sources and could approve inputs that YAML would reject.
+"""
+from typing import Dict, List, Optional
 from loguru import logger
 
 from .models import Decision, DecisionResult, RiskScore, RiskLevel
@@ -17,19 +21,28 @@ class DecisionEngine:
         self,
         verify_max_risk: float = 0.30,
         review_max_risk: float = 0.65,
-        min_liveness: float = 0.50,
-        min_antispoof: float = 0.45,
-        min_face_similarity: float = 0.40,
+        min_liveness: Optional[float] = None,
+        min_antispoof: Optional[float] = None,
+        min_face_similarity: Optional[float] = None,
         max_tampering: float = 0.60,
-        min_ocr_confidence: float = 0.30,
+        min_ocr_confidence: Optional[float] = None,
     ):
+        from src.core.thresholds import get_thresholds
+        t = get_thresholds()
+
         self.verify_max_risk = verify_max_risk
         self.review_max_risk = review_max_risk
-        self.min_liveness = min_liveness
-        self.min_antispoof = min_antispoof
-        self.min_face_similarity = min_face_similarity
         self.max_tampering = max_tampering
-        self.min_ocr_confidence = min_ocr_confidence
+
+        # كل العتبات من YAML ما لم تُمرَّر صراحةً (للاختبار)
+        self.min_liveness = min_liveness if min_liveness is not None else t.liveness
+        self.min_antispoof = min_antispoof if min_antispoof is not None else t.antispoofing
+        self.min_face_similarity = (
+            min_face_similarity if min_face_similarity is not None else t.face_similarity
+        )
+        self.min_ocr_confidence = (
+            min_ocr_confidence if min_ocr_confidence is not None else t.ocr_confidence
+        )
 
     def decide(
         self,
@@ -38,22 +51,16 @@ class DecisionEngine:
         reasons: List[str] | None = None,
     ) -> DecisionResult:
         reasons = reasons or []
-
-        # --- قواعد رفض صارمة (Hard Reject) ---
         hard_reject = False
 
         liveness = signals.get("liveness")
         if liveness is not None and liveness < self.min_liveness:
-            reasons.append(
-                f"liveness ({liveness:.3f}) < {self.min_liveness}"
-            )
+            reasons.append(f"liveness ({liveness:.3f}) < {self.min_liveness}")
             hard_reject = True
 
         antispoof = signals.get("antispoof")
         if antispoof is not None and antispoof < self.min_antispoof:
-            reasons.append(
-                f"antispoof ({antispoof:.3f}) < {self.min_antispoof}"
-            )
+            reasons.append(f"antispoof ({antispoof:.3f}) < {self.min_antispoof}")
             hard_reject = True
 
         similarity = signals.get("face_similarity")
@@ -79,7 +86,6 @@ class DecisionEngine:
                 raw_scores=signals,
             )
 
-        # --- قرار بناءً على risk_score ---
         if risk.score <= self.verify_max_risk:
             decision = Decision.VERIFIED
         elif risk.score <= self.review_max_risk:

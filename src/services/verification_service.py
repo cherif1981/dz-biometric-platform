@@ -31,9 +31,11 @@ class VerificationResult:
 class VerificationEngine:
     def __init__(self, ft=None, lt=None, ast=None):
         from src.core.config import settings
-        ft = ft if ft is not None else settings.FACE_MATCH_THRESHOLD
-        lt = lt if lt is not None else settings.LIVENESS_THRESHOLD
-        ast = ast if ast is not None else getattr(settings, 'ANTISPOOF_THRESHOLD', 0.45)
+        from src.core.thresholds import get_thresholds
+        _t = get_thresholds()
+        ft = ft if ft is not None else _t.face_similarity
+        lt = lt if lt is not None else _t.liveness
+        ast = ast if ast is not None else _t.antispoofing
 
         from src.services.face_service import FaceService
         from src.services.liveness_service import LivenessService

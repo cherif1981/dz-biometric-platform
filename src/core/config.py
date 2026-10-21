@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,9 +24,12 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://user:pass@localhost:5432/dz_biometric"
     REDIS_URL: str = "redis://localhost:6379/0"
 
-    # ML
-    FACE_MATCH_THRESHOLD: float = 0.45
-    LIVENESS_THRESHOLD: float = 0.7
+    # ML — THRESHOLDS MOVED TO config/thresholds.yaml (single source of truth).
+    # These fields are kept as OPTIONAL overrides only; when None, callers MUST
+    # read from src.core.thresholds.get_thresholds(). Never hardcode defaults
+    # here again — that's what caused the 0.45 vs 0.5668 drift.
+    FACE_MATCH_THRESHOLD: Optional[float] = None
+    LIVENESS_THRESHOLD: Optional[float] = None
     OCR_LANGS: list[str] = ["ar", "fr", "en"]
 
     CORS_ORIGINS: list[str] = ["*"]

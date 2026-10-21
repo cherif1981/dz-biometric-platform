@@ -1,56 +1,55 @@
-"""Unit tests for liveness detection."""
-import io
+"""
+Tests for the ONNX-based liveness service.
+
+Previous tests expected `components` (sharpness, saturation, FFT energy)
+from the old heuristic. Those components no longer exist — the detector
+now delegates to a trained ONNX model. These tests verify the new
+fail-closed contract instead.
+"""
+import numpy as np
+import cv2
 import pytest
-from PIL import Image
 
 from src.services.liveness_service import LivenessService
 
 
-def _make_image(color=(200, 200, 200), size=(256, 256)):
-    """Helper: create a JPEG image in bytes."""
-    img = Image.new("RGB", size, color=color)
-    buf = io.BytesIO()
-    img.save(buf, format="JPEG")
-    buf.seek(0)
-    return buf.read()
+def _encode_jpeg(img: np.ndarray) -> bytes:
+    ok, buf = cv2.imencode(".jpg", img)
+    assert ok, "failed to encode image"
+    return buf.tobytes()
 
 
 class TestLivenessService:
-    """Tests for LivenessService."""
-
     def setup_method(self):
         self.service = LivenessService(threshold=0.5)
 
-    def test_uniform_image_low_score(self):
-        """Uniform image should produce low liveness score."""
-        img_bytes = _make_image(color=(200, 200, 200))
-        result = self.service.check(img_bytes)
-        assert "score" in result
-        assert 0.0 <= result["score"] <= 1.0
-        assert result["score"] < 0.5
+    def test_threshold_is_injected(self):
+        assert self.service.threshold == 0.5
 
-    def test_noisy_image_higher_score(self):
-        """Noisy image should produce higher score."""
-        import numpy as np
-        arr = np.random.randint(0, 255, (256, 256, 3), dtype=np.uint8)
-        img = Image.fromarray(arr)
-        buf = io.BytesIO()
-        img.save(buf, format="JPEG")
-        buf.seek(0)
-        result = self.service.check(buf.read())
-        assert result["score"] > 0.3
-
-    def test_invalid_bytes(self):
-        """Invalid bytes should return 0 score."""
-        result = self.service.check(b"not an image")
-        assert result["score"] == 0.0
+    def test_blank_image_fails_closed(self):
+        """Blank image has no face -> must NOT be considered live."""
+        blank = np.zeros((200, 200, 3), dtype=np.uint8)
+        result = self.service.check(_encode_jpeg(blank))
         assert result["is_live"] is False
+        assert result["score"] == 0.0
+        assert result.get("error") is not None
 
-    def test_components_returned(self):
-        """Result should include component scores."""
-        img_bytes = _make_image()
-        result = self.service.check(img_bytes)
-        assert "components" in result
-        assert "lap" in result["components"]
-        assert "hf" in result["components"]
-        assert "color" in result["components"]
+    def test_invalid_bytes_fails_closed(self):
+        result = self.service.check(b"not-an-image-at-all")
+        assert result["is_live"] is False
+        assert result["score"] == 0.0
+        assert result.get("error") is not None
+
+    def test_noisy_image_does_not_crash(self):
+        """Random noise has no face -> still fail-closed, no exception."""
+        rng = np.random.default_rng(42)
+        noise = rng.integers(0, 256, (200, 200, 3), dtype=np.uint8)
+        result = self.service.check(_encode_jpeg(noise))
+        assert result["is_live"] is False
+        assert result["score"] == 0.0
+
+    def test_result_has_required_keys(self):
+        blank = np.zeros((200, 200, 3), dtype=np.uint8)
+        result = self.service.check(_encode_jpeg(blank))
+        for key in ("is_live", "score", "threshold", "error"):
+            assert key in result
