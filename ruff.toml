@@ -1,16 +1,44 @@
-# ruff.toml — configuration Ruff du projet dz-biometric-platform
+# ============================================================
+# Configuration Ruff — dz-biometric-platform
+# Ce fichier est prioritaire sur toute section [tool.ruff]
+# de pyproject.toml. Assurez-vous que pyproject.toml ne
+# contient AUCUNE section [tool.ruff] pour éviter les conflits.
+# Compatible avec Ruff >= 0.4.0
+# ============================================================
 
+# Longueur de ligne maximale (alignée sur Black)
 line-length = 100
-target-version = "py310"
-exclude = [".git", ".venv", "venv", "__pycache__", "build", "dist"]
 
+# Version Python cible
+target-version = "py310"
+
+# Fichiers et dossiers à ignorer
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "build",
+    "dist",
+    ".eggs",
+    "*.egg-info",
+]
+
+# ============================================================
+# Règles de lint
+# ============================================================
 [lint]
-# Règles activées : pycodestyle (E, W), Pyflakes (F), isort (I)
+
+# Règles activées :
+#   E = pycodestyle (erreurs)
+#   W = pycodestyle (avertissements)
+#   F = Pyflakes (erreurs logiques)
+#   I = isort (ordre des imports)
 select = ["E", "W", "F", "I"]
 
-# Règles ignorées pour éviter les échecs sur des détails non critiques
+# Règles ignorées pour éviter les faux positifs
 ignore = [
-    "E501",   # ligne trop longue
+    "E501",   # ligne trop longue (gérée par Black / ruff format)
     "E402",   # import non en haut du fichier (fréquent avec FastAPI)
     "F401",   # import inutilisé (parfois nécessaire dans __init__.py)
     "F841",   # variable assignée mais jamais utilisée
@@ -18,5 +46,8 @@ ignore = [
     "W504",   # saut de ligne après opérateur binaire
 ]
 
+# ============================================================
+# Configuration isort (ordre des imports)
+# ============================================================
 [lint.isort]
 known-first-party = ["src"]
