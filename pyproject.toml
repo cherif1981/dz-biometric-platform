@@ -49,13 +49,26 @@ where = ["src"]
 line-length = 100
 target-version = ["py310"]
 
-# --- Configuration Ruff unique et minimale ---
+# ============================================================
+# Configuration Ruff — centralisée (aucun ruff.toml à la racine)
+# Compatible Ruff 0.4.10 : W503 / W504 retirés (obsolètes)
+# ============================================================
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+exclude = [".git", ".venv", "venv", "__pycache__", "build", "dist"]
 
 [tool.ruff.lint]
-select = ["E", "F"]
+select = ["E", "W", "F", "I"]
+ignore = [
+    "E501",   # ligne trop longue
+    "E402",   # import non en haut du fichier (FastAPI)
+    "F401",   # import inutilisé (__init__.py)
+    "F841",   # variable inutilisée
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
