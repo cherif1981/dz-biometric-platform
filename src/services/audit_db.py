@@ -1,6 +1,7 @@
-import sqlite3, json
+import json
+import sqlite3
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 DB_PATH = "/tmp/dz_biometric.db"
 
