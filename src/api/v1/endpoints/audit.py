@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Query
+
 from src.core.permissions import RequireScopes
 
 router = APIRouter()
