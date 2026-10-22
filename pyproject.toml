@@ -50,8 +50,7 @@ line-length = 100
 target-version = ["py310"]
 
 # ============================================================
-# Configuration Ruff — centralisée (aucun ruff.toml à la racine)
-# Compatible Ruff 0.4.10 : W503 / W504 retirés (obsolètes)
+# Configuration Ruff — sans W503/W504 (supprimés depuis Ruff 0.1.5)
 # ============================================================
 [tool.ruff]
 line-length = 100
@@ -62,7 +61,7 @@ exclude = [".git", ".venv", "venv", "__pycache__", "build", "dist"]
 select = ["E", "W", "F", "I"]
 ignore = [
     "E501",   # ligne trop longue
-    "E402",   # import non en haut du fichier (FastAPI)
+    "E402",   # import non en haut de fichier (FastAPI)
     "F401",   # import inutilisé (__init__.py)
     "F841",   # variable inutilisée
 ]
