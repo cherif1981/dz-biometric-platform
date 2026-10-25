@@ -54,21 +54,27 @@ class VerifyPayload(BaseModel):
     antispoofing_score: float = 0.0
 
 
-@app.post("/verify-legacy", tags=["verification-legacy"])
-def verify_legacy(payload: VerifyPayload, current: User = Depends(get_current_user)):
+@app.post("/verify-legacy", tags=["verification-legacy"], deprecated=True, include_in_schema=False)
+def verify_legacy(current: User = Depends(get_current_user)):
     """
-    Endpoint legacy de vérification (conservé pour compatibilité).
-    Utilisez plutôt /verify/ exposé par verify.router.
+    [DISABLED FOR SECURITY]
+
+    The legacy contract accepted client-supplied biometric scores
+    (face_score, liveness_score, antispoofing_score) and trusted them
+    to issue a VERIFIED/REJECTED decision. Any authenticated user
+    could forge a VERIFIED result by sending all scores as 1.0 without
+    presenting any image.
+
+    Replaced by POST /api/v1/verify/, which accepts raw id_image +
+    selfie files and recomputes every score server-side.
     """
-    scores = {
-        "face_similarity": payload.face_score,
-        "liveness": payload.liveness_score,
-        "antispoofing": payload.antispoofing_score,
-    }
-    try:
-        return builder.build(payload.subject_id, scores)
-    except ValueError as e:
-        raise HTTPException(400, str(e))
+    raise HTTPException(
+        status_code=410,
+        detail=(
+            "This endpoint has been permanently disabled for security reasons. "
+            "Use POST /api/v1/verify/ with id_image and selfie files."
+        ),
+    )
 
 
 @app.get("/health", tags=["health"])
