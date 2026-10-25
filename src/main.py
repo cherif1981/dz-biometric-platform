@@ -22,12 +22,15 @@ app = FastAPI(
 
 # --- Routeur de review (existant) ---
 from src.review_api import router as review_router
+from fastapi import Depends
+from src.api.v1.endpoints.auth import get_current_user
+from src.models.user import User
 app.include_router(review_router)
 
 # --- Routeur principal de l'API v1 (import sécurisé) ---
 try:
     from src.api.v1.router import api_router
-    app.include_router(api_router)
+    app.include_router(api_router, prefix="/api/v1")
 except ImportError as e:
     logger.warning(
         f"Impossible d'importer api_router : {e}. "
@@ -52,7 +55,7 @@ class VerifyPayload(BaseModel):
 
 
 @app.post("/verify-legacy", tags=["verification-legacy"])
-def verify_legacy(payload: VerifyPayload):
+def verify_legacy(payload: VerifyPayload, current: User = Depends(get_current_user)):
     """
     Endpoint legacy de vérification (conservé pour compatibilité).
     Utilisez plutôt /verify/ exposé par verify.router.
@@ -81,3 +84,6 @@ def root():
         "docs": "/docs",
         "openapi": "/openapi.json",
     }
+
+
+# ===== تضمين راوتر المصادقة (auth) =====

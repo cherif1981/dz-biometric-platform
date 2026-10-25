@@ -2,7 +2,6 @@
 from typing import Dict
 from src.services.base_service import BaseVerificationService
 
-
 class FaceVerificationService(BaseVerificationService):
     modality = "face_similarity"
 
@@ -11,3 +10,13 @@ class FaceVerificationService(BaseVerificationService):
         # المهم: تُرجع درجة فقط، لا تقارنها بأي عتبة.
         score = payload.get("face_score", 0.0)
         return {self.modality: float(score)}
+
+    # ---- backward-compat singleton accessor ----
+    _singleton = None
+
+    @classmethod
+    def get(cls):
+        """Return a shared instance. Some legacy code calls FaceService.get()."""
+        if cls._singleton is None:
+            cls._singleton = cls()
+        return cls._singleton

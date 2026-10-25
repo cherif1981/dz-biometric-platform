@@ -16,6 +16,9 @@ except ImportError:
 
 
 class OCRService:
+
+    def __init__(self, *args, **kwargs):
+        pass
     _readers = None
     REVIEW_THRESHOLD = 0.65
 

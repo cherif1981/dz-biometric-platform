@@ -37,7 +37,7 @@ def test_face_service_fails_secure_when_model_missing(monkeypatch):
 def test_reject_oversized_upload(client):
     big = b"x" * (6 * 1024 * 1024)
     r = client.post(
-        "/verify/",
+        "/api/v1/verify/",
         files={"id_image": ("big.jpg", big, "image/jpeg"),
                "selfie": ("big.jpg", big, "image/jpeg")},
     )
@@ -46,7 +46,7 @@ def test_reject_oversized_upload(client):
 
 def test_verify_endpoint_with_valid_images(client, valid_image):
     r = client.post(
-        "/verify/",
+        "/api/v1/verify/",
         files={"id_image": ("id.jpg", valid_image, "image/jpeg"),
                "selfie": ("selfie.jpg", valid_image, "image/jpeg")},
     )
@@ -57,7 +57,7 @@ def test_verify_endpoint_with_valid_images(client, valid_image):
 # ============ LIVENESS ============
 
 def test_challenge_new_returns_valid_session(client):
-    r = client.post("/liveness/challenge/new")
+    r = client.post("/api/v1/liveness/challenge/new")
     assert r.status_code == 200
     data = r.json()
     assert "session_id" in data
@@ -66,7 +66,7 @@ def test_challenge_new_returns_valid_session(client):
 
 def test_challenge_frame_rejects_invalid_session(client):
     r = client.post(
-        "/liveness/challenge/nonexistent/frame",
+        "/api/v1/liveness/challenge/nonexistent/frame",
         json={"yaw": 25.0, "pitch": 0, "ear": 0.3},
     )
     assert r.status_code == 200
@@ -76,7 +76,7 @@ def test_challenge_frame_rejects_invalid_session(client):
 # ============ AUDIT ============
 
 def test_audit_stats_returns_structure(client):
-    r = client.get("/audit/stats")
+    r = client.get("/api/v1/audit/stats")
     assert r.status_code == 200
     assert "total" in r.json()
 
@@ -85,14 +85,14 @@ def test_audit_stats_returns_structure(client):
 
 def test_verify_with_only_one_image(client, valid_image):
     r = client.post(
-        "/verify/",
+        "/api/v1/verify/",
         files={"id_image": ("id.jpg", valid_image, "image/jpeg")},
     )
     assert r.status_code == 422
 
 
 def test_verify_with_no_images(client):
-    r = client.post("/verify/")
+    r = client.post("/api/v1/verify/")
     assert r.status_code == 422
 
 

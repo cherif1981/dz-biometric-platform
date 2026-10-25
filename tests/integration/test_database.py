@@ -20,14 +20,14 @@ class TestAuditDB:
         assert db is not None
 
     def test_stats_endpoint(self, client):
-        r = client.get("/audit/stats")
+        r = client.get("/api/v1/audit/stats")
         assert r.status_code == 200
         data = r.json()
         assert "total" in data
         assert "by_status" in data
 
     def test_recent_endpoint(self, client):
-        r = client.get("/audit/recent?limit=5")
+        r = client.get("/api/v1/audit/recent?limit=5")
         assert r.status_code == 200
         data = r.json()
         assert "records" in data

@@ -41,7 +41,7 @@ class VerificationEngine:
             ReportBuilder,
         )
         from src.core.thresholds import get_thresholds
-        from src.services.face_service import FaceService
+        from src.services.face_service import FaceVerificationService as FaceService
         from src.services.liveness_service import LivenessService
         from src.services.ocr_service import OCRService
         from src.services.antispoofing_service import AntiSpoofing

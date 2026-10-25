@@ -11,7 +11,7 @@ from src.core.thresholds import get_thresholds
 
 
 class LivenessService:
-    def __init__(self, threshold: Optional[float] = None):
+    def __init__(self, threshold: Optional[float] = None, *args, **kwargs):
         self.threshold = threshold if threshold is not None else get_thresholds().liveness
         self._detector = PassiveLiveness()
 

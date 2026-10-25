@@ -1,53 +1,47 @@
-"""Pytest configuration and shared fixtures."""
+
 import os
-import sys
-from pathlib import Path
+
+# ⚠️ يجب ضبط المتغيرات قبل أي استيراد لـ src.*
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./test.db"
+os.environ.setdefault("SECRET_KEY", "change-me-in-production-please-use-a-long-random-string")
+os.environ.setdefault("JWT_ALGORITHM", "HS256")
+os.environ.setdefault("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
+os.environ.setdefault("REFRESH_TOKEN_EXPIRE_DAYS", "7")
 
 import pytest
-from fastapi.testclient import TestClient
-
-# Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-
-@pytest.fixture(scope="session")
-def app():
-    """Create FastAPI test application."""
-    os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-    os.environ["SECRET_KEY"] = "test-secret-key"
-    os.environ["ENVIRONMENT"] = "testing"
-
-    from src.main import app as fastapi_app
-    return fastapi_app
-
-
-@pytest.fixture(scope="session")
-def client(app):
-    """Create test client."""
-    return TestClient(app)
+import pytest_asyncio
+from sqlalchemy import select
 
 
 @pytest.fixture
-def sample_id_image():
-    """Return sample ID image bytes."""
-    import io
-    from PIL import Image
-
-    img = Image.new("RGB", (400, 300), color=(240, 240, 240))
-    buf = io.BytesIO()
-    img.save(buf, format="JPEG")
-    buf.seek(0)
-    return buf.read()
+def client():
+    """TestClient متزامن لاختبارات integration — يدعم lifespan."""
+    from fastapi.testclient import TestClient
+    from src.main import app
+    with TestClient(app) as c:
+        yield c
 
 
-@pytest.fixture
-def sample_selfie():
-    """Return sample selfie image bytes."""
-    import io
-    from PIL import Image
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def _seed_db():
+    from src.db.base import Base
+    from src.db.session import engine, AsyncSessionLocal
+    from src.models.user import User
+    from src.core.security import hash_password
 
-    img = Image.new("RGB", (300, 300), color=(200, 200, 220))
-    buf = io.BytesIO()
-    img.save(buf, format="JPEG")
-    buf.seek(0)
-    return buf.read()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    async with AsyncSessionLocal() as s:
+        r = await s.execute(select(User).where(User.username == "testuser"))
+        if not r.scalar_one_or_none():
+            s.add(User(
+                username="testuser",
+                email="test@example.com",
+                password_hash=hash_password("SecurePass123!"),
+                scopes=["read", "write"],
+            ))
+            await s.commit()
+
+    yield
+    await engine.dispose()

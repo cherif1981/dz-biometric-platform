@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from src.services.audit_db import AuditDB
 
-router = APIRouter(prefix="/audit", tags=["audit"])
+router = APIRouter(tags=["audit"])
 db = AuditDB()
 
 
