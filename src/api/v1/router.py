@@ -1,46 +1,36 @@
 from fastapi import APIRouter
+import logging
 
-from src.api.v1.endpoints import (
-    auth,
-    identity,
-    ocr,
-    face,
-    liveness,
-    users,
-)
-try:
-    from src.api.v1 import verify
-except Exception as _e:
-    verify = None
-    import logging; logging.getLogger(__name__).warning(f'verify skipped: {_e}')
-try:
-    from src.api.v1 import liveness as challenge_liveness
-except Exception as _e:
-    challenge_liveness = None
-    import logging; logging.getLogger(__name__).warning(f'challenge_liveness skipped: {_e}')
-try:
-    from src.api.v1 import audit as audit_stats
-except Exception as _e:
-    audit_stats = None
-    import logging; logging.getLogger(__name__).warning(f'audit_stats skipped: {_e}')
-
-
+logger = logging.getLogger(__name__)
 api_router = APIRouter()
 
-# --- Endpoints avec préfixe défini ici (pas de préfixe interne) ---
-api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
-api_router.include_router(users.router, prefix="/users", tags=["users"])
-api_router.include_router(identity.router, prefix="/identity", tags=["identity"])
-api_router.include_router(ocr.router, prefix="/ocr", tags=["ocr"])
-api_router.include_router(face.router, prefix="/face", tags=["face"])
-api_router.include_router(liveness.router, prefix="/liveness", tags=["liveness"])
 
-# --- Endpoints avec préfixe déjà défini dans leur module ---
-# verify.py définit déjà APIRouter(prefix="/verify", ...) → ne pas répéter
-if verify: api_router.include_router(verify.router, tags=["verification"])
+def _try_import(module_path, name, prefix=None, tags=None):
+    try:
+        mod = __import__(module_path, fromlist=[name])
+        router = getattr(mod, name)
+        if prefix is not None:
+            api_router.include_router(router, prefix=prefix, tags=tags or [name])
+        else:
+            api_router.include_router(router, tags=tags or [name])
+        logger.info(f"✅ mounted {module_path}.{name}")
+        return True
+    except Exception as e:
+        logger.warning(f"⚠️ skip {module_path}.{name}: {type(e).__name__}: {e}")
+        return False
 
-# liveness.py (src/api/v1) définit déjà APIRouter(prefix="/liveness", ...)
-if challenge_liveness: api_router.include_router(challenge_liveness.router, tags=["liveness"])
 
-# audit.py : adaptez selon que le préfixe interne existe ou non
-if audit_stats: api_router.include_router(audit_stats.router, prefix="/audit", tags=["audit"])
+for mod_name, prefix in [
+    ("auth",      "/auth"),
+    ("users",     "/users"),
+    ("identity",  "/identity"),
+    ("ocr",       "/ocr"),
+    ("face",      "/face"),
+    ("liveness",  "/liveness"),
+]:
+    _try_import(f"src.api.v1.endpoints.{mod_name}", "router", prefix=prefix, tags=[mod_name])
+
+for mod_name in ["verify", "liveness"]:
+    _try_import(f"src.api.v1.{mod_name}", "router", prefix=None, tags=[mod_name])
+
+_try_import("src.api.v1.audit", "router", prefix=None, tags=["audit"])

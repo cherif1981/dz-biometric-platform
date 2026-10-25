@@ -28,17 +28,6 @@ from src.models.user import User
 app.include_router(review_router)
 
 # --- Routeur principal de l'API v1 (import sécurisé) ---
-try:
-    from src.api.v1.router import api_router
-    app.include_router(api_router, prefix="/api/v1")
-except ImportError as e:
-    logger.warning(
-        f"Impossible d'importer api_router : {e}. "
-        "Certains endpoints (verify, liveness, etc.) ne seront pas disponibles. "
-        "Vérifiez que opencv-python-headless est installé."
-    )
-
-# --- Moteur de décision et constructeur de rapports ---
 engine = DecisionEngine("config/thresholds.yaml")
 builder = ReportBuilder(engine)
 
@@ -93,3 +82,6 @@ def root():
 
 
 # ===== تضمين راوتر المصادقة (auth) =====
+
+from src.api.v1.router import api_router
+app.include_router(api_router, prefix="/api/v1")

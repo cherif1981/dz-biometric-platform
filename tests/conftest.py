@@ -1,7 +1,5 @@
-
 import os
 
-# ⚠️ يجب ضبط المتغيرات قبل أي استيراد لـ src.*
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./test.db"
 os.environ.setdefault("SECRET_KEY", "change-me-in-production-please-use-a-long-random-string")
 os.environ.setdefault("JWT_ALGORITHM", "HS256")
@@ -15,7 +13,6 @@ from sqlalchemy import select
 
 @pytest.fixture
 def client():
-    """TestClient متزامن لاختبارات integration — يدعم lifespan."""
     from fastapi.testclient import TestClient
     from src.main import app
     with TestClient(app) as c:
