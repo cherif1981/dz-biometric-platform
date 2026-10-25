@@ -9,6 +9,7 @@ Definitions (ISO/IEC 30107-3 + NIST FRVT):
 Uses Wilson score interval for binomial proportions (better than normal
 approximation at small n / extreme rates).
 """
+
 import math
 from dataclasses import dataclass, field
 from typing import Iterable, List, Tuple
@@ -50,7 +51,10 @@ class ConfusionCounts:
 
     def to_dict(self) -> dict:
         return {
-            "TP": self.tp, "FP": self.fp, "TN": self.tn, "FN": self.fn,
+            "TP": self.tp,
+            "FP": self.fp,
+            "TN": self.tn,
+            "FN": self.fn,
             "FAR": round(self.far, 6),
             "FAR_95CI": tuple(round(x, 6) for x in self.far_ci()),
             "FRR": round(self.frr, 6),
@@ -61,9 +65,9 @@ class ConfusionCounts:
 @dataclass
 class PADCounts:
     bona_fide_total: int = 0
-    bona_fide_rejected: int = 0   # → BPCER numerator
+    bona_fide_rejected: int = 0  # → BPCER numerator
     attack_total: int = 0
-    attack_accepted: int = 0      # → APCER numerator
+    attack_accepted: int = 0  # → APCER numerator
 
     @property
     def apcer(self) -> float:
@@ -77,10 +81,14 @@ class PADCounts:
         return {
             "attacks": self.attack_total,
             "APCER": round(self.apcer, 6),
-            "APCER_95CI": tuple(round(x, 6) for x in wilson_ci(self.attack_accepted, self.attack_total)),
+            "APCER_95CI": tuple(
+                round(x, 6) for x in wilson_ci(self.attack_accepted, self.attack_total)
+            ),
             "bona_fide": self.bona_fide_total,
             "BPCER": round(self.bpcer, 6),
-            "BPCER_95CI": tuple(round(x, 6) for x in wilson_ci(self.bona_fide_rejected, self.bona_fide_total)),
+            "BPCER_95CI": tuple(
+                round(x, 6) for x in wilson_ci(self.bona_fide_rejected, self.bona_fide_total)
+            ),
         }
 
 

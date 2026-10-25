@@ -1,10 +1,11 @@
+from datetime import datetime, timedelta, timezone
 
 import pytest
-from datetime import datetime, timedelta, timezone
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 from jose import jwt
-from src.main import app
+
 from src.core.config import settings
+from src.main import app
 
 AUTH_BASE = "/api/v1/auth"
 
@@ -13,8 +14,7 @@ AUTH_BASE = "/api/v1/auth"
 async def test_demo_bypass_removed():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
-        r = await c.post(f"{AUTH_BASE}/login",
-                         data={"username": "demo", "password": "demo"})
+        r = await c.post(f"{AUTH_BASE}/login", data={"username": "demo", "password": "demo"})
     assert r.status_code == 401, f"expected 401, got {r.status_code}: {r.text}"
 
 
@@ -22,8 +22,9 @@ async def test_demo_bypass_removed():
 async def test_valid_login_returns_tokens():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
-        r = await c.post(f"{AUTH_BASE}/login",
-                         data={"username": "testuser", "password": "SecurePass123!"})
+        r = await c.post(
+            f"{AUTH_BASE}/login", data={"username": "testuser", "password": "SecurePass123!"}
+        )
     assert r.status_code == 200, f"expected 200, got {r.status_code}: {r.text}"
     body = r.json()
     assert "access_token" in body and "refresh_token" in body
@@ -34,12 +35,12 @@ async def test_valid_login_returns_tokens():
 async def test_me_with_valid_token():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
-        login = await c.post(f"{AUTH_BASE}/login",
-                             data={"username": "testuser", "password": "SecurePass123!"})
+        login = await c.post(
+            f"{AUTH_BASE}/login", data={"username": "testuser", "password": "SecurePass123!"}
+        )
         assert login.status_code == 200, login.text
         token = login.json()["access_token"]
-        r = await c.get(f"{AUTH_BASE}/me",
-                        headers={"Authorization": f"Bearer {token}"})
+        r = await c.get(f"{AUTH_BASE}/me", headers={"Authorization": f"Bearer {token}"})
     assert r.status_code == 200, r.text
     assert r.json()["username"] == "testuser"
 
@@ -51,8 +52,7 @@ async def test_expired_token_rejected():
     expired = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
-        r = await c.get(f"{AUTH_BASE}/me",
-                        headers={"Authorization": f"Bearer {expired}"})
+        r = await c.get(f"{AUTH_BASE}/me", headers={"Authorization": f"Bearer {expired}"})
     assert r.status_code == 401, r.text
 
 
@@ -60,12 +60,12 @@ async def test_expired_token_rejected():
 async def test_refresh_token_rejected_as_access():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
-        login = await c.post(f"{AUTH_BASE}/login",
-                             data={"username": "testuser", "password": "SecurePass123!"})
+        login = await c.post(
+            f"{AUTH_BASE}/login", data={"username": "testuser", "password": "SecurePass123!"}
+        )
         assert login.status_code == 200, login.text
         refresh = login.json()["refresh_token"]
-        r = await c.get(f"{AUTH_BASE}/me",
-                        headers={"Authorization": f"Bearer {refresh}"})
+        r = await c.get(f"{AUTH_BASE}/me", headers={"Authorization": f"Bearer {refresh}"})
     assert r.status_code == 401, r.text
 
 

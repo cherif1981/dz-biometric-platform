@@ -9,12 +9,12 @@ Categories:
 Each entry is a JSON manifest line: {path, subject_id, category, source, hash}.
 Hashes let us detect accidental duplication across splits.
 """
+
 import hashlib
 import json
 import os
 import sys
 from pathlib import Path
-
 
 CATEGORIES = ["bona_fide", "impostor", "pad_level1", "pad_level2"]
 
@@ -50,12 +50,14 @@ def build_manifest(root: str, out_path: str) -> dict:
             seen_hashes[h] = str(img)
             # subject_id: strip everything after the first __
             subject = img.stem.split("__")[0]
-            records.append({
-                "path": str(img.relative_to(root_p)),
-                "subject_id": subject,
-                "category": cat,
-                "sha256": h,
-            })
+            records.append(
+                {
+                    "path": str(img.relative_to(root_p)),
+                    "subject_id": subject,
+                    "category": cat,
+                    "sha256": h,
+                }
+            )
     manifest = {
         "root": root,
         "count": len(records),

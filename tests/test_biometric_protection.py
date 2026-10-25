@@ -1,16 +1,21 @@
 """Biometric data protection: encryption, redaction."""
+
 import base64
 import os
-import pytest
 
+import pytest
 
 # --- Encryption tests ---
 
+
 def test_encrypt_decrypt_roundtrip():
-    from src.core.biometric_crypto import encrypt_biometric, decrypt_biometric, generate_key_b64
+    from src.core.biometric_crypto import decrypt_biometric, encrypt_biometric, generate_key_b64
+
     os.environ["BIOMETRIC_ENC_KEY"] = generate_key_b64()
     import importlib
+
     import src.core.biometric_crypto as bc
+
     importlib.reload(bc)
 
     plaintext = b"\xff\xd8\xff\xe0fake-jpeg-bytes"
@@ -22,9 +27,12 @@ def test_encrypt_decrypt_roundtrip():
 
 def test_encryption_uses_random_nonce():
     from src.core.biometric_crypto import generate_key_b64
+
     os.environ["BIOMETRIC_ENC_KEY"] = generate_key_b64()
     import importlib
+
     import src.core.biometric_crypto as bc
+
     importlib.reload(bc)
 
     a = bc.encrypt_biometric(b"same-bytes")
@@ -34,9 +42,12 @@ def test_encryption_uses_random_nonce():
 
 def test_encryption_tamper_detected():
     from src.core.biometric_crypto import generate_key_b64
+
     os.environ["BIOMETRIC_ENC_KEY"] = generate_key_b64()
     import importlib
+
     import src.core.biometric_crypto as bc
+
     importlib.reload(bc)
 
     stored = bc.encrypt_biometric(b"tamper-me")
@@ -49,7 +60,9 @@ def test_encryption_tamper_detected():
 def test_missing_key_falls_back_with_marker():
     os.environ.pop("BIOMETRIC_ENC_KEY", None)
     import importlib
+
     import src.core.biometric_crypto as bc
+
     importlib.reload(bc)
 
     stored = bc.encrypt_biometric(b"dev-only")
@@ -58,8 +71,10 @@ def test_missing_key_falls_back_with_marker():
 
 # --- Redaction tests ---
 
+
 def test_mask_subject_is_stable_and_short():
     from src.core.log_redaction import mask_subject
+
     m1 = mask_subject("user@example.com")
     m2 = mask_subject("user@example.com")
     assert m1 == m2
@@ -70,6 +85,7 @@ def test_mask_subject_is_stable_and_short():
 
 def test_redact_strips_hex_and_b64():
     from src.core.log_redaction import redact_message
+
     msg = "processing image=" + "a" * 64 + " hash=" + base64.b64encode(b"x" * 100).decode()
     out = redact_message(msg)
     assert "aaaa" not in out
@@ -79,6 +95,7 @@ def test_redact_strips_hex_and_b64():
 
 def test_redact_removes_jpeg_magic():
     from src.core.log_redaction import redact_message
+
     msg = "payload=b'\xff\xd8\xff\xe0...'"
     out = redact_message(msg)
     assert "\xff\xd8\xff" not in out

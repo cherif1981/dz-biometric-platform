@@ -9,12 +9,13 @@ Design:
 
 Never store the key in the DB or in the same location as ciphertext.
 """
+
 from __future__ import annotations
 
 import base64
+import logging
 import os
 import secrets
-import logging
 from typing import Optional
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -57,9 +58,7 @@ def _load_key() -> Optional[bytes]:
         raise ValueError("BIOMETRIC_ENC_KEY must be base64-encoded")
 
     if len(key) != 32:
-        raise ValueError(
-            f"BIOMETRIC_ENC_KEY must decode to 32 bytes, got {len(key)}"
-        )
+        raise ValueError(f"BIOMETRIC_ENC_KEY must decode to 32 bytes, got {len(key)}")
 
     _KEY = key
     return _KEY
@@ -81,12 +80,11 @@ def encrypt_biometric(plaintext: bytes) -> str:
 def decrypt_biometric(stored: str) -> bytes:
     """Decrypt base64 string → original bytes."""
     if stored.startswith("PLAINTEXT::"):
-        return base64.b64decode(stored[len("PLAINTEXT::"):])
+        return base64.b64decode(stored[len("PLAINTEXT::") :])
     key = _load_key()
     if key is None:
         raise RuntimeError(
-            "Cannot decrypt: BIOMETRIC_ENC_KEY not set but ciphertext has no "
-            "PLAINTEXT:: marker"
+            "Cannot decrypt: BIOMETRIC_ENC_KEY not set but ciphertext has no PLAINTEXT:: marker"
         )
     raw = base64.b64decode(stored)
     nonce, ct = raw[:12], raw[12:]

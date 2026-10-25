@@ -9,6 +9,7 @@ simulate the *decision path*:
 This catches regressions where the liveness/antispoof service stops
 distinguishing these patterns, without claiming ISO certification.
 """
+
 import io
 from typing import List
 

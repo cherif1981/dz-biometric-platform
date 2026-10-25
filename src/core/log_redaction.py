@@ -3,6 +3,7 @@
 The audit finding: "settings for encryption keys do not by themselves
 prove that all sensitive data is actually protected" applies to logs too.
 """
+
 import hashlib
 import re
 from typing import Optional
