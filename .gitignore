@@ -51,3 +51,9 @@ models/Silent-Face-Anti-Spoofing/
 # If .gitignore excludes *.onnx or models/, the exceptions below re-include it.
 !models/MiniFASNetV2.onnx
 !models/MiniFASNetV2.onnx.sha256
+
+secrets/
+*.key
+*.pem
+.env.*
+!.env.example

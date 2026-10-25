@@ -1,0 +1,120 @@
+# docker-compose.prod.yml — production overrides
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Security hardening:
+#   - No ports exposed for postgres/redis (internal network only)
+#   - Secrets from files (not env vars) via Docker secrets
+#   - No --reload (production uses --workers)
+#   - read_only filesystem + no-new-privileges + non-root user
+#   - Health checks + resource limits
+version: "3.9"
+
+services:
+  postgres:
+    # ✅ remove any host port binding
+    ports: !reset []
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/postgres_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_DB_FILE: /run/secrets/postgres_db
+    secrets:
+      - postgres_user
+      - postgres_password
+      - postgres_db
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$(cat /run/secrets/postgres_user)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 1G }
+
+  redis:
+    ports: !reset []
+    command: >
+      sh -c 'redis-server
+             --requirepass "$$(cat /run/secrets/redis_password)"
+             --appendonly yes
+             --bind 0.0.0.0
+             --protected-mode yes'
+    secrets:
+      - redis_password
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$$(cat /run/secrets/redis_password)", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # ✅ no --reload — production uses --workers
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn src.main:app
+               --host 0.0.0.0
+               --port 8000
+               --workers 4
+               --no-access-log"
+    # ✅ only API is published, bound to localhost (behind reverse proxy)
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      ENVIRONMENT: production
+      SECRET_KEY_FILE: /run/secrets/secret_key
+    secrets:
+      - secret_key
+    # ✅ no volume mounts for code in production
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.cache
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    user: "1000:1000"
+    networks:
+      - backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits: { cpus: "2.0", memory: 2G }
+
+secrets:
+  postgres_user:
+    file: ./secrets/postgres_user.txt
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+  postgres_db:
+    file: ./secrets/postgres_db.txt
+  redis_password:
+    file: ./secrets/redis_password.txt
+  secret_key:
+    file: ./secrets/secret_key.txt
+
+networks:
+  backend:
+    driver: bridge
+    internal: true   # ✅ cannot reach the internet
