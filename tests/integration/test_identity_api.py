@@ -36,7 +36,7 @@ class TestVerifyEndpoint:
         r = client.post("/verify-legacy/", headers=auth_headers)
         assert r.status_code == 422
 
-    @pytest.mark.xfail(reason="deprecated /verify-legacy returns 410", strict=False)
+    @pytest.mark.xfail(reason="deprecated /verify-legacy returns 410", strict=True)
     def test_verify_with_images(self, client, auth_headers):
         """بصورتين صالحتين يجب أن يُقبل الطلب (200)."""
         files = {
@@ -46,7 +46,7 @@ class TestVerifyEndpoint:
         r = client.post("/verify-legacy/", headers=auth_headers)
         assert r.status_code == 200
 
-    @pytest.mark.xfail(reason="deprecated /verify-legacy returns 410", strict=False)
+    @pytest.mark.xfail(reason="deprecated /verify-legacy returns 410", strict=True)
     def test_verify_response_structure(self, client, auth_headers):
         """يجب أن يحتوي الرد على الحقول المطلوبة."""
         files = {

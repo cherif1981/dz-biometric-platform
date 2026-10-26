@@ -25,7 +25,7 @@ def valid_image():
 # ============ FAIL-SECURE ============
 
 
-@pytest.mark.xfail(reason="needs auth headers / path update", strict=False)
+@pytest.mark.xfail(reason="needs auth headers / path update", strict=True)
 def test_face_service_fails_secure_when_model_missing(monkeypatch):
     from src.services import face_service
 
@@ -53,7 +53,7 @@ def test_reject_oversized_upload(client):
     assert r.status_code == 413
 
 
-@pytest.mark.xfail(reason="needs auth headers / path update", strict=False)
+@pytest.mark.xfail(reason="needs auth headers / path update", strict=True)
 def test_verify_endpoint_with_valid_images(client, valid_image):
     r = client.post(
         "/verify-legacy/",
@@ -91,7 +91,7 @@ def test_challenge_frame_rejects_invalid_session(client):
 # ============ AUDIT ============
 
 
-@pytest.mark.xfail(reason="needs auth headers / path update", strict=False)
+@pytest.mark.xfail(reason="needs auth headers / path update", strict=True)
 def test_audit_stats_returns_structure(client, auth_headers):
     r = client.get("/api/v1/logs", headers=auth_headers)
     assert r.status_code == 200
@@ -101,7 +101,7 @@ def test_audit_stats_returns_structure(client, auth_headers):
 # ============ EDGE CASES ============
 
 
-@pytest.mark.xfail(reason="needs auth headers / path update", strict=False)
+@pytest.mark.xfail(reason="needs auth headers / path update", strict=True)
 def test_verify_with_only_one_image(client, valid_image):
     r = client.post(
         "/verify-legacy/",
@@ -110,13 +110,12 @@ def test_verify_with_only_one_image(client, valid_image):
     assert r.status_code == 422
 
 
-@pytest.mark.xfail(reason="needs auth headers / path update", strict=False)
+@pytest.mark.xfail(reason="needs auth headers / path update", strict=True)
 def test_verify_with_no_images(client, auth_headers):
     r = client.post("/verify-legacy/", headers=auth_headers)
     assert r.status_code == 422
 
 
-@pytest.mark.xfail(reason="needs auth headers / path update", strict=False)
 def test_health_endpoint(client, auth_headers):
     r = client.get("/health", headers=auth_headers)
     assert r.status_code == 200
