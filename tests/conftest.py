@@ -49,8 +49,11 @@ def _create_schema():
 
     # استيراد كل النماذج لتسجيلها في metadata
     for modname in (
-        "src.models", "src.models.user", "src.models.audit",
-        "src.db.models", "src.db.models.user",
+        "src.models",
+        "src.models.user",
+        "src.models.audit",
+        "src.db.models",
+        "src.db.models.user",
     ):
         try:
             __import__(modname)
@@ -107,9 +110,11 @@ def _seed_test_data(_create_schema):
 
     try:
         from src.core.security import get_password_hash
+
         hashed = get_password_hash("SecurePass123!")
     except Exception:
         from passlib.context import CryptContext
+
         hashed = CryptContext(schemes=["bcrypt"], deprecated="auto").hash("SecurePass123!")
 
     engine = create_async_engine(
@@ -125,23 +130,29 @@ def _seed_test_data(_create_schema):
             if existing.scalar_one_or_none():
                 return
             kwargs = {"username": "testuser", pw_field: hashed}
-            if "email" in cols:     kwargs["email"] = "test@example.com"
-            if "is_active" in cols: kwargs["is_active"] = True
-            if "scopes" in cols:    kwargs["scopes"] = ["verify", "read", "admin"]
-            if "role" in cols:      kwargs["role"] = "admin"
+            if "email" in cols:
+                kwargs["email"] = "test@example.com"
+            if "is_active" in cols:
+                kwargs["is_active"] = True
+            if "scopes" in cols:
+                kwargs["scopes"] = ["verify", "read", "admin"]
+            if "role" in cols:
+                kwargs["role"] = "admin"
             db.add(User(**kwargs))
             await db.commit()
             print(f"[seed] testuser created (pw_field={pw_field})")
             # DEBUG_SEED: تحقق من التوافق
             try:
                 from src.core.security import verify_password
+
                 v = verify_password("SecurePass123!", hashed)
                 print(f"[seed] DEBUG_SEED verify('SecurePass123!') → {v}")
             except Exception as e:
                 print(f"[seed] DEBUG_SEED verify failed: {e}")
             try:
                 from src.core.security import verify_password
-                v = verify_password("SecurePass123!", user.password_hash if hasattr(user, 'password_hash') else user.hashed_password)
+
+                pass  # DEBUG_SEED removed: undefined 'user'
             except Exception:
                 pass
 
@@ -183,6 +194,7 @@ def corrupt_bytes() -> bytes:
 @pytest.fixture(scope="session")
 def antispoof_service():
     from src.services.antispoofing_service import AntiSpoofingService
+
     return AntiSpoofingService()
 
 
@@ -193,6 +205,7 @@ def antispoof_service():
 def client():
     from fastapi.testclient import TestClient
     from src.main import app
+
     with TestClient(app) as c:
         yield c
 

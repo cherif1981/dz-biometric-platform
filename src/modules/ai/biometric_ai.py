@@ -1,8 +1,8 @@
 """Biometric AI — Quality/Liveness/AntiSpoof موحد ومفصول عن Similarity."""
 
-from dataclasses import dataclass, field
-from typing import Dict, Optional, Any
 import io
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional
 
 import cv2
 import numpy as np
@@ -12,6 +12,7 @@ from loguru import logger
 @dataclass
 class FaceQualityResult:
     """نتيجة تقييم جودة الوجه."""
+
     overall: float = 0.0
     sharpness: float = 0.0
     brightness: float = 0.0
@@ -37,6 +38,7 @@ class FaceQualityResult:
 @dataclass
 class LivenessResult:
     """نتيجة فحص الحياة."""
+
     score: float = 0.0
     is_real: bool = False
     method: str = "heuristic_v1"
@@ -46,6 +48,7 @@ class LivenessResult:
 @dataclass
 class AntiSpoofResult:
     """نتيجة مكافحة الانتحال."""
+
     score: float = 0.0
     is_live: bool = False
     method: str = "heuristic_v1"
@@ -66,8 +69,10 @@ class BiometricAI:
     def __init__(self, face_app=None, min_quality: float = 0.40):
         self.face_app = face_app
         self.min_quality = min_quality
-        logger.info(f"BiometricAI initialized | face_app={'yes' if face_app else 'no'} | "
-                    f"min_quality={min_quality}")
+        logger.info(
+            f"BiometricAI initialized | face_app={'yes' if face_app else 'no'} | "
+            f"min_quality={min_quality}"
+        )
 
     # ==================== Face Quality ====================
     def assess_face_quality(self, image_bytes: bytes) -> FaceQualityResult:
@@ -134,11 +139,13 @@ class BiometricAI:
                 logger.warning(f"Face quality via face_app failed: {e}")
 
         # المزيج
-        overall = (sharpness * 0.30
-                   + brightness * 0.20
-                   + contrast * 0.15
-                   + face_size * 0.20
-                   + pose_score * 0.15)
+        overall = (
+            sharpness * 0.30
+            + brightness * 0.20
+            + contrast * 0.15
+            + face_size * 0.20
+            + pose_score * 0.15
+        )
 
         overall = round(float(overall), 4)
         is_acceptable = overall >= self.min_quality
@@ -178,8 +185,7 @@ class BiometricAI:
 
         img = self._decode(image_bytes)
         if img is None:
-            return LivenessResult(score=0.0, is_real=False,
-                                  details={"error": "invalid_image"})
+            return LivenessResult(score=0.0, is_real=False, details={"error": "invalid_image"})
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -197,7 +203,7 @@ class BiometricAI:
         fshift = np.fft.fftshift(f)
         magnitude = np.log(np.abs(fshift) + 1)
         h, w = magnitude.shape
-        center = magnitude[h//4:3*h//4, w//4:3*w//4]
+        center = magnitude[h // 4 : 3 * h // 4, w // 4 : 3 * w // 4]
         outer = magnitude.mean() - center.mean()
         freq_score = min(1.0, max(0.0, outer) / 3.0)
 
@@ -232,8 +238,7 @@ class BiometricAI:
 
         img = self._decode(image_bytes)
         if img is None:
-            return AntiSpoofResult(score=0.0, is_live=False,
-                                   details={"error": "invalid_image"})
+            return AntiSpoofResult(score=0.0, is_live=False, details={"error": "invalid_image"})
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -243,7 +248,7 @@ class BiometricAI:
         h, w = fshift.shape
         # Moiré يظهر كقمم في الترددات العالية خارج المركز
         outer = fshift.copy()
-        outer[h//3:2*h//3, w//3:2*w//3] = 0
+        outer[h // 3 : 2 * h // 3, w // 3 : 2 * w // 3] = 0
         moire_ratio = float(outer.sum()) / (fshift.sum() + 1e-6)
         moire_score = 1.0 - min(1.0, moire_ratio * 3.0)
 

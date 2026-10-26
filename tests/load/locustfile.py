@@ -1,5 +1,7 @@
-from locust import HttpUser, task, between
 import random
+
+from locust import HttpUser, between, task
+
 
 class BiometricUser(HttpUser):
     wait_time = between(0.1, 0.5)
@@ -10,12 +12,15 @@ class BiometricUser(HttpUser):
 
     @task(3)
     def verify(self):
-        self.client.post("/verify", json={
-            "subject_id": f"user-{random.randint(1, 10000)}",
-            "face_score": random.uniform(0.3, 0.99),
-            "liveness_score": random.uniform(0.3, 0.99),
-            "antispoofing_score": random.uniform(0.3, 0.99),
-        })
+        self.client.post(
+            "/verify",
+            json={
+                "subject_id": f"user-{random.randint(1, 10000)}",
+                "face_score": random.uniform(0.3, 0.99),
+                "liveness_score": random.uniform(0.3, 0.99),
+                "antispoofing_score": random.uniform(0.3, 0.99),
+            },
+        )
 
     @task(1)
     def metrics(self):

@@ -1,10 +1,12 @@
-
 """
 محدّد معدل الطلبات - Sliding Window.
 في Colab: تخزين في الذاكرة. في الإنتاج: استبدل Backend بـ Redis.
 """
+
 from __future__ import annotations
-import time, threading
+
+import threading
+import time
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from typing import Literal
@@ -14,12 +16,13 @@ from typing import Literal
 class RateLimitDecision:
     allowed: bool
     remaining: int
-    retry_after: float          # ثوانٍ حتى يُسمح بالمحاولة التالية
+    retry_after: float  # ثوانٍ حتى يُسمح بالمحاولة التالية
     reason: Literal["ok", "limit_exceeded", "blocked"]
 
 
 class InMemoryBackend:
     """Backend بسيط، thread-safe، مناسب لبيئة واحدة أو للاختبار."""
+
     def __init__(self):
         self._buckets: dict[str, deque[float]] = defaultdict(deque)
         self._lock = threading.Lock()
@@ -50,6 +53,7 @@ class RateLimiter:
     - per_ip:   عدد الطلبات لكل IP في النافذة
     القرار = الأكثر تقييدًا.
     """
+
     def __init__(
         self,
         *,
@@ -77,13 +81,9 @@ class RateLimiter:
         decisions: list[RateLimitDecision] = []
 
         if user_id:
-            decisions.append(
-                self.backend.hit(f"u:{user_id}", self.user_window, self.user_limit)
-            )
+            decisions.append(self.backend.hit(f"u:{user_id}", self.user_window, self.user_limit))
         if ip:
-            decisions.append(
-                self.backend.hit(f"ip:{ip}", self.ip_window, self.ip_limit)
-            )
+            decisions.append(self.backend.hit(f"ip:{ip}", self.ip_window, self.ip_limit))
 
         if not decisions:
             return RateLimitDecision(True, 0, 0.0, "ok")
@@ -91,8 +91,9 @@ class RateLimiter:
         # 📊 Prometheus
         try:
             from src.services import metrics as _m
+
             blocked = any(not d.allowed for d in decisions)
-            _m.record_rate_limit('per_user' if user_id else 'per_ip', blocked)
+            _m.record_rate_limit("per_user" if user_id else "per_ip", blocked)
         except Exception:
             pass
         # الأكثر تقييدًا
@@ -104,6 +105,7 @@ class RateLimiter:
 
 # نسخة عامة (singleton) يستخدمها التطبيق
 _default_limiter: RateLimiter | None = None
+
 
 def get_default_limiter() -> RateLimiter:
     global _default_limiter
@@ -149,6 +151,7 @@ class RedisBackend:
 
     def hit(self, key: str, window: float, limit: int) -> "RateLimitDecision":
         import time
+
         now = time.time()
         allowed, remaining, retry = self._script(
             keys=[f"rl:{key}"],
@@ -176,6 +179,7 @@ def build_backend(kind: str = "memory", redis_url: str | None = None):
         except ImportError:
             raise RuntimeError("redis-py غير مثبت: pip install redis")
         import redis as _redis
+
         if not redis_url:
             raise ValueError("redis_url مطلوب لـ redis backend")
         client = _redis.from_url(redis_url, decode_responses=False)

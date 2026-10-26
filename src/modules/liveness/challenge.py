@@ -1,6 +1,5 @@
 import secrets
 
-
 CHALLENGES = ["blink", "turn_left", "turn_right", "smile", "nod"]
 
 

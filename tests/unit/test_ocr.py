@@ -1,5 +1,7 @@
 """Unit tests for OCR service."""
+
 import io
+
 import pytest
 from PIL import Image, ImageDraw
 
@@ -22,6 +24,7 @@ class TestOCRService:
         """OCR service should be importable."""
         try:
             from src.services.ocr_service import OCRService
+
             assert OCRService is not None
         except ImportError as e:
             pytest.skip(f"OCR service not available: {e}")

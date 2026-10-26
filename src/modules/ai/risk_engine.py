@@ -1,9 +1,10 @@
 """AI Risk Engine — يحول الإشارات إلى risk_score موزون."""
 
 from typing import Dict, Optional
+
 from loguru import logger
 
-from .models import RiskScore, RiskLevel
+from .models import RiskLevel, RiskScore
 
 
 class RiskEngine:
@@ -36,9 +37,9 @@ class RiskEngine:
     }
 
     RISK_THRESHOLDS = {
-        RiskLevel.LOW:      0.25,
-        RiskLevel.MEDIUM:   0.50,
-        RiskLevel.HIGH:     0.75,
+        RiskLevel.LOW: 0.25,
+        RiskLevel.MEDIUM: 0.50,
+        RiskLevel.HIGH: 0.75,
         RiskLevel.CRITICAL: 1.00,
     }
 

@@ -1,28 +1,30 @@
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.core.exceptions import ValidationError
 from src.core.security import (
     create_access_token,
     create_refresh_token,
     decode_token,
     verify_password,
 )
-from src.core.exceptions import ValidationError
 from src.db.session import get_db
 from src.repositories.user_repository import UserRepository
 
 router = APIRouter()
+
 
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
 
+
 class RefreshRequest(BaseModel):
     refresh_token: str
+
 
 @router.post("/login", response_model=TokenResponse)
 async def login(
@@ -42,6 +44,7 @@ async def login(
         access_token=create_access_token(user.id, user.scopes),
         refresh_token=create_refresh_token(user.id),
     )
+
 
 @router.post("/refresh", response_model=TokenResponse)
 async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
@@ -67,16 +70,18 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
 # ===== نقطة نهاية محمية لاختبار الصلاحيات وانتهاء الرموز =====
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
-from src.core.security import decode_token
+
 from src.models.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+
 
 class UserOut(BaseModel):
     id: int
     username: str
     email: str | None = None
     scopes: list[str] = []
+
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
@@ -95,6 +100,7 @@ async def get_current_user(
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
     return user
+
 
 @router.get("/me", response_model=UserOut)
 async def read_me(current: User = Depends(get_current_user)):

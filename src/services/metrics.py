@@ -1,5 +1,13 @@
 """مقاييس Prometheus — idempotent (آمنة عند إعادة الاستيراد)."""
-from prometheus_client import REGISTRY, Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    REGISTRY,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
+)
 
 
 def _unregister_if_exists(*names: str) -> None:

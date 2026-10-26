@@ -2,10 +2,11 @@
 Upload validation middleware — enforce max file size.
 Returns JSONResponse (BaseHTTPMiddleware cannot raise HTTPException).
 """
+
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from starlette.middleware.base import BaseHTTPMiddleware
 from loguru import logger
+from starlette.middleware.base import BaseHTTPMiddleware
 
 MAX_UPLOAD_MB = 5
 MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024

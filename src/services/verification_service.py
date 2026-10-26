@@ -1,8 +1,9 @@
+import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
+
 from loguru import logger
-import time
 
 # === AI Risk Engine : import déplacé dans __init__ (lazy loading) ===
 # L'import en haut du fichier chargeait cv2 via src.modules.ai,
@@ -33,19 +34,19 @@ class VerificationResult:
 class VerificationEngine:
     def __init__(self, ft=None, lt=None, ast=None):
         # === Imports lourds déplacés ici (lazy loading) ===
+        from src.core.thresholds import get_thresholds
         from src.modules.ai import (
-            RiskEngine,
+            BiometricAI,
             DecisionEngine,
             DocumentAI,
-            BiometricAI,
             ReportBuilder,
+            RiskEngine,
         )
-        from src.core.thresholds import get_thresholds
+        from src.services.antispoofing_service import AntiSpoofing
+        from src.services.audit_db import AuditDB
         from src.services.face_service import FaceVerificationService as FaceService
         from src.services.liveness_service import LivenessService
         from src.services.ocr_service import OCRService
-        from src.services.antispoofing_service import AntiSpoofing
-        from src.services.audit_db import AuditDB
         # === end ===
 
         _t = get_thresholds()
@@ -77,8 +78,15 @@ class VerificationEngine:
                 reasons.append("OCR_FAILED")
         except Exception as e:
             return self._fin(
-                VerificationStatus.REJECTED, 0, None, None, None,
-                {}, [f"OCR_ERROR:{e}"], {}, client_ip,
+                VerificationStatus.REJECTED,
+                0,
+                None,
+                None,
+                None,
+                {},
+                [f"OCR_ERROR:{e}"],
+                {},
+                client_ip,
             )
 
         try:
@@ -98,8 +106,15 @@ class VerificationEngine:
                 reasons.append(f"FACE:{fs:.3f}")
         except Exception as e:
             return self._fin(
-                VerificationStatus.REJECTED, 0, None, None, asc,
-                ocr_fields, [f"FACE_ERR:{e}"], scores, client_ip,
+                VerificationStatus.REJECTED,
+                0,
+                None,
+                None,
+                asc,
+                ocr_fields,
+                [f"FACE_ERR:{e}"],
+                scores,
+                client_ip,
             )
 
         try:
@@ -110,8 +125,15 @@ class VerificationEngine:
                 reasons.append(f"LIVE:{ls:.3f}")
         except Exception as e:
             return self._fin(
-                VerificationStatus.REJECTED, 0, fs, None, asc,
-                ocr_fields, [f"LIVE_ERR:{e}"], scores, client_ip,
+                VerificationStatus.REJECTED,
+                0,
+                fs,
+                None,
+                asc,
+                ocr_fields,
+                [f"LIVE_ERR:{e}"],
+                scores,
+                client_ip,
             )
 
         if expected:
@@ -135,7 +157,15 @@ class VerificationEngine:
             st = VerificationStatus.REJECTED
 
         return self._fin(
-            st, conf, fs, ls, asc, ocr_fields, reasons, scores, client_ip,
+            st,
+            conf,
+            fs,
+            ls,
+            asc,
+            ocr_fields,
+            reasons,
+            scores,
+            client_ip,
             risk_result=_risk_result,
         )
 
@@ -144,10 +174,9 @@ class VerificationEngine:
 
         try:
             from src.services.audit_db import AuditRecord
+
             r.audit_id = self.db.log(
-                AuditRecord(
-                    None, time.time(), st.value, conf, fs, ls, asc, ocr, reasons, ip
-                )
+                AuditRecord(None, time.time(), st.value, conf, fs, ls, asc, ocr, reasons, ip)
             )
         except Exception as e:
             logger.warning(f"audit: {e}")
@@ -164,9 +193,7 @@ class VerificationEngine:
                     "raw_scores": scores,
                 },
             )()
-            r.ai_report = self.report_builder.build(
-                decision_result=dr, signals=scores
-            ).to_dict()
+            r.ai_report = self.report_builder.build(decision_result=dr, signals=scores).to_dict()
         except Exception as _e:
             r.ai_report = {"error": str(_e)}
             logger.warning(f"report_builder failed: {_e}")

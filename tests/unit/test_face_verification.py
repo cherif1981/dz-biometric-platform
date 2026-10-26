@@ -1,4 +1,5 @@
 import numpy as np
+
 from src.modules.face_verification.matcher import FaceMatcher
 
 
@@ -11,8 +12,10 @@ def test_same_embedding_matches():
 
 
 def test_orthogonal_no_match():
-    a = np.zeros(512, dtype=np.float32); a[0] = 1.0
-    b = np.zeros(512, dtype=np.float32); b[1] = 1.0
+    a = np.zeros(512, dtype=np.float32)
+    a[0] = 1.0
+    b = np.zeros(512, dtype=np.float32)
+    b[1] = 1.0
     m = FaceMatcher(threshold=0.5)
     assert m.compare(a, b)["match"] is False
 

@@ -1,5 +1,6 @@
 import pytest
 from fastapi import HTTPException
+
 from src.core.permissions import RequireScopes
 
 

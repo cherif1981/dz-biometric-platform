@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+
 from src.main import app
 
 client = TestClient(app)
@@ -11,6 +12,7 @@ def test_login_demo_is_rejected():
     body = r.json()
     assert "access_token" not in body, "no token should be issued"
     assert "detail" in body
+
 
 def test_login_bad():
     r = client.post("/api/v1/login", data={"username": "x", "password": "y"})

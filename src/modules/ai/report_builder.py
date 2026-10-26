@@ -1,10 +1,10 @@
 """AI Report Builder — تقرير موحد من كل طبقات AI."""
 
-from dataclasses import dataclass, field, asdict
-from typing import Dict, Any, Optional
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from loguru import logger
+from typing import Any, Dict, Optional
 
+from loguru import logger
 
 # إصدار سكيما التقرير (للتتبع مع مرور الوقت)
 REPORT_SCHEMA_VERSION = "1.0.0"
@@ -13,6 +13,7 @@ REPORT_SCHEMA_VERSION = "1.0.0"
 @dataclass
 class AIReport:
     """تقرير موحد للتحقق."""
+
     decision: str
     risk: Dict[str, Any]
     face: Dict[str, Any] = field(default_factory=dict)
@@ -56,12 +57,12 @@ class ReportBuilder:
 
     def build(
         self,
-        decision_result,                       # DecisionResult
+        decision_result,  # DecisionResult
         signals: Dict[str, float],
-        doc_analysis=None,                     # DocumentAnalysis
-        face_quality=None,                     # FaceQualityResult
-        liveness_result=None,                  # LivenessResult
-        antispoof_result=None,                 # AntiSpoofResult
+        doc_analysis=None,  # DocumentAnalysis
+        face_quality=None,  # FaceQualityResult
+        liveness_result=None,  # LivenessResult
+        antispoof_result=None,  # AntiSpoofResult
         extra_meta: Optional[Dict[str, Any]] = None,
     ) -> AIReport:
         risk = decision_result.risk
@@ -107,15 +108,17 @@ class ReportBuilder:
         # ===== document =====
         doc_block = {
             "type": doc_analysis.doc_type if doc_analysis else "unknown",
-            "type_confidence": round(float(
-                doc_analysis.type_confidence if doc_analysis else 0.0), 4),
-            "quality": round(float(
-                doc_analysis.quality_score if doc_analysis else 0.0), 4),
+            "type_confidence": round(
+                float(doc_analysis.type_confidence if doc_analysis else 0.0), 4
+            ),
+            "quality": round(float(doc_analysis.quality_score if doc_analysis else 0.0), 4),
             "ocr_confidence": round(float(signals.get("ocr_confidence", 0.0)), 4),
-            "tampering_probability": round(float(
-                doc_analysis.tampering_probability if doc_analysis else 0.0), 4),
-            "field_consistency": round(float(
-                doc_analysis.field_consistency if doc_analysis else 0.0), 4),
+            "tampering_probability": round(
+                float(doc_analysis.tampering_probability if doc_analysis else 0.0), 4
+            ),
+            "field_consistency": round(
+                float(doc_analysis.field_consistency if doc_analysis else 0.0), 4
+            ),
         }
         if doc_analysis is not None and doc_analysis.extracted_fields:
             # احجب بعض الحقول الحساسة في التقرير العام

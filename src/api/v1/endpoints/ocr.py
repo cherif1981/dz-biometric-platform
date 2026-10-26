@@ -1,4 +1,5 @@
-from fastapi import APIRouter, UploadFile, File, Form, Depends
+from fastapi import APIRouter, Depends, File, Form, UploadFile
+
 from src.core.permissions import RequireScopes
 from src.modules.ocr.arabic_engine import ArabicEngine
 from src.modules.ocr.french_engine import FrenchEngine

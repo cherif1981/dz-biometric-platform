@@ -1,16 +1,20 @@
 """FastAPI entrypoint — يربط DecisionEngine و ReportBuilder و metrics."""
-import os
+
 import logging
+import os
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+
+from src.api.v1.router import api_router
 from src.core.decision_engine import DecisionEngine
 from src.services.report_builder import ReportBuilder
-from src.api.v1.router import api_router
 
 logger = logging.getLogger(__name__)
 
 try:
     from prometheus_fastapi_instrumentator import Instrumentator
+
     METRICS_OK = True
 except ImportError:
     METRICS_OK = False
@@ -22,18 +26,18 @@ app = FastAPI(
 )
 
 
-
-
-
 # ═══════════════════════════════════════════════════════════════════
 # Prometheus /metrics (على مستوى الوحدة، بعد app مباشرة)
 # ═══════════════════════════════════════════════════════════════════
 @app.get("/metrics", include_in_schema=False)
 async def prometheus_metrics():
-    from src.services.metrics import metrics_payload
     from fastapi.responses import Response
+
+    from src.services.metrics import metrics_payload
+
     body, ct = metrics_payload()
     return Response(content=body, media_type=ct)
+
 
 # ═══════════════════════════════════════════════════════════════════
 # حدّ حجم الرفع: يعمل قبل auth (أول middleware)
@@ -49,6 +53,7 @@ async def _limit_upload_size_first(request, call_next):
         try:
             if int(content_length) > MAX_UPLOAD_SIZE:
                 from fastapi.responses import JSONResponse
+
                 return JSONResponse(
                     status_code=413,
                     content={"detail": f"payload too large (max {MAX_UPLOAD_SIZE} bytes)"},
@@ -66,10 +71,12 @@ app.include_router(api_router, prefix="/api/v1")
 # ═══════════════════════════════════════════════════════════════
 
 # --- Routeur de review (existant) ---
-from src.review_api import router as review_router
 from fastapi import Depends
+
 from src.api.v1.endpoints.auth import get_current_user
 from src.models.user import User
+from src.review_api import router as review_router
+
 app.include_router(review_router)
 
 # --- Routeur principal de l'API v1 (import sécurisé) ---
@@ -127,4 +134,3 @@ def root():
 
 
 # ===== تضمين راوتر المصادقة (auth) =====
-

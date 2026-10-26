@@ -1,7 +1,11 @@
-
 """تسجيل محاولات التحقق - للمراجعة الجنائية واليدوية."""
-import json, time, uuid, pathlib
+
+import json
+import pathlib
+import time
+import uuid
 from datetime import datetime, timezone
+
 from loguru import logger
 
 LOG_DIR = pathlib.Path("/content/dz-biometric-platform/logs")
@@ -18,7 +22,7 @@ def log_attempt(
     antispoofing_score: float | None = None,
     similarity: float | None = None,
     detector: str | None = None,
-    user_ref: str | None = None,          # معرف مستخدم مجزّأ (لا تخزّن بيانات شخصية)
+    user_ref: str | None = None,  # معرف مستخدم مجزّأ (لا تخزّن بيانات شخصية)
     extra: dict | None = None,
 ) -> str:
     """

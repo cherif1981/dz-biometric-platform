@@ -3,8 +3,10 @@
 EnvKeyProvider: للتطوير (FERNET_KEY من environment)
 VaultKeyProvider: للإنتاج (HashiCorp Vault / AWS KMS / GCP KMS)
 """
+
 import os
 from abc import ABC, abstractmethod
+
 from cryptography.fernet import Fernet
 
 
@@ -30,9 +32,7 @@ class EnvKeyProvider(KeyProvider):
         return self._key
 
     def rotate(self) -> None:
-        raise NotImplementedError(
-            "EnvKeyProvider لا يدعم الدوران. استخدم KMS/Vault للإنتاج."
-        )
+        raise NotImplementedError("EnvKeyProvider لا يدعم الدوران. استخدم KMS/Vault للإنتاج.")
 
 
 class VaultKeyProvider(KeyProvider):
@@ -44,14 +44,10 @@ class VaultKeyProvider(KeyProvider):
         self.key_name = key_name
 
     def get_data_key(self) -> bytes:
-        raise NotImplementedError(
-            "يُستكمل بـ hvac.transit.decrypt() أو boto3 kms.decrypt()."
-        )
+        raise NotImplementedError("يُستكمل بـ hvac.transit.decrypt() أو boto3 kms.decrypt().")
 
     def rotate(self) -> None:
-        raise NotImplementedError(
-            "يُستكمل بـ hvac.transit.rotate_key() أو kms.rotate_key()."
-        )
+        raise NotImplementedError("يُستكمل بـ hvac.transit.rotate_key() أو kms.rotate_key().")
 
 
 def get_key_provider() -> KeyProvider:

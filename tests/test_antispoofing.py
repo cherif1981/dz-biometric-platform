@@ -1,7 +1,7 @@
-
 import pytest
-from src.services.antispoofing_service import AntiSpoofingService
+
 from src.core.thresholds import get_thresholds, reset_cache
+from src.services.antispoofing_service import AntiSpoofingService
 
 
 def test_real_face_is_accepted_or_reviewed(antispoof_service, real_face_bytes):
@@ -38,7 +38,6 @@ def test_invalid_thresholds_raise():
 
 
 def test_three_decision_bands_are_consistent(antispoof_service, real_face_bytes):
-    from src.core.thresholds import get_thresholds, reset_cache
     reset_cache()
     t = get_thresholds()
     THRESHOLD_REJECT = t.antispoofing_reject

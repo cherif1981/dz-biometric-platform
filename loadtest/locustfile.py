@@ -1,5 +1,6 @@
 """Locust load test for /api/v1/auth/login + /health."""
-from locust import HttpUser, task, between
+
+from locust import HttpUser, between, task
 
 
 class AuthUser(HttpUser):

@@ -1,4 +1,5 @@
 """Security tests for sensitive data handling."""
+
 import pytest
 
 
@@ -8,6 +9,7 @@ class TestSensitiveData:
     def test_field_encryption_importable(self):
         try:
             from src.core.field_encryption import encrypt_field
+
             assert encrypt_field is not None
         except ImportError:
             pytest.skip("Field encryption not available")
@@ -22,9 +24,9 @@ class TestSensitiveData:
             pytest.skip("src/ not found")
 
         suspicious_patterns = [
-            "password=\"admin\"",
-            "secret_key=\"hardcoded\"",
-            "api_key=\"sk-\"",
+            'password="admin"',
+            'secret_key="hardcoded"',
+            'api_key="sk-"',
         ]
 
         for py_file in src_dir.rglob("*.py"):

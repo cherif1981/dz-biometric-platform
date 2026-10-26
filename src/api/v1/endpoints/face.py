@@ -1,4 +1,5 @@
-from fastapi import APIRouter, UploadFile, File, Depends, Form
+from fastapi import APIRouter, Depends, File, Form, UploadFile
+
 from src.core.permissions import RequireScopes
 from src.modules.face_verification.detector import FaceDetector
 from src.modules.face_verification.embeddings import EmbeddingExtractor

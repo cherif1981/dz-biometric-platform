@@ -15,7 +15,11 @@ class FaceDetector:
     def detect(self, image_bytes_or_array):
         from src.modules.document_reader.preprocessing import to_cv2
 
-        img = to_cv2(bytes(image_bytes_or_array)) if isinstance(image_bytes_or_array, (bytes, bytearray)) else image_bytes_or_array
+        img = (
+            to_cv2(bytes(image_bytes_or_array))
+            if isinstance(image_bytes_or_array, (bytes, bytearray))
+            else image_bytes_or_array
+        )
         faces = self._instance().get(img)
         if not faces:
             return None

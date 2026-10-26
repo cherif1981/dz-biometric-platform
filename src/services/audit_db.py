@@ -37,17 +37,26 @@ class AuditDB:
         with sqlite3.connect(self.path) as c:
             cur = c.execute(
                 "INSERT INTO verifications VALUES (NULL,?,?,?,?,?,?,?,?,?)",
-                (r.timestamp, r.status, r.confidence, r.face_similarity,
-                 r.liveness_score, r.antispoof_score,
-                 json.dumps(r.ocr_fields), json.dumps(r.reasons), r.client_ip))
+                (
+                    r.timestamp,
+                    r.status,
+                    r.confidence,
+                    r.face_similarity,
+                    r.liveness_score,
+                    r.antispoof_score,
+                    json.dumps(r.ocr_fields),
+                    json.dumps(r.reasons),
+                    r.client_ip,
+                ),
+            )
             return cur.lastrowid
 
     def stats(self):
         with sqlite3.connect(self.path) as c:
             total = c.execute("SELECT COUNT(*) FROM verifications").fetchone()[0]
-            by = dict(c.execute(
-                "SELECT status, COUNT(*) FROM verifications GROUP BY status"
-            ).fetchall())
+            by = dict(
+                c.execute("SELECT status, COUNT(*) FROM verifications GROUP BY status").fetchall()
+            )
             return {"total": total, "by_status": by}
 
     def recent(self, limit=20):
@@ -55,8 +64,18 @@ class AuditDB:
             rows = c.execute(
                 "SELECT id,timestamp,status,confidence,face_similarity,"
                 "liveness_score,reasons FROM verifications "
-                "ORDER BY timestamp DESC LIMIT ?", (limit,)).fetchall()
-            return [{"id": r[0], "timestamp": r[1], "status": r[2],
-                     "confidence": r[3], "face_similarity": r[4],
-                     "liveness_score": r[5],
-                     "reasons": json.loads(r[6]) if r[6] else []} for r in rows]
+                "ORDER BY timestamp DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+            return [
+                {
+                    "id": r[0],
+                    "timestamp": r[1],
+                    "status": r[2],
+                    "confidence": r[3],
+                    "face_similarity": r[4],
+                    "liveness_score": r[5],
+                    "reasons": json.loads(r[6]) if r[6] else [],
+                }
+                for r in rows
+            ]

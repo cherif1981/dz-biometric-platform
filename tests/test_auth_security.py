@@ -7,7 +7,6 @@ from jose import jwt
 from src.core.config import settings
 from src.main import app
 
-
 AUTH_BASE = "/api/v1"
 
 

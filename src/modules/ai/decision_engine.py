@@ -4,10 +4,12 @@ Thresholds are loaded from src.core.thresholds (single source of truth).
 The previous hardcoded defaults (0.40 / 0.50 / 0.45 / 0.30) were the most
 lenient of all sources and could approve inputs that YAML would reject.
 """
+
 from typing import Dict, List, Optional
+
 from loguru import logger
 
-from .models import Decision, DecisionResult, RiskScore, RiskLevel
+from .models import Decision, DecisionResult, RiskLevel, RiskScore
 
 
 class DecisionEngine:
@@ -28,6 +30,7 @@ class DecisionEngine:
         min_ocr_confidence: Optional[float] = None,
     ):
         from src.core.thresholds import get_thresholds
+
         t = get_thresholds()
 
         self.verify_max_risk = verify_max_risk
@@ -65,16 +68,12 @@ class DecisionEngine:
 
         similarity = signals.get("face_similarity")
         if similarity is not None and similarity < self.min_face_similarity:
-            reasons.append(
-                f"face_similarity ({similarity:.3f}) < {self.min_face_similarity}"
-            )
+            reasons.append(f"face_similarity ({similarity:.3f}) < {self.min_face_similarity}")
             hard_reject = True
 
         tampering = signals.get("document_tampering")
         if tampering is not None and tampering > self.max_tampering:
-            reasons.append(
-                f"document_tampering ({tampering:.3f}) > {self.max_tampering}"
-            )
+            reasons.append(f"document_tampering ({tampering:.3f}) > {self.max_tampering}")
             hard_reject = True
 
         if hard_reject:

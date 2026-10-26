@@ -1,9 +1,11 @@
 """مسارات المراجعة البشرية — ترتبط بـ DecisionEngine عبر final_status=REVIEW."""
+
+import uuid
+from datetime import datetime, timezone
+from typing import List
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List
-from datetime import datetime, timezone
-import uuid
 
 router = APIRouter(prefix="/review", tags=["human-review"])
 _reviews: dict = {}
@@ -16,7 +18,7 @@ class ReviewItem(BaseModel):
 
 
 class ReviewDecision(BaseModel):
-    human_status: str   # VERIFIED | REJECTED
+    human_status: str  # VERIFIED | REJECTED
     reviewer_id: str
     notes: str = ""
 
@@ -44,10 +46,12 @@ def decide(review_id: str, decision: ReviewDecision):
         raise HTTPException(404, "review_id not found")
     if decision.human_status not in ("VERIFIED", "REJECTED"):
         raise HTTPException(400, "human_status must be VERIFIED or REJECTED")
-    _reviews[review_id].update({
-        "human_status": decision.human_status,
-        "reviewer_id": decision.reviewer_id,
-        "notes": decision.notes,
-        "decided_at": datetime.now(timezone.utc).isoformat(),
-    })
+    _reviews[review_id].update(
+        {
+            "human_status": decision.human_status,
+            "reviewer_id": decision.reviewer_id,
+            "notes": decision.notes,
+            "decided_at": datetime.now(timezone.utc).isoformat(),
+        }
+    )
     return _reviews[review_id]

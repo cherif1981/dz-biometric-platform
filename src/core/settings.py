@@ -1,9 +1,18 @@
-
 """إعدادات مركزية — ترفض أي قيمة افتراضية أو غير آمنة."""
+
 import os
 from typing import Any
 
-INSECURE_VALUES = {"secret", "changeme", "password", "admin", "dev-secret", "default", "test", "123456"}
+INSECURE_VALUES = {
+    "secret",
+    "changeme",
+    "password",
+    "admin",
+    "dev-secret",
+    "default",
+    "test",
+    "123456",
+}
 
 
 class Settings:
@@ -11,10 +20,10 @@ class Settings:
 
     def __init__(self, env: dict | None = None) -> None:
         env = env or os.environ
-        self.jwt_secret   = self._require(env, "JWT_SECRET")
-        self.fernet_key   = self._require(env, "FERNET_KEY")
+        self.jwt_secret = self._require(env, "JWT_SECRET")
+        self.fernet_key = self._require(env, "FERNET_KEY")
         self.database_url = self._require(env, "DATABASE_URL")
-        self.redis_url    = self._require(env, "REDIS_URL")
+        self.redis_url = self._require(env, "REDIS_URL")
         self._validate_fernet(self.fernet_key)
 
     @staticmethod
@@ -31,6 +40,7 @@ class Settings:
     @staticmethod
     def _validate_fernet(key: str) -> None:
         from cryptography.fernet import Fernet
+
         try:
             Fernet(key.encode() if isinstance(key, str) else key)
         except Exception as e:

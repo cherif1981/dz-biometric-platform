@@ -4,9 +4,10 @@
 # @Company : Minivision
 # @File : MultiFTNet.py
 # @Software : PyCharm
-from torch import nn
 import torch.nn.functional as F
-from src.model_lib.MiniFASNet import MiniFASNetV1,MiniFASNetV2,MiniFASNetV1SE,MiniFASNetV2SE
+from torch import nn
+
+from src.model_lib.MiniFASNet import MiniFASNetV1, MiniFASNetV1SE, MiniFASNetV2, MiniFASNetV2SE
 
 
 class FTGenerator(nn.Module):
@@ -17,14 +18,12 @@ class FTGenerator(nn.Module):
             nn.Conv2d(in_channels, 128, kernel_size=(3, 3), padding=1),
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
-
             nn.Conv2d(128, 64, kernel_size=(3, 3), padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
-
             nn.Conv2d(64, out_channels, kernel_size=(3, 3), padding=1),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
+            nn.ReLU(inplace=True),
         )
 
     def forward(self, x):
@@ -36,15 +35,19 @@ class MultiFTNet(nn.Module):
         super(MultiFTNet, self).__init__()
         self.img_channel = img_channel
         self.num_classes = num_classes
-        self.model = MiniFASNetV2SE(embedding_size=embedding_size, conv6_kernel=conv6_kernel,
-                                      num_classes=num_classes, img_channel=img_channel)
+        self.model = MiniFASNetV2SE(
+            embedding_size=embedding_size,
+            conv6_kernel=conv6_kernel,
+            num_classes=num_classes,
+            img_channel=img_channel,
+        )
         self.FTGenerator = FTGenerator(in_channels=128)
         self._initialize_weights()
 
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
             elif isinstance(m, (nn.BatchNorm2d, nn.BatchNorm1d, nn.GroupNorm)):

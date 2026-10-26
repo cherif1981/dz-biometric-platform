@@ -1,4 +1,5 @@
 """Security tests for access control."""
+
 import pytest
 
 
@@ -8,6 +9,7 @@ class TestAccessControl:
     def test_permissions_module_importable(self):
         try:
             from src.core.permissions import RequireScopes
+
             assert RequireScopes is not None
         except ImportError:
             pytest.skip("Permissions module not available")
@@ -15,6 +17,7 @@ class TestAccessControl:
     def test_security_module_importable(self):
         try:
             from src.core.security import create_access_token
+
             assert create_access_token is not None
         except ImportError:
             pytest.skip("Security module not available")

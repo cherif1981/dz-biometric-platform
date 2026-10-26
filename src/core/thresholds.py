@@ -7,10 +7,12 @@ Rules:
 - Missing file, missing key, non-numeric value, or value outside [0,1]
   → raises immediately (fail-fast, no silent defaults).
 """
+
+import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Dict
-import os
+
 import yaml
 
 _DEFAULT_PATH = Path("config/thresholds.yaml")
@@ -77,7 +79,7 @@ def get_thresholds() -> Thresholds:
             "Refusing to start — absence of config is NOT success."
         )
 
-    with path.open(encoding='utf-8') as f:
+    with path.open(encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
 
     for key, env_name in _ENV_OVERRIDES.items():

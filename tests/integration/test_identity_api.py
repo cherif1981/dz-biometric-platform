@@ -1,12 +1,14 @@
 """Integration tests for /health and /verify/ endpoints."""
-import io
-import pytest
 
+import io
+
+import pytest
 
 
 def _make_image() -> bytes:
     """JPEG صغير صالح للاختبار."""
     from PIL import Image
+
     buf = io.BytesIO()
     Image.new("RGB", (10, 10), color=(200, 200, 200)).save(buf, format="JPEG")
     return buf.getvalue()
@@ -28,13 +30,13 @@ class TestHealthEndpoint:
 
 
 class TestVerifyEndpoint:
-    @pytest.mark.xfail(reason='/verify-legacy returns 410 Gone (deprecated endpoint)', strict=False)
+    @pytest.mark.xfail(reason="/verify-legacy returns 410 Gone (deprecated endpoint)", strict=False)
     def test_verify_missing_fields(self, client, auth_headers):
         """بدون ملفات يجب أن يرجع 422."""
         r = client.post("/verify-legacy/", headers=auth_headers)
         assert r.status_code == 422
 
-    @pytest.mark.xfail(reason='deprecated /verify-legacy returns 410', strict=False)
+    @pytest.mark.xfail(reason="deprecated /verify-legacy returns 410", strict=False)
     def test_verify_with_images(self, client, auth_headers):
         """بصورتين صالحتين يجب أن يُقبل الطلب (200)."""
         files = {
@@ -44,7 +46,7 @@ class TestVerifyEndpoint:
         r = client.post("/verify-legacy/", headers=auth_headers)
         assert r.status_code == 200
 
-    @pytest.mark.xfail(reason='deprecated /verify-legacy returns 410', strict=False)
+    @pytest.mark.xfail(reason="deprecated /verify-legacy returns 410", strict=False)
     def test_verify_response_structure(self, client, auth_headers):
         """يجب أن يحتوي الرد على الحقول المطلوبة."""
         files = {

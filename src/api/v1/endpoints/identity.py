@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from pydantic import BaseModel
 
 from src.core.permissions import RequireScopes
@@ -38,5 +38,7 @@ async def extract_identity(
     fields, conf = extract_fields(card["image"], doc_type)
 
     return IdentityExtractResponse(
-        document_type=doc_type, fields=fields, confidence=conf,
+        document_type=doc_type,
+        fields=fields,
+        confidence=conf,
     )

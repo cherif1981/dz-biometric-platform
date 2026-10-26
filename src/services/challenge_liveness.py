@@ -1,6 +1,8 @@
-import time, uuid, random
+import random
+import time
+import uuid
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import Dict, List
 
 
 @dataclass
@@ -59,8 +61,9 @@ class ChallengeResponseLiveness:
                 if len(p) >= 5 and max(p) - min(p) > 15:
                     s.completed.append(a)
         missing = [a for a in s.actions if a not in s.completed]
-        return ChallengeResult(len(missing) == 0, s.completed, missing,
-                               len(s.completed)/len(s.actions))
+        return ChallengeResult(
+            len(missing) == 0, s.completed, missing, len(s.completed) / len(s.actions)
+        )
 
     def get_session(self, sid):
         return self.sessions.get(sid)

@@ -1,10 +1,11 @@
 import re
+
 from src.modules.ocr.arabic_engine import ArabicEngine
 from src.modules.ocr.french_engine import FrenchEngine
 
 # Simple regex-based field extraction. Extend with MRZ parser for passports.
 _PATTERNS = {
-    "nin": re.compile(r"\b\d{18}\b"),                       # Numéro d'Identification National
+    "nin": re.compile(r"\b\d{18}\b"),  # Numéro d'Identification National
     "date": re.compile(r"\b\d{2}[./-]\d{2}[./-]\d{4}\b"),
     "name_latin": re.compile(r"[A-Z][A-Z\s]{3,}"),
 }

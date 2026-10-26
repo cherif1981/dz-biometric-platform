@@ -1,7 +1,11 @@
 """
 Field-level encryption for sensitive biometric data using Fernet.
 """
-import os, base64, json
+
+import base64
+import json
+import os
+
 from cryptography.fernet import Fernet
 from loguru import logger
 

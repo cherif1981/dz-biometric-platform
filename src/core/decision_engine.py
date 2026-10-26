@@ -1,4 +1,3 @@
-
 import json
 from dataclasses import dataclass, field
 from typing import Dict, List
@@ -22,6 +21,7 @@ class DecisionEngine:
                 self.thresholds = json.load(f)
             else:
                 import yaml
+
                 self.thresholds = yaml.safe_load(f)
 
     def decide(self, scores: Dict[str, float]) -> DecisionResult:

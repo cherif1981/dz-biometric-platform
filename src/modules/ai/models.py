@@ -7,6 +7,7 @@ from typing import Dict, List, Optional
 
 class RiskLevel(str, Enum):
     """مستوى المخاطر."""
+
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
@@ -15,6 +16,7 @@ class RiskLevel(str, Enum):
 
 class Decision(str, Enum):
     """القرار النهائي للتحقق."""
+
     VERIFIED = "VERIFIED"
     MANUAL_REVIEW = "MANUAL_REVIEW"
     REJECTED = "REJECTED"
@@ -23,6 +25,7 @@ class Decision(str, Enum):
 @dataclass
 class RiskScore:
     """نتيجة محرك المخاطر."""
+
     score: float
     level: RiskLevel
     components: Dict[str, float] = field(default_factory=dict)
@@ -42,6 +45,7 @@ class RiskScore:
 @dataclass
 class DecisionResult:
     """نتيجة محرك القرار."""
+
     decision: Decision
     risk: RiskScore
     reasons: List[str] = field(default_factory=list)

@@ -4,11 +4,16 @@ Enhanced OCR service with:
 - Structured field extraction
 - Human review flag for low-confidence results
 """
-import cv2, numpy as np, re
+
+import re
+
+import cv2
+import numpy as np
 from loguru import logger
 
 try:
     import easyocr
+
     HAS_EASYOCR = True
 except ImportError:
     HAS_EASYOCR = False
@@ -16,9 +21,9 @@ except ImportError:
 
 
 class OCRService:
-
     def __init__(self, *args, **kwargs):
         pass
+
     _readers = None
     REVIEW_THRESHOLD = 0.65
 
@@ -64,13 +69,17 @@ class OCRService:
                 "fields": {"raw_text": "stub"},
                 "confidence": 0.0,
                 "needs_human_review": True,
-                "note": "easyocr not installed"
+                "note": "easyocr not installed",
             }
 
         img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
         if img is None:
-            return {"fields": {}, "confidence": 0.0, "needs_human_review": True,
-                    "error": "decode_failed"}
+            return {
+                "fields": {},
+                "confidence": 0.0,
+                "needs_human_review": True,
+                "error": "decode_failed",
+            }
 
         items = []
         for r in self._get():
@@ -93,20 +102,20 @@ class OCRService:
 
         conf = float(np.mean([c for _, c in items])) if items else 0.0
 
-        needs_review = (
-            conf < self.REVIEW_THRESHOLD
-            or "nin" not in fields
-            or not items
-        )
+        needs_review = conf < self.REVIEW_THRESHOLD or "nin" not in fields or not items
 
         return {
             "fields": fields,
             "confidence": round(conf, 4),
             "needs_human_review": needs_review,
             "review_reason": (
-                "low_confidence" if conf < self.REVIEW_THRESHOLD else
-                "missing_nin" if "nin" not in fields else
-                "no_text_detected" if not items else None
+                "low_confidence"
+                if conf < self.REVIEW_THRESHOLD
+                else "missing_nin"
+                if "nin" not in fields
+                else "no_text_detected"
+                if not items
+                else None
             ),
             "items": items[:20],
         }

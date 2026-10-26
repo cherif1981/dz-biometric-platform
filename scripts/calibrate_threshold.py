@@ -2,6 +2,7 @@
 Calibrate face match threshold using synthetic test embeddings.
 In production, replace with real labeled data (genuine vs impostor pairs).
 """
+
 import numpy as np
 from loguru import logger
 
@@ -15,7 +16,7 @@ def calibrate_threshold(genuine_scores, impostor_scores, target_far=0.01):
     """
     impostor_scores = sorted(impostor_scores, reverse=True)
     idx = int(len(impostor_scores) * target_far)
-    threshold = impostor_scores[min(idx, len(impostor_scores)-1)]
+    threshold = impostor_scores[min(idx, len(impostor_scores) - 1)]
 
     tp = sum(1 for s in genuine_scores if s >= threshold)
     fn = len(genuine_scores) - tp

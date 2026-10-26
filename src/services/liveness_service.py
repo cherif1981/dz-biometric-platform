@@ -4,10 +4,11 @@ Liveness service — thin wrapper around the passive liveness detector.
 - Accepts an optional `threshold` (falls back to config/thresholds.yaml).
 - Fail-closed: any error -> is_live=False.
 """
-from typing import Optional, Dict, Any
 
-from src.modules.liveness.passive import PassiveLiveness
+from typing import Any, Dict, Optional
+
 from src.core.thresholds import get_thresholds
+from src.modules.liveness.passive import PassiveLiveness
 
 
 class LivenessService:

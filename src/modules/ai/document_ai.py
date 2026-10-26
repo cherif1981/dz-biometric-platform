@@ -1,8 +1,8 @@
 """Document AI — تصنيف، جودة، كشف تلاعب، استخراج حقول."""
 
-from dataclasses import dataclass, field, asdict
-from typing import Dict, List, Any, Optional
 import re
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, List, Optional
 
 import cv2
 import numpy as np
@@ -12,6 +12,7 @@ from loguru import logger
 @dataclass
 class DocumentAnalysis:
     """نتيجة تحليل الوثيقة."""
+
     doc_type: str = "unknown"
     type_confidence: float = 0.0
     quality_score: float = 0.0
@@ -44,10 +45,10 @@ class DocumentAI:
 
     # الحقول المطلوبة لكل نوع وثيقة (قابلة للتوسيع)
     REQUIRED_FIELDS = {
-        "national_id":    ["first_name", "last_name", "date_of_birth", "document_number"],
-        "passport":       ["first_name", "last_name", "date_of_birth", "passport_number", "nationality"],
+        "national_id": ["first_name", "last_name", "date_of_birth", "document_number"],
+        "passport": ["first_name", "last_name", "date_of_birth", "passport_number", "nationality"],
         "driver_license": ["first_name", "last_name", "date_of_birth", "license_number"],
-        "unknown":        ["first_name", "last_name"],
+        "unknown": ["first_name", "last_name"],
     }
 
     # أنماط للتحقق من صحة الحقول
@@ -55,7 +56,7 @@ class DocumentAI:
         "date_of_birth": r"^\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4}$",
         "document_number": r"^[A-Z0-9]{5,20}$",
         "passport_number": r"^[A-Z0-9]{6,15}$",
-        "license_number":  r"^[A-Z0-9]{5,20}$",
+        "license_number": r"^[A-Z0-9]{5,20}$",
     }
 
     def __init__(self, ocr_service=None, min_quality: float = 0.30):
@@ -136,9 +137,7 @@ class DocumentAI:
         contrast = float(gray.std()) / 128.0
         contrast_score = min(1.0, contrast)
 
-        quality = (sharpness_score * 0.4
-                   + brightness_score * 0.3
-                   + contrast_score * 0.3)
+        quality = sharpness_score * 0.4 + brightness_score * 0.3 + contrast_score * 0.3
 
         return round(float(quality), 4)
 
@@ -182,9 +181,7 @@ class DocumentAI:
             block_score = self._block_artifact_score(gray)
 
             # مزيج موزون
-            tampering = (ela_prob * 0.5
-                         + edge_prob * 0.3
-                         + block_score * 0.2)
+            tampering = ela_prob * 0.5 + edge_prob * 0.3 + block_score * 0.2
 
             return round(float(min(1.0, tampering)), 4)
         except Exception as e:

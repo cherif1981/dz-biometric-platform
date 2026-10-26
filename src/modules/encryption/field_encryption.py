@@ -1,4 +1,5 @@
 from cryptography.fernet import Fernet
+
 from src.core.config import settings
 from src.core.exceptions import AppError
 

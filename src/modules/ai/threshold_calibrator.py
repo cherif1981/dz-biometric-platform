@@ -1,9 +1,9 @@
 """معايرة thresholds من Dataset باستخدام ROC."""
 
-from dataclasses import dataclass
-from typing import List, Optional
 import json
 import os
+from dataclasses import dataclass
+from typing import List, Optional
 
 import numpy as np
 from loguru import logger
@@ -12,9 +12,9 @@ from loguru import logger
 @dataclass
 class CalibrationResult:
     threshold: float
-    far_at_threshold: float      # False Acceptance Rate
-    frr_at_threshold: float      # False Rejection Rate
-    eer: float                   # Equal Error Rate
+    far_at_threshold: float  # False Acceptance Rate
+    frr_at_threshold: float  # False Rejection Rate
+    eer: float  # Equal Error Rate
     auc: float
     n_positive: int
     n_negative: int
@@ -82,10 +82,14 @@ class ThresholdCalibrator:
         eer = float((fpr[eer_idx] + fnr[eer_idx]) / 2.0)
 
         # AUC (تقريب شبه منحرف)
-        auc = float(np.trapezoid(tpr, fpr)) if hasattr(np, "trapezoid") else float(np.trapz(tpr, fpr))
+        auc = (
+            float(np.trapezoid(tpr, fpr)) if hasattr(np, "trapezoid") else float(np.trapz(tpr, fpr))
+        )
 
-        logger.info(f"Calibration: thr={best_thr:.4f} FAR={fpr[idx]:.5f} "
-                    f"FRR={1-tpr[idx]:.5f} EER={eer:.4f} AUC={auc:.4f}")
+        logger.info(
+            f"Calibration: thr={best_thr:.4f} FAR={fpr[idx]:.5f} "
+            f"FRR={1 - tpr[idx]:.5f} EER={eer:.4f} AUC={auc:.4f}"
+        )
 
         return CalibrationResult(
             threshold=best_thr,

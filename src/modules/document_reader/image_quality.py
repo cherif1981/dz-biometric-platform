@@ -1,4 +1,5 @@
 import io
+
 import numpy as np
 from PIL import Image
 
@@ -22,12 +23,14 @@ def check_quality(image_bytes: bytes) -> dict:
 
     # Blur: variance of Laplacian (approximate)
     lap = (
-        -4 * gray[1:-1, 1:-1]
-        + gray[:-2, 1:-1] + gray[2:, 1:-1]
-        + gray[1:-1, :-2] + gray[1:-1, 2:]
+        -4 * gray[1:-1, 1:-1] + gray[:-2, 1:-1] + gray[2:, 1:-1] + gray[1:-1, :-2] + gray[1:-1, 2:]
     )
     if lap.var() < 80:
         issues.append("blurry")
 
-    return {"ok": len(issues) == 0, "issues": issues,
-            "brightness": float(brightness), "sharpness": float(lap.var())}
+    return {
+        "ok": len(issues) == 0,
+        "issues": issues,
+        "brightness": float(brightness),
+        "sharpness": float(lap.var()),
+    }

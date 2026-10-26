@@ -12,13 +12,13 @@ Design:
   returns is_live=False. Absence of a result is NOT success.
 - Threshold comes from config/thresholds.yaml (single source of truth).
 """
+
 import os
 from pathlib import Path
 from typing import Dict, Optional
 
 from src.core.thresholds import get_thresholds
 from src.modules.liveness.anti_spoofing import AntiSpoofing
-
 
 _MODEL_ENV = "ANTISPOOF_MODEL_PATH"
 _DEFAULT_MODEL = Path("models/MiniFASNetV2.onnx")

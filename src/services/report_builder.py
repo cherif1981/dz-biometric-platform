@@ -1,4 +1,3 @@
-
 from dataclasses import asdict
 from datetime import datetime, timezone
 from typing import Any, Dict
@@ -22,7 +21,7 @@ class ReportBuilder:
             "subject_id": subject_id,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "decision": {
-                "final_status": decision.final_status,        # ← من DecisionEngine
+                "final_status": decision.final_status,  # ← من DecisionEngine
                 "confidence": decision.confidence,
                 "reasons": decision.reasons,
             },

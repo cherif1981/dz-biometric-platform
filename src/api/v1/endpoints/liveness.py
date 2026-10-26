@@ -1,4 +1,5 @@
-from fastapi import APIRouter, UploadFile, File, Depends
+from fastapi import APIRouter, Depends, File, UploadFile
+
 from src.core.permissions import RequireScopes
 from src.modules.liveness.passive import PassiveLiveness
 

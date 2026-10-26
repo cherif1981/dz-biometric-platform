@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-from src.modules.document_reader.preprocessing import to_cv2, deskew, normalize
+
+from src.modules.document_reader.preprocessing import deskew, normalize, to_cv2
 
 
 class CardDetector:
@@ -38,10 +39,15 @@ class CardDetector:
         pts = quad.reshape(4, 2).astype(np.float32)
         s = pts.sum(axis=1)
         d = np.diff(pts, axis=1).ravel()
-        rect = np.array([
-            pts[np.argmin(s)], pts[np.argmin(d)],
-            pts[np.argmax(s)], pts[np.argmax(d)],
-        ], dtype=np.float32)
+        rect = np.array(
+            [
+                pts[np.argmin(s)],
+                pts[np.argmin(d)],
+                pts[np.argmax(s)],
+                pts[np.argmax(d)],
+            ],
+            dtype=np.float32,
+        )
         (tl, tr, br, bl) = rect
         W = int(max(np.linalg.norm(br - bl), np.linalg.norm(tr - tl)))
         H = int(max(np.linalg.norm(tr - br), np.linalg.norm(tl - bl)))

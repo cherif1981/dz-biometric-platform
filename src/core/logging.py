@@ -1,4 +1,5 @@
 import sys
+
 from loguru import logger
 
 
@@ -8,7 +9,7 @@ def setup_logging() -> None:
         sys.stdout,
         level="INFO",
         format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | "
-               "<cyan>{name}</cyan>:<cyan>{function}</cyan> - <level>{message}</level>",
+        "<cyan>{name}</cyan>:<cyan>{function}</cyan> - <level>{message}</level>",
         enqueue=True,
     )
     logger.add(

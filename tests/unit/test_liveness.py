@@ -6,8 +6,9 @@ from the old heuristic. Those components no longer exist — the detector
 now delegates to a trained ONNX model. These tests verify the new
 fail-closed contract instead.
 """
-import numpy as np
+
 import cv2
+import numpy as np
 import pytest
 
 from src.services.liveness_service import LivenessService

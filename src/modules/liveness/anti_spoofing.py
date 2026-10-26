@@ -4,10 +4,12 @@ Replaces the placeholder that returned fixed values.
 
 Security principle: absence of face or model failure MUST NOT be treated as success.
 """
+
+from typing import Dict, Optional
+
 import cv2
 import numpy as np
 import onnxruntime as ort
-from typing import Dict, Optional
 
 
 class AntiSpoofing:
@@ -18,9 +20,7 @@ class AntiSpoofing:
         threshold: float = 0.5,
         input_size: tuple = (80, 80),
     ):
-        self.session = ort.InferenceSession(
-            model_path, providers=["CPUExecutionProvider"]
-        )
+        self.session = ort.InferenceSession(model_path, providers=["CPUExecutionProvider"])
         self.input_name = self.session.get_inputs()[0].name
         self.input_size = input_size
         self.scale = scale
@@ -48,7 +48,7 @@ class AntiSpoofing:
         y1 = max(0, int(center_y - new_h / 2))
         x2 = min(src_w - 1, int(center_x + new_w / 2))
         y2 = min(src_h - 1, int(center_y + new_h / 2))
-        cropped = image[y1:y2 + 1, x1:x2 + 1]
+        cropped = image[y1 : y2 + 1, x1 : x2 + 1]
         return cv2.resize(cropped, self.input_size)
 
     def _preprocess(self, face: np.ndarray) -> np.ndarray:
