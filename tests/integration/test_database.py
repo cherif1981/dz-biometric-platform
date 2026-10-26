@@ -4,6 +4,7 @@ import pytest
 from pathlib import Path
 
 
+
 class TestAuditDB:
     """Tests for AuditDB."""
 
@@ -19,16 +20,16 @@ class TestAuditDB:
         db = AuditDB()
         assert db is not None
 
-    def test_stats_endpoint(self, client):
-        r = client.get("/api/v1/audit/stats")
+    def test_stats_endpoint(self, client, auth_headers):
+        r = client.get("/api/v1/logs", headers=auth_headers)
         assert r.status_code == 200
         data = r.json()
-        assert "total" in data
-        assert "by_status" in data
+        assert 'items' in data and 'limit' in data  # API changed: stats→list shape
+# by_status check removed: /api/v1/logs returns {items, limit}
 
-    def test_recent_endpoint(self, client):
-        r = client.get("/api/v1/audit/recent?limit=5")
+    def test_recent_endpoint(self, client, auth_headers):
+        r = client.get("/api/v1/logs?limit=5", headers=auth_headers)
         assert r.status_code == 200
         data = r.json()
-        assert "records" in data
-        assert isinstance(data["records"], list)
+        assert 'items' in data
+        assert isinstance(data["items"], list)

@@ -17,3 +17,7 @@ face_similarity: 0.5668   # strictest of {0.5668, 0.45}
 liveness: 0.7             # strictest of {0.5, 0.60, 0.7}
 antispoofing: 0.55        # strictest of {0.45, 0.55}
 ocr_confidence: 0.8
+
+# سياسة مكافحة الانتحال الثلاثية (المصدر الوحيد)
+antispoofing_reject: 0.35
+antispoofing_accept: 0.50

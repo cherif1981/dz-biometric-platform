@@ -7,7 +7,8 @@ from jose import jwt
 from src.core.config import settings
 from src.main import app
 
-AUTH_BASE = "/api/v1/auth"
+
+AUTH_BASE = "/api/v1"
 
 
 @pytest.mark.asyncio

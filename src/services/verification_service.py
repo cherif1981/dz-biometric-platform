@@ -61,7 +61,7 @@ class VerificationEngine:
         self.decision_engine = DecisionEngine()
         self.liveness = LivenessService()
         self.ocr = OCRService()
-        self.antispoof = AntiSpoofing(ast)
+        self.antispoof = _make_antispoof(ast)
         self.db = AuditDB()
         self.ft, self.lt, self.ast, self.band = ft, lt, ast, 0.10
 
@@ -172,3 +172,38 @@ class VerificationEngine:
             logger.warning(f"report_builder failed: {_e}")
 
         return r
+
+
+# ═══════════════════════════════════════════════════════════════════
+# مساعد إنشاء AntiSpoofing بأمان (مضاف في نهاية الملف)
+# ═══════════════════════════════════════════════════════════════════
+def _make_antispoof(cfg=None):
+    """
+    ينشئ AntiSpoofing مع استخراج العتبات من cfg بأمان.
+    يدعم dict / object / None، ويعود للافتراضيات عند الفشل.
+    """
+    from src.services.antispoofing_service import AntiSpoofing
+
+    def _get(name, default=None):
+        if cfg is None:
+            return default
+        if isinstance(cfg, dict):
+            return cfg.get(name, default)
+        return getattr(cfg, name, default)
+
+    reject = _get("threshold_reject")
+    accept = _get("threshold_accept")
+    if reject is None:
+        reject = _get("antispoofing_threshold_reject")
+    if accept is None:
+        accept = _get("antispoofing_threshold_accept")
+
+    try:
+        reject = float(reject) if reject is not None else None
+        accept = float(accept) if accept is not None else None
+    except (TypeError, ValueError):
+        reject = accept = None
+
+    if reject is None or accept is None:
+        return AntiSpoofing()
+    return AntiSpoofing(threshold_reject=reject, threshold_accept=accept)

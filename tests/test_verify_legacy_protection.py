@@ -29,7 +29,7 @@ async def test_verify_legacy_rejects_forged_scores():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
         login = await c.post(
-            "/api/v1/auth/login",
+            "/api/v1/login",
             data={"username": "testuser", "password": "SecurePass123!"},
         )
         assert login.status_code == 200, login.text

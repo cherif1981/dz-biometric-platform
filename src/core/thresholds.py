@@ -14,11 +14,20 @@ import os
 import yaml
 
 _DEFAULT_PATH = Path("config/thresholds.yaml")
-_REQUIRED = ("face_similarity", "liveness", "antispoofing", "ocr_confidence")
+_REQUIRED = (
+    "face_similarity",
+    "liveness",
+    "antispoofing",
+    "antispoofing_reject",
+    "antispoofing_accept",
+    "ocr_confidence",
+)
 _ENV_OVERRIDES = {
     "face_similarity": "FACE_SIMILARITY_THRESHOLD",
     "liveness": "LIVENESS_THRESHOLD",
     "antispoofing": "ANTISPOOFING_THRESHOLD",
+    "antispoofing_reject": "AS_REJECT_THRESHOLD",
+    "antispoofing_accept": "AS_ACCEPT_THRESHOLD",
     "ocr_confidence": "OCR_CONFIDENCE_THRESHOLD",
 }
 
@@ -39,7 +48,17 @@ class Thresholds:
         self.face_similarity = float(data["face_similarity"])
         self.liveness = float(data["liveness"])
         self.antispoofing = float(data["antispoofing"])
+        self.antispoofing_reject = float(data["antispoofing_reject"])
+        self.antispoofing_accept = float(data["antispoofing_accept"])
         self.ocr_confidence = float(data["ocr_confidence"])
+
+        # Cross-validation: three-way policy must satisfy reject < accept
+        if not (self.antispoofing_reject < self.antispoofing_accept):
+            raise ValueError(
+                f"antispoofing thresholds invalid: must satisfy "
+                f"reject < accept, got reject={self.antispoofing_reject}, "
+                f"accept={self.antispoofing_accept}"
+            )
 
     def as_dict(self) -> Dict[str, float]:
         return {k: getattr(self, k) for k in _REQUIRED}
@@ -58,7 +77,7 @@ def get_thresholds() -> Thresholds:
             "Refusing to start — absence of config is NOT success."
         )
 
-    with path.open(encoding="utf-8") as f:
+    with path.open(encoding='utf-8') as f:
         data = yaml.safe_load(f) or {}
 
     for key, env_name in _ENV_OVERRIDES.items():

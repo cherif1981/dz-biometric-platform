@@ -1,0 +1,36 @@
+# سياسة الأمان لمنصة التحقق البيومتري
+# لا تضع أسرارًا هنا — استخدم متغيرات البيئة في الإنتاج.
+
+antispoofing:
+  model:
+    path: /content/models/MiniFASNetV2.onnx
+    sha256: "b32929adc2d9c34b9486f8c4c7bc97c1b69bc0ea9befefc380e4faae4e463907"
+    input_size: [80, 80]
+    real_class_index: 2
+  thresholds:
+    reject: 0.35
+    accept: 0.50
+  detector:
+    type: yunet
+    score_threshold: 0.6
+    nms_threshold: 0.3
+    min_face_size: 60
+
+
+rate_limiting:
+  per_user:
+    window_seconds: 60
+    limit: 10
+  per_ip:
+    window_seconds: 60
+    limit: 30
+  backend: memory           # memory | redis
+  redis_url: "redis://localhost:6379/0"   # يُستخدم إن backend=redis
+
+audit:
+  log_file: /content/dz-biometric-platform/logs/verification_audit.jsonl
+  log_level: INFO
+
+http:
+  retry_after_header: true
+  status_code_rate_limited: 429
