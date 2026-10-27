@@ -127,6 +127,13 @@ def _verify_model_integrity(model_path: str) -> None:
         )
 
 
+from enum import Enum
+
+class PADState(str, Enum):
+    VERIFIED    = "VERIFIED"
+    HEURISTIC   = "HEURISTIC"
+    UNAVAILABLE = "UNAVAILABLE"
+
 class AntiSpoofingService:
     def __init__(
         self, threshold_reject: float | None = None, threshold_accept: float | None = None
@@ -148,6 +155,7 @@ class AntiSpoofingService:
         _download(MODEL_URLS[0], MODEL_PATH, 100_000)
         _verify_model_integrity(MODEL_PATH)
         self.session = ort.InferenceSession(MODEL_PATH, providers=["CPUExecutionProvider"])
+        self.state = PADState.VERIFIED if self.session is not None else PADState.HEURISTIC
         self.input_name = self.session.get_inputs()[0].name
         self.detector = YuNetDetector()
         print(
