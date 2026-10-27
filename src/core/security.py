@@ -49,3 +49,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
     if payload.get("type") != "access":
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Wrong token type")
     return {"user_id": payload["sub"], "scopes": payload.get("scopes", [])}
+
+
+# توافق خلفي: الاسم القديم المستخدم في tests/conftest.py
+get_password_hash = hash_password

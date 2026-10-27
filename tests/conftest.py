@@ -109,9 +109,9 @@ def _seed_test_data(_create_schema):
         return
 
     try:
-        from src.core.security import get_password_hash
+        from src.core.security import hash_password
 
-        hashed = get_password_hash("SecurePass123!")
+        hashed = hash_password("SecurePass123!")
     except Exception:
         from passlib.context import CryptContext
 
