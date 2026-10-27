@@ -1,0 +1,590 @@
+{
+  "metrics_by_threshold": [
+    {
+      "threshold": 0.3,
+      "n_bona": 40,
+      "n_attack": 40,
+      "apcer": 0.0,
+      "bpcer": 1.0,
+      "acer": 0.5
+    },
+    {
+      "threshold": 0.35,
+      "n_bona": 40,
+      "n_attack": 40,
+      "apcer": 0.0,
+      "bpcer": 1.0,
+      "acer": 0.5
+    },
+    {
+      "threshold": 0.4,
+      "n_bona": 40,
+      "n_attack": 40,
+      "apcer": 0.0,
+      "bpcer": 1.0,
+      "acer": 0.5
+    },
+    {
+      "threshold": 0.45,
+      "n_bona": 40,
+      "n_attack": 40,
+      "apcer": 0.0,
+      "bpcer": 1.0,
+      "acer": 0.5
+    },
+    {
+      "threshold": 0.5,
+      "n_bona": 40,
+      "n_attack": 40,
+      "apcer": 0.0,
+      "bpcer": 1.0,
+      "acer": 0.5
+    },
+    {
+      "threshold": 0.55,
+      "n_bona": 40,
+      "n_attack": 40,
+      "apcer": 0.0,
+      "bpcer": 1.0,
+      "acer": 0.5
+    },
+    {
+      "threshold": 0.6,
+      "n_bona": 40,
+      "n_attack": 40,
+      "apcer": 0.0,
+      "bpcer": 1.0,
+      "acer": 0.5
+    },
+    {
+      "threshold": 0.65,
+      "n_bona": 40,
+      "n_attack": 40,
+      "apcer": 0.0,
+      "bpcer": 1.0,
+      "acer": 0.5
+    },
+    {
+      "threshold": 0.7,
+      "n_bona": 40,
+      "n_attack": 40,
+      "apcer": 0.0,
+      "bpcer": 1.0,
+      "acer": 0.5
+    }
+  ],
+  "operating_point": {
+    "threshold": 0.5,
+    "n_bona": 40,
+    "n_attack": 40,
+    "apcer": 0.0,
+    "bpcer": 1.0,
+    "acer": 0.5
+  },
+  "attack_breakdown": {
+    "printed_photo": {
+      "n": 16,
+      "apcer": 0.0,
+      "mean_score": 0.0
+    },
+    "ipad_video": {
+      "n": 15,
+      "apcer": 0.0,
+      "mean_score": 0.0
+    },
+    "iphone_video": {
+      "n": 9,
+      "apcer": 0.0,
+      "mean_score": 0.0
+    }
+  },
+  "score_stats": {
+    "bona_mean": 0.0,
+    "bona_std": 0.0,
+    "atk_mean": 0.0,
+    "atk_std": 0.0
+  },
+  "raw_results": [
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client001_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9933921694755554, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client001_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9935619831085205, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client013_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.994408369064331, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client013_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9943787455558777, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client014_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9939297437667847, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client014_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9938608407974243, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client023_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9937467575073242, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client023_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.993867814540863, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client024_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9923208355903625, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client024_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9935815334320068, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client026_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9937465190887451, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client026_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9945918917655945, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client028_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9940661191940308, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client028_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9943506121635437, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client029_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9937002658843994, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client029_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9940476417541504, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client030_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9943757057189941, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client030_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9942779541015625, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client032_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9939775466918945, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client032_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.993891716003418, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client033_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9940683841705322, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client033_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9942736029624939, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client035_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9935808181762695, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client035_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9936972260475159, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client036_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.994765043258667, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client036_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9942445158958435, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client037_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9943870306015015, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client037_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.994346559047699, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client039_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9938176274299622, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client039_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9945597052574158, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client042_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9944434762001038, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client042_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9944741129875183, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client048_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9940410256385803, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client048_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9943667054176331, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client049_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9940062761306763, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client049_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9942407608032227, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client050_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9937196969985962, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client050_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9947146773338318, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client051_android_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9927992820739746, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 1,
+      "video": "real_client051_laptop_SD_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9940791130065918, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client013_laptop_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9946991205215454, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client048_android_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9936262369155884, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client024_android_SD_iphone_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.992112398147583, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client023_android_SD_iphone_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9929405450820923, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client037_android_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9949938654899597, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client024_android_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9920480847358704, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client049_laptop_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9940654039382935, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client032_android_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9944450259208679, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client048_laptop_SD_iphone_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9941370487213135, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client042_android_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9948221445083618, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client028_laptop_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.993843674659729, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client023_android_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9945728182792664, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client023_android_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9930840730667114, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client032_android_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9929965138435364, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client048_android_SD_iphone_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9942542910575867, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client039_laptop_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9943708777427673, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client001_android_SD_iphone_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9932017922401428, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client028_android_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9936872124671936, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client051_android_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.992643415927887, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client051_laptop_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9940608143806458, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client036_android_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9948595762252808, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client042_android_SD_iphone_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9942223429679871, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client028_laptop_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9942002296447754, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client039_laptop_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9943091869354248, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client001_laptop_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9939566850662231, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client037_laptop_SD_iphone_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9950841069221497, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client049_android_SD_iphone_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9934521913528442, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client051_android_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9937886595726013, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client033_android_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9934554696083069, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client030_android_SD_iphone_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9946110248565674, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client033_android_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9945753812789917, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client030_android_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9950422048568726, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client039_android_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9934846758842468, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client042_laptop_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9945251941680908, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client039_android_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9947825074195862, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client028_android_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9945705533027649, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client029_laptop_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9938039779663086, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client001_laptop_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9931724667549133, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client037_laptop_SD_ipad_video_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9945281147956848, 'reason': 'live', 'detector': 'YuNet'}"
+    },
+    {
+      "score": 0.0,
+      "label": 0,
+      "video": "attack_client037_laptop_SD_printed_photo_scene01",
+      "raw": "{'is_live': True, 'decision': 'ACCEPT', 'antispoofing_score': 0.9943057894706726, 'reason': 'live', 'detector': 'YuNet'}"
+    }
+  ],
+  "method": "one frame per video (ISO/IEC 30107-3)"
+}

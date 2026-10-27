@@ -1,0 +1,1232 @@
+[
+  {
+    "sample_id": "lfw_0000",
+    "face_score": 0.847008466720581,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0001",
+    "face_score": 0.6896082162857056,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0002",
+    "face_score": 0.5535250306129456,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0003",
+    "face_score": 0.6682175993919373,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0004",
+    "face_score": 0.6959471106529236,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0005",
+    "face_score": 0.6400524377822876,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0006",
+    "face_score": 0.4679517149925232,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0007",
+    "face_score": 0.6595353484153748,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0008",
+    "face_score": 0.7403293251991272,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0009",
+    "face_score": 0.7458629608154297,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0010",
+    "face_score": 0.641595721244812,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0011",
+    "face_score": 0.6990543603897095,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0012",
+    "face_score": 0.6496422290802002,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0013",
+    "face_score": 0.678034245967865,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0014",
+    "face_score": 0.6880970597267151,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0016",
+    "face_score": 0.6988207101821899,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0017",
+    "face_score": 0.7127050757408142,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0018",
+    "face_score": 0.6543931365013123,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0019",
+    "face_score": 0.588381290435791,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0020",
+    "face_score": 0.6458496451377869,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0021",
+    "face_score": 0.643378734588623,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0022",
+    "face_score": 0.6118263006210327,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0023",
+    "face_score": 0.6036466956138611,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0024",
+    "face_score": 0.6756249666213989,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0025",
+    "face_score": 0.7565658688545227,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0026",
+    "face_score": 0.4608829617500305,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0027",
+    "face_score": 0.6257888078689575,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0029",
+    "face_score": 0.5627080202102661,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0030",
+    "face_score": 0.6919213533401489,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0031",
+    "face_score": 0.4642457962036133,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0032",
+    "face_score": 0.6386978626251221,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0034",
+    "face_score": 0.7233902215957642,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0035",
+    "face_score": 0.7749993801116943,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0037",
+    "face_score": 0.5462847352027893,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0038",
+    "face_score": 0.7642117738723755,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0039",
+    "face_score": 0.6933518648147583,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0040",
+    "face_score": 0.7846934199333191,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0041",
+    "face_score": 0.7198195457458496,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0042",
+    "face_score": 0.6319468021392822,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0043",
+    "face_score": 0.7067844867706299,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0044",
+    "face_score": 0.6090070605278015,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0045",
+    "face_score": 0.5274084806442261,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0046",
+    "face_score": 0.72920823097229,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0047",
+    "face_score": 0.4387321472167969,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0048",
+    "face_score": 0.6791675090789795,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0049",
+    "face_score": 0.8116436004638672,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0050",
+    "face_score": 0.6263704299926758,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0051",
+    "face_score": 0.8034319281578064,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0053",
+    "face_score": 0.6645578145980835,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0055",
+    "face_score": 0.75755774974823,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0057",
+    "face_score": 0.7467360496520996,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0058",
+    "face_score": 0.6463569402694702,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0062",
+    "face_score": 0.5881420969963074,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0063",
+    "face_score": 0.6174713969230652,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0064",
+    "face_score": 0.6360408067703247,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0065",
+    "face_score": 0.6820041537284851,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0066",
+    "face_score": 0.0628102570772171,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0067",
+    "face_score": -0.06263826042413712,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0068",
+    "face_score": 0.655997633934021,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0069",
+    "face_score": 0.6657413244247437,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0070",
+    "face_score": 0.5916454792022705,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0071",
+    "face_score": 0.7031316757202148,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0072",
+    "face_score": 0.5855964422225952,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0073",
+    "face_score": 0.7076201438903809,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0075",
+    "face_score": 0.5149013996124268,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0076",
+    "face_score": 0.6510851383209229,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0077",
+    "face_score": 0.7768309712409973,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0079",
+    "face_score": 0.6184388399124146,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0080",
+    "face_score": 0.014732494950294495,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0081",
+    "face_score": 0.6947692036628723,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0082",
+    "face_score": 0.7192150354385376,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0083",
+    "face_score": 0.6868883371353149,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0084",
+    "face_score": 0.6968252658843994,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0085",
+    "face_score": 0.7248852252960205,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0086",
+    "face_score": 0.6098126173019409,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0087",
+    "face_score": 0.6997162699699402,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0088",
+    "face_score": 0.6570872068405151,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0089",
+    "face_score": 0.6210829019546509,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0090",
+    "face_score": 0.6113153696060181,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0091",
+    "face_score": 0.5905126333236694,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0092",
+    "face_score": 0.7225544452667236,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0093",
+    "face_score": 0.7042816281318665,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0094",
+    "face_score": 0.7188249826431274,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0095",
+    "face_score": 0.6131488084793091,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0096",
+    "face_score": 0.6947460174560547,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0097",
+    "face_score": -0.07383529096841812,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0098",
+    "face_score": 0.6247941255569458,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0099",
+    "face_score": 0.6680253744125366,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0100",
+    "face_score": 0.6083816289901733,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0102",
+    "face_score": 0.5676247477531433,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0104",
+    "face_score": 0.5250975489616394,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0105",
+    "face_score": 0.5912237167358398,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0106",
+    "face_score": 0.646167516708374,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0107",
+    "face_score": 0.6278051137924194,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0108",
+    "face_score": 0.6344094276428223,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0109",
+    "face_score": 0.40314003825187683,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0110",
+    "face_score": 0.6897644996643066,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0111",
+    "face_score": 0.7247382402420044,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0112",
+    "face_score": 0.674311637878418,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0113",
+    "face_score": 0.6986663341522217,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0114",
+    "face_score": 0.7867891788482666,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0117",
+    "face_score": 0.5756654739379883,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0118",
+    "face_score": 0.6210073828697205,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0119",
+    "face_score": 0.550622284412384,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0121",
+    "face_score": 0.6948084831237793,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0122",
+    "face_score": 0.7414282560348511,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0125",
+    "face_score": 0.6957696676254272,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0126",
+    "face_score": 0.738140344619751,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0127",
+    "face_score": 0.6328941583633423,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0128",
+    "face_score": 0.6360468864440918,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0129",
+    "face_score": 0.6705047488212585,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0130",
+    "face_score": 0.018365584313869476,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0131",
+    "face_score": 0.5660459995269775,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0132",
+    "face_score": 0.7010247111320496,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0133",
+    "face_score": 0.6516062617301941,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0135",
+    "face_score": 0.7669050693511963,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0136",
+    "face_score": 0.7996224164962769,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0137",
+    "face_score": 0.6118944883346558,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0138",
+    "face_score": 0.7481249570846558,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0139",
+    "face_score": 0.6889660358428955,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0140",
+    "face_score": 0.6470147967338562,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0141",
+    "face_score": 0.7207428812980652,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0142",
+    "face_score": 0.8826032876968384,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0143",
+    "face_score": 0.6863182783126831,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0144",
+    "face_score": 0.6500431299209595,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0146",
+    "face_score": 0.631862223148346,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0147",
+    "face_score": 0.6074507236480713,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0148",
+    "face_score": 0.711785078048706,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0149",
+    "face_score": 0.6172573566436768,
+    "face_is_genuine": true
+  },
+  {
+    "sample_id": "lfw_0152",
+    "face_score": 0.09594680368900299,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0154",
+    "face_score": 0.013421544805169106,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0156",
+    "face_score": 0.074086494743824,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0157",
+    "face_score": -0.02939613163471222,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0159",
+    "face_score": 0.034307319670915604,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0160",
+    "face_score": 0.04549211636185646,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0162",
+    "face_score": 0.03583657741546631,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0163",
+    "face_score": 0.1642419397830963,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0165",
+    "face_score": -0.007081182673573494,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0166",
+    "face_score": 0.10637316107749939,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0167",
+    "face_score": -0.03400033712387085,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0168",
+    "face_score": -0.007413808256387711,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0169",
+    "face_score": 0.04836336523294449,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0170",
+    "face_score": -0.026363180950284004,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0172",
+    "face_score": 0.07726885378360748,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0173",
+    "face_score": 0.07915449887514114,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0174",
+    "face_score": -0.021556854248046875,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0175",
+    "face_score": 0.07457824051380157,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0176",
+    "face_score": 0.02006315067410469,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0177",
+    "face_score": 0.011138424277305603,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0178",
+    "face_score": -0.11981168389320374,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0179",
+    "face_score": 0.03515785187482834,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0180",
+    "face_score": 0.07301020622253418,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0183",
+    "face_score": 0.02564047835767269,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0184",
+    "face_score": -0.03940042853355408,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0186",
+    "face_score": 0.03930865228176117,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0187",
+    "face_score": 0.022793974727392197,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0188",
+    "face_score": -0.015954092144966125,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0189",
+    "face_score": 0.04550681263208389,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0190",
+    "face_score": 0.08264905214309692,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0192",
+    "face_score": -0.015067130327224731,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0193",
+    "face_score": 0.07384049147367477,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0194",
+    "face_score": -0.10148380696773529,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0195",
+    "face_score": 0.017646504566073418,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0196",
+    "face_score": 0.009516164660453796,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0197",
+    "face_score": 0.0016063302755355835,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0198",
+    "face_score": 0.0894363671541214,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0199",
+    "face_score": 0.058377575129270554,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0200",
+    "face_score": -0.02132703736424446,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0201",
+    "face_score": -0.02217135764658451,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0202",
+    "face_score": -0.033693231642246246,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0203",
+    "face_score": -0.022643161937594414,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0204",
+    "face_score": 0.04304197430610657,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0205",
+    "face_score": -0.03561847284436226,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0206",
+    "face_score": 0.0024483799934387207,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0207",
+    "face_score": -0.022990994155406952,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0208",
+    "face_score": 0.035462841391563416,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0209",
+    "face_score": 0.04843611270189285,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0210",
+    "face_score": -0.01703229919075966,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0211",
+    "face_score": -0.09909133613109589,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0213",
+    "face_score": 0.031523916870355606,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0214",
+    "face_score": 0.030354846268892288,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0215",
+    "face_score": 0.06427933275699615,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0216",
+    "face_score": 0.054798781871795654,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0217",
+    "face_score": -0.04738429933786392,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0218",
+    "face_score": 0.03488042205572128,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0219",
+    "face_score": -0.0009533949196338654,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0220",
+    "face_score": 0.05536652356386185,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0222",
+    "face_score": -0.09697327017784119,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0223",
+    "face_score": 0.021020231768488884,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0224",
+    "face_score": 0.04480694979429245,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0225",
+    "face_score": -0.1054682731628418,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0226",
+    "face_score": 0.09279938042163849,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0227",
+    "face_score": 0.011446911841630936,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0228",
+    "face_score": 0.049698054790496826,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0230",
+    "face_score": -0.005634569097310305,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0231",
+    "face_score": -0.06559230387210846,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0232",
+    "face_score": 0.05692439526319504,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0235",
+    "face_score": -0.038988832384347916,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0236",
+    "face_score": 0.06980136036872864,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0237",
+    "face_score": 0.067417211830616,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0238",
+    "face_score": -0.00951332040131092,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0239",
+    "face_score": 0.03596656024456024,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0243",
+    "face_score": 0.04260075464844704,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0244",
+    "face_score": 0.03142952546477318,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0245",
+    "face_score": 0.01871490851044655,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0246",
+    "face_score": -0.006958626210689545,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0249",
+    "face_score": 0.06602898240089417,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0250",
+    "face_score": -0.06410619616508484,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0251",
+    "face_score": 0.06773723661899567,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0252",
+    "face_score": -0.037585023790597916,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0253",
+    "face_score": -0.004070102237164974,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0254",
+    "face_score": 0.032503802329301834,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0255",
+    "face_score": 0.007705850526690483,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0256",
+    "face_score": 0.035628899931907654,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0257",
+    "face_score": 0.014840142801404,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0258",
+    "face_score": 0.13402967154979706,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0260",
+    "face_score": -0.007492221891880035,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0261",
+    "face_score": 0.04321974515914917,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0263",
+    "face_score": 0.016186220571398735,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0264",
+    "face_score": -0.0007602442055940628,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0265",
+    "face_score": 0.08190982043743134,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0268",
+    "face_score": 0.05509868264198303,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0269",
+    "face_score": 0.12314723432064056,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0270",
+    "face_score": 0.10705313086509705,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0272",
+    "face_score": 0.08773684501647949,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0273",
+    "face_score": 0.005770193412899971,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0274",
+    "face_score": 0.048764511942863464,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0276",
+    "face_score": 0.03648114204406738,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0277",
+    "face_score": -0.060732368379831314,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0279",
+    "face_score": 0.011736743152141571,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0280",
+    "face_score": 0.01882820576429367,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0281",
+    "face_score": 0.012111209332942963,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0282",
+    "face_score": 0.06373234838247299,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0284",
+    "face_score": -0.020107146352529526,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0286",
+    "face_score": -0.03884591534733772,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0287",
+    "face_score": 0.013112157583236694,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0288",
+    "face_score": 0.0716576874256134,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0289",
+    "face_score": -0.061037369072437286,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0290",
+    "face_score": -0.03838736563920975,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0291",
+    "face_score": 0.008349684998393059,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0294",
+    "face_score": 0.04491499066352844,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0295",
+    "face_score": 0.059112969785928726,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0296",
+    "face_score": 0.07348999381065369,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0297",
+    "face_score": 0.0521099790930748,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0298",
+    "face_score": 0.009534167125821114,
+    "face_is_genuine": false
+  },
+  {
+    "sample_id": "lfw_0299",
+    "face_score": -0.07221665978431702,
+    "face_is_genuine": false
+  }
+]

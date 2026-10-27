@@ -1,52 +1,52 @@
-import json
-from dataclasses import dataclass, field
-from typing import Dict, List
+"""واجهة توافق: تفوّض القرار إلى UnifiedDecisionEngine (مصدر الحقيقة الوحيد)."""
+from __future__ import annotations
 
+from typing import Optional
 
-@dataclass
-class DecisionResult:
-    final_status: str
-    confidence: float
-    per_modality_scores: Dict[str, float]
-    applied_thresholds: Dict[str, float]
-    reasons: List[str] = field(default_factory=list)
+from .decision_policy import (
+    UnifiedDecisionEngine, DecisionThresholds, DecisionResult,
+    Decision, CriterionStatus,
+)
+
+__all__ = ["DecisionEngine", "DecisionResult", "Decision", "CriterionStatus"]
 
 
 class DecisionEngine:
-    """المصدر الوحيد لاتخاذ القرار في النظام."""
+    """محرك قرار متوافق مع الواجهة القديمة.
 
-    def __init__(self, thresholds_path: str = "config/thresholds.yaml"):
-        with open(thresholds_path, encoding="utf-8") as f:
-            if thresholds_path.endswith(".json"):
-                self.thresholds = json.load(f)
-            else:
-                import yaml
+    - يقبل `thresholds: dict` (كما كان سابقاً) ويحوّلها إلى DecisionThresholds.
+    - يقبل `scores: dict` ويرجع DecisionResult.
+    - يحفظ `last_result` للتوافق مع مستدعين قد يقرؤونه.
+    """
 
-                self.thresholds = yaml.safe_load(f)
+    def __init__(self, thresholds: Optional[dict] = None, strict_critical: bool = True):
+        t = DecisionThresholds.from_settings(None)
+        if thresholds:
+            # دعم المفاتيح القديمة: face/liveness/antispoof/ocr
+            alias = {"face": "face_similarity", "ocr": "ocr_confidence"}
+            fields = {}
+            for k, v in thresholds.items():
+                name = alias.get(k, k)
+                base = getattr(t, name)
+                # نستخدم النمط النسبي كما في السلوك القديم (threshold * 0.9)
+                fields[name] = type(base)(
+                    name=base.name, accept=float(v),
+                    review_factor=getattr(base, "review_factor", 0.9),
+                    critical=base.critical,
+                )
+            t = DecisionThresholds(**{**{k: getattr(t, k) for k in
+                                         ("face_similarity","liveness","antispoof","ocr_confidence")},
+                                      **fields})
+        self.thresholds = t
+        self._engine = UnifiedDecisionEngine(t, strict_critical=strict_critical)
+        self.last_result: Optional[DecisionResult] = None
 
-    def decide(self, scores: Dict[str, float]) -> DecisionResult:
-        reasons, passed = [], []
-        for modality, score in scores.items():
-            thr = self.thresholds.get(modality)
-            if thr is None:
-                raise ValueError(f"No threshold configured for modality: {modality}")
-            if score >= thr:
-                passed.append(modality)
-            else:
-                reasons.append(f"{modality}: {score:.3f} < {thr}")
+    def decide(self, scores: dict) -> DecisionResult:
+        self.last_result = self._engine.decide(scores)
+        return self.last_result
 
-        if len(passed) == len(scores) and scores:
-            status = "VERIFIED"
-        elif any(scores[m] >= self.thresholds[m] * 0.9 for m in scores if m not in passed):
-            status = "REVIEW"
-        else:
-            status = "REJECTED"
-
-        confidence = sum(scores.values()) / len(scores) if scores else 0.0
-        return DecisionResult(
-            final_status=status,
-            confidence=round(confidence, 4),
-            per_modality_scores=scores,
-            applied_thresholds=self.thresholds,
-            reasons=reasons,
-        )
+    # واجهة مساعدة للتوافق مع الكود القديم الذي قد يقرأ الثقة/النقاط
+    def score(self, scores: dict) -> float:
+        """يبقى متاحاً للتوافق فقط، ولا يُستخدم في القرار."""
+        vals = [float(v) for v in scores.values() if v is not None]
+        return sum(vals) / len(vals) if vals else 0.0

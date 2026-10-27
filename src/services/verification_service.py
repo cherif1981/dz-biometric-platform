@@ -55,13 +55,13 @@ class VerificationEngine:
         ast = ast if ast is not None else _t.antispoofing
 
         self.face = FaceService.get()
-        self.document_ai = DocumentAI(ocr_service=getattr(self, "ocr", None))
+        self.ocr = OCRService()
+        self.document_ai = DocumentAI(ocr_service=self.ocr)
         self.biometric_ai = BiometricAI(face_app=getattr(self, "face", None))
         self.report_builder = ReportBuilder()
         self.risk_engine = RiskEngine()
         self.decision_engine = DecisionEngine()
         self.liveness = LivenessService()
-        self.ocr = OCRService()
         self.antispoof = _make_antispoof(ast)
         self.db = AuditDB()
         self.ft, self.lt, self.ast, self.band = ft, lt, ast, 0.10
@@ -100,7 +100,11 @@ class VerificationEngine:
 
         try:
             fr = self.face.verify(id_bytes, selfie_bytes)
-            fs = float(fr.get("similarity", 0))
+            fs_raw = fr.get("similarity")
+            if fs_raw is None:
+                reasons.append("FACE_DETECTION_FAILED")
+                raise ValueError("face detection failed")  # يذهب إلى _fin الرفض
+            fs = float(fs_raw)
             scores["face_similarity"] = fs
             if fs < self.ft:
                 reasons.append(f"FACE:{fs:.3f}")
@@ -142,7 +146,7 @@ class VerificationEngine:
                     reasons.append(f"FIELD:{k}")
 
         _risk_result = self.risk_engine.compute(scores)
-        conf = 1.0 - _risk_result.score
+        conf = 1.0 - (_risk_result.score if (_risk_result is not None and hasattr(_risk_result, 'score')) else 0.0)
 
         if not reasons:
             st = VerificationStatus.VERIFIED
@@ -193,7 +197,10 @@ class VerificationEngine:
                     "raw_scores": scores,
                 },
             )()
-            r.ai_report = self.report_builder.build(decision_result=dr, signals=scores).to_dict()
+            try:
+                r.ai_report = self.report_builder.build(decision_result=dr, signals=scores).to_dict()
+            except Exception:
+                r.ai_report = None   # التقرير الداخلي غير حرج — تجاهل الفشل بصمت
         except Exception as _e:
             r.ai_report = {"error": str(_e)}
             logger.warning(f"report_builder failed: {_e}")

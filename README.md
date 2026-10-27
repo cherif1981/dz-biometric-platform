@@ -1,118 +1,157 @@
 # DZ Biometric Platform - Colab Edition
 
-نسخة معدّلة من [DZ Biometric Platform](https://github.com/cherif1981/dz-biometric-platform)
-تعمل على **Google Colab** مع **Cloudflare Tunnel**.
+نسخة معدّلة تعمل على Google Colab مع Cloudflare Tunnel.
 
-## 📅 آخر تحديث
-2026-10-12 10:43:47
+**آخر تحديث:** 2026-10-27 (تقييم موثّق)
+
+---
+
+## ⚠️ إفصاح مهم
+
+الادعاء السابق **«دقة 94%»** لم يكن قابلاً لإعادة الإنتاج.
+استُبدل بتقييم مستقل على LFW.
+
+---
 
 ## ✅ حالة المشروع
+
 | المكوّن | الحالة |
 |---|---|
-| FastAPI Server | ✅ يعمل |
+| FastAPI | ✅ يعمل |
 | Cloudflare Tunnel | ✅ يعمل |
-| OCR (عربية + فرنسية) | ✅ يعمل |
-| Face Verification | ✅ دقة 94% |
-| Liveness Detection | ✅ يعمل |
-| Anti-Spoofing | ✅ يعمل (heuristic) |
+| **Face Verification** | ✅ **EER 4.07%** |
+| OCR | ⚠️ لم يُقيَّم |
+| Liveness | ⚠️ لم يُقيَّم |
+| **Anti-Spoofing** | ❌ **نموذج منحلّ** |
 | Audit DB | ✅ يعمل |
-| GPU (CUDA) | ✅ مفعّل |
 
-## 🎯 نتائج الاختبار
+---
 
-### آخر نتيجة: ✅ VERIFIED
+## 📊 تقييم مطابقة الوجه — insightface على LFW
 
-## العتبات الفعلية (المصدر: `config/thresholds.yaml`)
+| المقياس | القيمة |
+|---|---|
+| **EER** | **4.07%** |
+| ROC-AUC | 0.9753 |
+| FAR @ EER | 4.27% |
+| FRR @ EER | 3.88% |
+| معدل فشل الكشف | **18.0%** |
+| العينة | 129+117 |
 
-| المقياس | العتبة | البيئة (env override) |
-|---|---|---|
-| تشابه الوجه | `0.5668` | `FACE_SIMILARITY_THRESHOLD` |
-| الحيوية | `0.7` | `LIVENESS_THRESHOLD` |
-| مكافحة الانتحال — رفض | `0.35` | `AS_REJECT_THRESHOLD` |
-| مكافحة الانتحال — قبول | `0.5` | `AS_ACCEPT_THRESHOLD` |
-| ثقة OCR | `0.8` | `OCR_CONFIDENCE_THRESHOLD` |
+**إعادة الإنتاج:**
 
-> **ملاحظة:** العتبات تُقرأ من `config/thresholds.yaml` فقط. أي تعديل في `README.md` أو `security.yaml` لا يؤثر على القرار. لتعديل سلوك النظام: عدّل YAML (أو استخدم env override).
+- LFW (150+150) عبر sklearn
+- البذرة: 42 في `eval_scores_face.json`
+- padding=60 عند فشل الكشف
 
-### إحصائيات التدقيق
-```json
-{
-  "total": 5,
-  "by_status": {
-    "REJECTED": 4,
-    "VERIFIED": 1
-  }
-}
-```
+**إفصاحات:**
+
+1. تحيّز انتقائي: 4.07% تخص 246/300 فقط.
+2. 117 سلبية → أدنى FMR = 8.5×10⁻³.
+3. فضاء cosine خام؛ الإنتاج يحوّل بـ (cos+1)/2.
+
+---
+
+## مكافحة الانتحال — **لم تُقيَّم**
+
+MiniFASNetV2.onnx لا يستجيب للمحتوى:
+
+| المدخل | probs[real] |
+|---|---|
+| أسود | 0.992 |
+| أبيض | 0.995 |
+| ضوضاء | 0.992 |
+| حقيقي | 0.994 |
+| هجوم | 0.993 |
+
+الفرق: **0.001** — أقل من ضوضاء القياس.
+لا APCER/BPCER. **المطلوب:** DeepPixBiS / CDCN / نموذج HuggingFace.
+
+## OCR — **لم يُقيَّم**
+
+يتطلب وثائق بنصوص مرجعية. غير متوفرة علناً.
+
+---
+
+## 🔧 العتبات (`config/thresholds.yaml`)
+
+| المقياس | العتبة |
+|---|---|
+| تشابه الوجه | 0.5668 |
+| الحيوية | 0.7 |
+| AS — قبول | 0.5 |
+| OCR | 0.8 |
+
+> ⚠️ عتبة AS معطّلة — النموذج يُرجع ~0.99 للكل.
+
+---
 
 ## 🔧 التعديلات المطبقة
 
-### 1. `src/services/verification_service.py`
+### 1. ترتيب DocumentAI/OCRService
+
+`self.ocr = OCRService()` قبل `DocumentAI(ocr_service=self.ocr)`.
+
+### 2. face_service.py — استبدال stub بـ insightface
+
+الـ stub القديم كان يُرجع 0.0 دائماً. الآن:
+
 ```python
 # قبل
-def __init__(self, ft=0.45, lt=0.60, ast=0.55):
+def verify(self, payload):
+    return {self.modality: float(payload.get('face_score', 0.0))}
 
 # بعد
-def __init__(self, ft=0.40, lt=0.50, ast=0.45):
+class FaceVerificationService:
+    def _embed(self, img):
+        # insightface + padding=60/80
+        return faces[0].normed_embedding
 ```
 
-### 2. `src/services/liveness_service.py`
-```python
-# قبل
-def __init__(self, threshold=0.60):
+### 3. decision_policy.py — محرك قرار موحّد
 
-# بعد
-def __init__(self, threshold=0.50):
-```
+`core/decision_engine.py` و `modules/ai/decision_engine.py`
+أصبحا واجهتا تفويض إلى `UnifiedDecisionEngine`.
+العتبات موحّدة مع لقطة في كل قرار.
 
-### 3. `src/services/antispoofing_service.py`
-```python
-# قبل
-def __init__(self, threshold: float = 0.55):
-
-# بعد
-def __init__(self, threshold: float = 0.45):
-```
+---
 
 ## 🚀 التشغيل على Colab
 
-```python
-# 1. تثبيت المكتبات
-!pip install fastapi uvicorn[standard] python-multipart nest-asyncio
-!pip install pydantic pydantic-settings sqlalchemy
-!pip install insightface onnxruntime opencv-python-headless easyocr
-!pip install python-jose[cryptography] passlib[bcrypt] loguru
-
-# 2. استنساخ المشروع
+```bash
+!pip install fastapi uvicorn insightface onnxruntime easyocr
 !git clone https://github.com/cherif1981/dz-biometric-colab-results.git
 %cd dz-biometric-colab-results
-
-# 3. تشغيل الخادم
 !uvicorn src.main:app --host 0.0.0.0 --port 8000 &
-
-# 4. Cloudflare Tunnel
-!wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O /usr/local/bin/cloudflared
-!chmod +x /usr/local/bin/cloudflared
 !cloudflared tunnel --url http://localhost:8000
 ```
 
-## 📁 هيكل المشروع
+---
+
+## 📁 الهيكل
 
 ```
-dz-biometric-colab-results/
-├── src/
-│   ├── api/v1/          # نقاط النهاية
-│   ├── core/            # الإعدادات والأمان
-│   ├── modules/         # OCR, Face, Liveness
-│   └── services/        # خدمات التطبيق
-├── tests/
-├── docs/
-├── requirements.txt
-└── README.md
+src/api/v1/  src/core/  src/modules/  src/services/
+config/thresholds.yaml
+eval_scores_face.json
 ```
+
+---
+
+## 📋 سجل التغييرات
+
+### 2026-10-27
+- إصلاح DocumentAI/OCRService
+- استبدال face stub بـ insightface
+- توحيد محرك القرار
+- EER 4.07% موثّق
+- PAD: نموذج منحلّ موثَّق
+- إزالة 94% غير القابل للتحقق
 
 ## 👤 المؤلف
-- **cherif1981** <meddourcherif1981@gmail.com>
+
+**cherif1981** — meddourcherif1981@gmail.com
 
 ## 📄 الترخيص
-هذا المشروع مرخص تحت MIT License.
+
+MIT License.
