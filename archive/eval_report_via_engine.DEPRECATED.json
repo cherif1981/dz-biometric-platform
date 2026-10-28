@@ -1,0 +1,28 @@
+{
+  "n_genuine": 150,
+  "n_impostor": 150,
+  "eer": 0.5,
+  "far_at_eer": 1.0,
+  "frr_at_eer": 0.0,
+  "threshold_at_eer": 0.0,
+  "roc_auc": 0.5,
+  "fnmr_at_fmr_0.01": {
+    "fnmr": 1.0,
+    "threshold": 0.0
+  },
+  "fnmr_at_fmr_0.001": {
+    "fnmr": 1.0,
+    "threshold": 0.0
+  },
+  "fnmr_at_fmr_0.0001": {
+    "fnmr": 1.0,
+    "threshold": 0.0
+  },
+  "_deprecated": {
+    "reason": "الأرقام مُلفَّقة: eval_scores.json يحتوي face_score=None في 300/300 سجل. المحرك القديم عوّض None بـ 0.5، فأنتج EER=0.5 و ROC-AUC=0.5 (خط العشوائية) و fnmr@fmr=1e-4=1.0 — كلها غير محسوبة من بيانات.",
+    "root_cause": "لم يُشغَّل النموذج على أي زوج وجه. eval_scores.json هيكل فارغ.",
+    "replaced_by": "eval_report.json (not_evaluated — الحالة الصحيحة)",
+    "date": "2026-10-28",
+    "action_required": "توليد eval_scores.json حقيقي عبر تشغيل النموذج على أزواج الصور. بدون ذلك، لا يوجد تقييم."
+  }
+}
