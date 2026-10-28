@@ -1,65 +1,83 @@
-# Security Policy — Face Anti-Spoofing
+# Security Model — dz-biometric-platform
 
-**Status: FORCE_REVIEW** | Last updated: 2026-10-28
+هذا المستند يعدد الضوابط الأمنية، كيف تُنفّذ، وكيف تُختبر. الضابط
+يُعتبر "مُثبتًا" فقط إذا نجح اختباره في `tests/test_security.py`.
 
-## Executive Summary
+## نموذج التهديد
+- **عميل خبيث**: يستطيع إرسال أي حمولة، إعادة استخدام جلسات، تزوير
+  درجات، تعديل إيصالات، أو استدعاء نقاط خارج الترتيب.
+- **نموذج PAD معطوب**: قد يرمي استثناءً أو يعيد درجة منخفضة.
+- **بنية تحتية مخترقة**: قاعدة التدقيق قد تصبح غير متاحة، أو قد
+  يصل مهاجم إلى الملف مباشرة.
+- **طلبات متزامنة**: قد يصل طلبان لجلسة واحدة في نفس اللحظة.
 
-No local anti-spoofing model achieves acceptable accuracy on production-like
-data. **All authentication requests MUST be routed to human review.**
+## الضوابط
 
-## Critical finding: README's 0.9753 AUC is NOT reproducible
+### 1. القرار على الخادم
+درجة الحيوية تُحسب في `run_pad`. لا يُقرأ `client_pad_score`. الإيصال
+موقّع HMAC على (`job_id`, `nonce`, `decision`, `score`).
 
-After exhaustive testing (3 preprocessing modes × 4 scoring formulas × 2 datasets,
-see `diagnostic_matrix.json`), the best achievable AUC on LFW is ~0.82. No
-combination reproduces 0.9753. Root cause: the original code passed [0,1] to a
-model trained on [0,255], collapsing all scores to ~0.55.
+اختبار: `test_forged_score_ignored`, `test_replay_rejected`.
 
-## Diagnostic matrix (2026-10-28)
+### 2. آلة حالات fail-closed
+الانتقالات صريحة؛ الانتقال غير المصرّح يرفع `StateErr`. الحالات
+الطرفية (`PAD_FAILED`, `ACCEPTED`, `REJECTED`, `TERMINATED`) نهائية.
 
-See `diagnostic_matrix.json` for full results. Summary:
+اختبار: `test_illegal_transition_blocked`.
 
-| preprocessing | scoring | LFW AUC | Kaggle AUC |
-|---|---|---|---|
-| [0,1] | any | ~0.55 ❌ | — |
-| [0,255] | 1-(p1+p2) | 0.789 | 0.64 |
-| [0,255] | logit_diff | 0.729 | 0.52 |
-| imagenet | 1-(p1+p2) | 0.820 | — |
-| imagenet | logit_diff | 0.815 | — |
+### 3. منع TOCTOU
+أول انتقال (`CHALLENGE_ISSUED → PAD_EVALUATING`) ذري عبر Redis
+`WATCH/MULTI`. الطلبات المتزامنة: واحد ينجح، الباقي 409.
 
-**Best reproducible**: 0.82 (imagenet + 1-(p1+p2))
-**README claim**: 0.9753 — **not reproducible**
+اختبار: `test_concurrent_submit_only_one_succeeds`.
 
-## Decision Policy
+### 4. التدقيق هو نقطة الالتزام
+`ACCEPTED` لا تُكتب في Redis قبل كتابة سجل التدقيق. إن فشل التدقيق:
+الجلسة `TERMINATED` والعميل يستلم 500 بدون إيصال. لا قرار بدون سجل.
 
-    POLICY = "FORCE_REVIEW"
-    # Every request → REVIEW. No ACCEPT. Human review mandatory.
+اختبار: `test_phantom_decision_prevented`.
 
-## Prohibited actions
+### 5. سلامة سلسلة التدقيق
+`row_hash = sha256(prev_hash || sha256(payload))`. أي تعديل يكسر
+السلسلة، و`verify_chain()` يحدد السطر المكسور.
 
-- Do NOT modify decision.py to allow ACCEPT without meeting promotion criteria
-- Do NOT use liveness = 1 - (p[1] + p[2]) as the only signal
-- Do NOT divide input by 255 (use [0,255])
-- Do NOT cite README's 0.9753 — it is not reproducible
+اختبار: `test_chain_detects_tampering`.
 
-## Promotion to VERIFIED requires ALL of
+### 6. التدقيق append-only
+SQLite: triggers تمنع `UPDATE`/`DELETE`. PostgreSQL: دور
+`audit_writer` بـ `INSERT` فقط.
 
-- ROC-AUC ≥ 0.95 on ≥500 real live + ≥500 real attacks
-- APCER @ BPCER=1% ≤ 5%
-- Cross-validated on data from actual deployment environment
-- Reproducible via `python -m evaluation.run_evaluation`
+اختبار: `test_audit_append_only_triggers`.
 
-## Reproducing evaluation
+### 7. تحديد معدل موزّع
+`slowapi` يستخدم Redis كـ `storage_uri`. بدون `REDIS_URL`،
+ينتقل إلى `memory://` — غير آمن لتعدد النسخ.
 
-    # Build manifest once
-    python -c "from evaluation.manifest import build_manifest; build_manifest('data/', 'data/manifest.csv')"
+اختبار: يدوي عبر نسختين — انظر `README`.
 
-    # Run evaluation (single command, single source of truth)
-    python -m evaluation.run_evaluation \
-        --model MiniFASNetV2.onnx \
-        --manifest data/manifest.csv \
-        --data-root data/ \
-        --output eval_report.json \
-        --score-mode logit_diff
+### 8. مراقبة مستمرة
+`monitor_runner.py` يستطلع `verify_chain()` كل `MONITOR_INTERVAL`.
+عند التلاعب: تنبيه (webhook + بريد) ثم exit 2 — يلتقطه systemd.
 
-The evaluation path imports `anti_spoof.preprocess` — it cannot diverge from
-production scoring.
+## قيود معروفة
+- **احتياطي HMAC_SECRET**: `dz_service.py` يستخدم `"dev-secret"` إن
+  لم يُضبط `HMAC_SECRET`. **ممنوع في الإنتاج.** استخدم مدير أسرار.
+- **لا انتهاء صلاحية للإيصال**: الإيصالات صالحة للأبد. أضف `exp`.
+- **429 من slowapi غير مسجل في التدقيق**: قرار متعمد (ليس قرارًا
+  بيومتريًا). في الإنتاج، سجّله في سجل أمني منفصل.
+
+## قائمة تحقق قبل الإنتاج
+- [ ] `HMAC_SECRET` من مدير أسرار، لا من الكود.
+- [ ] `REDIS_URL` بـ `rediss://` (TLS).
+- [ ] `AUDIT_DB_URL` PostgreSQL بدور `INSERT` فقط على `audit_logs`.
+- [ ] `AUDIT_DB_URL_RO` بدور `SELECT` فقط لـ `verify_chain()`.
+- [ ] `monitor_runner.py` تحت systemd بمستخدم `audit-mon`.
+- [ ] Cloudflare Access يحمي المسارات الإدارية.
+- [ ] `docs_url=None`, `openapi_url=None` في الإنتاج.
+- [ ] CORS origins صريحة، لا `["*"]`.
+- [ ] اختبار اختراق مستقل على staging.
+- [ ] سياسة احتفاظ/حذف موثقة ومطبقة.
+
+## الإبلاغ عن الثغرات
+استخدم GitHub Security Advisories، أو راسل
+meddourcherif1981@gmail.com. لا تفتح issue علنيًا.

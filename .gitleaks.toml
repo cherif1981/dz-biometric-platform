@@ -1,0 +1,17 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "قيم اختبارية ووثائقية معروفة — ليست أسرارًا"
+paths = [
+  '''tests/.*''',
+  '''fixtures/.*''',
+  '''docs/examples/.*''',
+]
+regexTarget = "match"
+regexes = [
+  '''AKIAIOSFODNN7EXAMPLE''',
+  '''dev-secret''',
+  '''test-secret''',
+  '''example\.com''',
+]

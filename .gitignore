@@ -1,75 +1,22 @@
 # Python
 __pycache__/
-*.py[cod]
-*.egg-info/
-.pytest_cache/
+*.pyc
+*.pyo
 .venv/
 venv/
-build/
-dist/
+.pytest_cache/
 
-# Data & Models
+# Databases (never commit)
 *.db
-*.sqlite
+*.db-wal
+*.db-shm
 *.sqlite3
-*.pth
-*.onnx
-data/*
-!data/.gitkeep
 
-# Environment
+# Secrets (never commit)
 .env
-.env.local
-
-# Logs
-*.log
-logs/*
-
-# IDE
-.vscode/
-.idea/
-*.swp
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Jupyter
-.ipynb_checkpoints/models/Silent-Face-Anti-Spoofing/
-models/Silent-Face-Anti-Spoofing/
-
-# P0 cleanup
-*.bak
-*.bak.*
-*pre_*
-*_old.*
-*.orig
-*~
-
-# --- Anti-spoofing model (needed in production) ---
-# Small (<2 MB) ONNX model required for real liveness detection.
-# If .gitignore excludes *.onnx or models/, the exceptions below re-include it.
-!models/MiniFASNetV2.onnx
-!models/MiniFASNetV2.onnx.sha256
-
+*.env
 secrets/
-*.key
-*.pem
-.env.*
-!.env.example
-.env
-.env.*
-!.env.example
-*.pem
-*.key
-*.p12
-MiniFASNetV2.onnx
-*.onnx
-test_cnibe.jpg
-*.tmp
-__pycache__/
-*.pyc
-data/
-reports/
-*.sqlite
-*.db
+
+# Colab
+/content/
+sample_data/
