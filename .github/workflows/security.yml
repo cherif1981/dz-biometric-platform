@@ -1,0 +1,67 @@
+name: Security & Integration
+on: [push, pull_request]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+
+      - name: Install deps
+        run: |
+          pip install onnxruntime opencv-python-headless numpy pytest \
+                      scikit-learn cryptography bandit safety \
+                      fakeredis python-dotenv
+
+      - name: Download model (for preprocessing tests)
+        run: |
+          wget -q -O MiniFASNetV2.onnx \
+            https://huggingface.co/danelcsb/face/resolve/main/minifasnet_v2.onnx
+
+      - name: Preprocessing regression
+        run: pytest tests/test_preprocessing.py -v
+
+      - name: Integration (auth flow)
+        run: pytest tests/test_auth_flow.py -v
+
+      - name: Evaluation consistency
+        run: pytest tests/test_evaluation_consistency.py -v || true
+
+      - name: Bandit (security scan)
+        run: |
+          bandit -r security/ anti_spoof/ evaluation/ \
+            -ll -f json -o bandit.json || true
+          python -c "
+          import json
+          d = json.load(open('bandit.json'))
+          high = [r for r in d.get('results',[]) if r['issue_severity']=='HIGH']
+          print(f'HIGH issues: {len(high)}')
+          exit(1 if high else 0)
+          "
+
+      - name: Secret scan
+        run: |
+          python -c "
+          import re, glob
+          pats = {
+              'aws': r'AKIA[0-9A-Z]{16}',
+              'ghp': r'ghp_[A-Za-z0-9]{36}',
+              'pem': r'-----BEGIN (RSA |EC )?PRIVATE KEY-----',
+          }
+          found = []
+          for p in glob.glob('**/*.py', recursive=True):
+              try: c = open(p, encoding='utf-8', errors='ignore').read()
+              except: continue
+              for n, pat in pats.items():
+                  if re.search(pat, c): found.append((p, n))
+          if found: print('SECRETS FOUND:', found); exit(1)
+          print('No hardcoded secrets')
+          "
+
+      - name: Verify .env not committed
+        run: |
+          if git ls-files | grep -E '^\.env$'; then
+            echo 'ERROR: .env is committed'; exit 1
+          fi

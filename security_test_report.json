@@ -1,0 +1,16 @@
+{
+  "controls": {
+    "Secrets: تحميل + رفض المفاتيح القصيرة": true,
+    "Audit: append-only trigger": true,
+    "Audit: hash chain": true,
+    "Audit: كشف التعديل اليدوي": true,
+    "Rate limit: يعمل (Lua أو fallback)": true,
+    "Storage: تشفير Fernet": true,
+    "Storage: الحذف الآمن": true,
+    "Storage: كشف التلاعب بالملف": true,
+    "Storage: TTL sweep": true,
+    "Gitignore يحمي .env": true
+  },
+  "ratelimit_path": "fallback",
+  "all_pass": true
+}
