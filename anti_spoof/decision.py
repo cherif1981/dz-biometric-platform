@@ -41,3 +41,24 @@ def decide(liveness, status):
     if status == ModelStatus.HEURISTIC or POLICY == "FORCE_REVIEW":
         return Decision.REVIEW
     return Decision.REVIEW
+
+
+from .sanity import sanity_check
+from .blink import detect_blink
+
+
+def decide_multimodal(frames, pad_score, pad_status):
+    """قرار متعدد الطبقات: sanity + PAD + رمشة."""
+    if not frames:
+        return Decision.REVIEW, "no_frames"
+    ok, reason = sanity_check(frames[0])
+    if not ok:
+        return Decision.REJECT, f"sanity:{reason}"
+    if pad_score is None or pad_status == ModelStatus.UNAVAILABLE:
+        return Decision.REVIEW, "pad_unavailable"
+    blinked, _ = detect_blink(frames)
+    if not blinked:
+        return Decision.REJECT, "no_blink_static_attack"
+    if pad_score >= 0.85 and pad_status == ModelStatus.VERIFIED:
+        return Decision.ACCEPT, "all_layers_passed"
+    return Decision.REVIEW, f"pad_borderline:{pad_score:.3f}"

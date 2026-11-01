@@ -20,7 +20,7 @@ YUNET_URL = "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection
 YUNET_PATH = "/content/models/face_detection_yunet_2023mar.onnx"
 INPUT_SIZE = (80, 80)
 SCALE = 2.7
-REAL_CLASS_INDEX = 2
+REAL_CLASS_INDEX = 1
 
 # ── عتبات القرار (اضبطها حسب بياناتك) ──
 # ما بينهما => مراجعة يدوية
@@ -196,7 +196,7 @@ class AntiSpoofingService:
         except Exception as e:
             return self._result(0.0, "REJECT", f"crop failed: {e}", self.detector.name)
 
-        face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
+        face = face.astype(np.float32)  # BGR, [0,255]
         face = np.expand_dims(np.transpose(face, (2, 0, 1)), 0)
 
         # ── الاستدلال ──
