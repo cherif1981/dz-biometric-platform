@@ -11,11 +11,12 @@
   3) فشل/غياب معيار غير حرج        → MANUAL_REVIEW
   4) كل المعايير الحرجة PASS        → ACCEPT
 """
+
 from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Optional
 
@@ -44,6 +45,7 @@ class CriterionThreshold:
     review_factor : بديل نسبي؛ إن كانت review=None فـ review = accept * review_factor
     critical      : هل فشل المعيار يوجب الرفض مباشرة (بدل المراجعة)
     """
+
     name: str
     accept: float
     review: Optional[float] = None
@@ -69,34 +71,60 @@ class CriterionThreshold:
 @dataclass(frozen=True)
 class DecisionThresholds:
     face_similarity: CriterionThreshold = field(
-        default_factory=lambda: CriterionThreshold("face_similarity", 0.75, review_factor=0.9, critical=True))
+        default_factory=lambda: CriterionThreshold(
+            "face_similarity", 0.75, review_factor=0.9, critical=True
+        )
+    )
     liveness: CriterionThreshold = field(
-        default_factory=lambda: CriterionThreshold("liveness", 0.80, review_factor=0.85, critical=True))
+        default_factory=lambda: CriterionThreshold(
+            "liveness", 0.80, review_factor=0.85, critical=True
+        )
+    )
     antispoof: CriterionThreshold = field(
-        default_factory=lambda: CriterionThreshold("antispoof", 0.80, review_factor=0.85, critical=True))
+        default_factory=lambda: CriterionThreshold(
+            "antispoof", 0.80, review_factor=0.85, critical=True
+        )
+    )
     ocr_confidence: CriterionThreshold = field(
-        default_factory=lambda: CriterionThreshold("ocr_confidence", 0.70, review_factor=0.75, critical=False))
+        default_factory=lambda: CriterionThreshold(
+            "ocr_confidence", 0.70, review_factor=0.75, critical=False
+        )
+    )
 
     def to_dict(self) -> dict:
-        return {n: asdict(getattr(self, n)) for n in
-                ("face_similarity", "liveness", "antispoof", "ocr_confidence")}
+        return {
+            n: asdict(getattr(self, n))
+            for n in ("face_similarity", "liveness", "antispoof", "ocr_confidence")
+        }
 
     @classmethod
     def from_settings(cls, settings=None) -> "DecisionThresholds":
         g = lambda k, d: getattr(settings, k, d) if settings is not None else d
         return cls(
             face_similarity=CriterionThreshold(
-                "face_similarity", g("FACE_THRESHOLD", 0.75),
-                review_factor=g("FACE_REVIEW_FACTOR", 0.9), critical=True),
+                "face_similarity",
+                g("FACE_THRESHOLD", 0.75),
+                review_factor=g("FACE_REVIEW_FACTOR", 0.9),
+                critical=True,
+            ),
             liveness=CriterionThreshold(
-                "liveness", g("LIVENESS_THRESHOLD", 0.80),
-                review_factor=g("LIVENESS_REVIEW_FACTOR", 0.85), critical=True),
+                "liveness",
+                g("LIVENESS_THRESHOLD", 0.80),
+                review_factor=g("LIVENESS_REVIEW_FACTOR", 0.85),
+                critical=True,
+            ),
             antispoof=CriterionThreshold(
-                "antispoof", g("ANTISPOOF_THRESHOLD", 0.80),
-                review_factor=g("ANTISPOOF_REVIEW_FACTOR", 0.85), critical=True),
+                "antispoof",
+                g("ANTISPOOF_THRESHOLD", 0.80),
+                review_factor=g("ANTISPOOF_REVIEW_FACTOR", 0.85),
+                critical=True,
+            ),
             ocr_confidence=CriterionThreshold(
-                "ocr_confidence", g("OCR_THRESHOLD", 0.70),
-                review_factor=g("OCR_REVIEW_FACTOR", 0.75), critical=False),
+                "ocr_confidence",
+                g("OCR_THRESHOLD", 0.70),
+                review_factor=g("OCR_REVIEW_FACTOR", 0.75),
+                critical=False,
+            ),
         )
 
 
@@ -128,10 +156,15 @@ class DecisionResult:
             "thresholds_snapshot": self.thresholds_snapshot,
             "scores_raw": self.scores_raw,
             "criteria": [
-                {"name": c.name, "score": c.score, "status": c.status.value,
-                 "accept_threshold": c.accept_threshold,
-                 "review_threshold": c.review_threshold,
-                 "critical": c.critical, "error": c.error}
+                {
+                    "name": c.name,
+                    "score": c.score,
+                    "status": c.status.value,
+                    "accept_threshold": c.accept_threshold,
+                    "review_threshold": c.review_threshold,
+                    "critical": c.critical,
+                    "error": c.error,
+                }
                 for c in self.criteria
             ],
         }
@@ -155,7 +188,11 @@ class UnifiedDecisionEngine:
             raw = scores.get(name)
             if raw is None:
                 status = CriterionStatus.FAIL if t.critical else CriterionStatus.REVIEW
-                criteria.append(CriterionResult(name, None, status, t.accept, t.review, t.critical, "missing_score"))
+                criteria.append(
+                    CriterionResult(
+                        name, None, status, t.accept, t.review, t.critical, "missing_score"
+                    )
+                )
                 if t.critical:
                     has_critical_fail = True
                     reasons.append(f"{name}:missing_critical")
@@ -187,16 +224,21 @@ class UnifiedDecisionEngine:
             decision = Decision.ACCEPT
 
         result = DecisionResult(
-            decision=decision, reasons=reasons or ["all_criteria_passed"],
-            criteria=criteria, policy_version=POLICY_VERSION,
+            decision=decision,
+            reasons=reasons or ["all_criteria_passed"],
+            criteria=criteria,
+            policy_version=POLICY_VERSION,
             thresholds_snapshot=self.thresholds.to_dict(),
             scores_raw=dict(scores),
         )
 
         logger.info(
             "decision=%s request_id=%s policy_version=%s thresholds=%s scores=%s reasons=%s",
-            decision.value, request_id, POLICY_VERSION,
+            decision.value,
+            request_id,
+            POLICY_VERSION,
             json.dumps(result.thresholds_snapshot, ensure_ascii=False),
-            json.dumps(result.scores_raw, ensure_ascii=False), result.reasons,
+            json.dumps(result.scores_raw, ensure_ascii=False),
+            result.reasons,
         )
         return result

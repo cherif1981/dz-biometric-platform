@@ -146,7 +146,11 @@ class VerificationEngine:
                     reasons.append(f"FIELD:{k}")
 
         _risk_result = self.risk_engine.compute(scores)
-        conf = 1.0 - (_risk_result.score if (_risk_result is not None and hasattr(_risk_result, 'score')) else 0.0)
+        conf = 1.0 - (
+            _risk_result.score
+            if (_risk_result is not None and hasattr(_risk_result, "score"))
+            else 0.0
+        )
 
         if not reasons:
             st = VerificationStatus.VERIFIED
@@ -198,9 +202,11 @@ class VerificationEngine:
                 },
             )()
             try:
-                r.ai_report = self.report_builder.build(decision_result=dr, signals=scores).to_dict()
+                r.ai_report = self.report_builder.build(
+                    decision_result=dr, signals=scores
+                ).to_dict()
             except Exception:
-                r.ai_report = None   # التقرير الداخلي غير حرج — تجاهل الفشل بصمت
+                r.ai_report = None  # التقرير الداخلي غير حرج — تجاهل الفشل بصمت
         except Exception as _e:
             r.ai_report = {"error": str(_e)}
             logger.warning(f"report_builder failed: {_e}")

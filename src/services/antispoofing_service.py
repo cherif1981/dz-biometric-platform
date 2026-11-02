@@ -129,10 +129,12 @@ def _verify_model_integrity(model_path: str) -> None:
 
 from enum import Enum
 
+
 class PADState(str, Enum):
-    VERIFIED    = "VERIFIED"
-    HEURISTIC   = "HEURISTIC"
+    VERIFIED = "VERIFIED"
+    HEURISTIC = "HEURISTIC"
     UNAVAILABLE = "UNAVAILABLE"
+
 
 class AntiSpoofingService:
     def __init__(
@@ -147,9 +149,9 @@ class AntiSpoofingService:
                 threshold_reject = t.antispoofing_reject
             if threshold_accept is None:
                 threshold_accept = t.antispoofing_accept
-        assert 0 < threshold_reject < threshold_accept < 1, (
-            f"يجب أن يكون 0 < reject < accept < 1 (حصلنا {threshold_reject}, {threshold_accept})"
-        )
+        assert (
+            0 < threshold_reject < threshold_accept < 1
+        ), f"يجب أن يكون 0 < reject < accept < 1 (حصلنا {threshold_reject}, {threshold_accept})"
         self.threshold_reject = float(threshold_reject)
         self.threshold_accept = float(threshold_accept)
         _download(MODEL_URLS[0], MODEL_PATH, 100_000)

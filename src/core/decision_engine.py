@@ -5,22 +5,27 @@
 - str/Path: مسار ملف YAML
 - None: عتبات افتراضية
 """
+
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Optional, Union
 
 from .decision_policy import (
-    UnifiedDecisionEngine, DecisionThresholds, DecisionResult,
-    Decision, CriterionStatus,
+    CriterionStatus,
+    Decision,
+    DecisionResult,
+    DecisionThresholds,
+    UnifiedDecisionEngine,
 )
 
 __all__ = ["DecisionEngine", "DecisionResult", "Decision", "CriterionStatus"]
 
 
 class DecisionEngine:
-    def __init__(self, thresholds: Union[dict, str, Path, None] = None,
-                 strict_critical: bool = True):
+    def __init__(
+        self, thresholds: Union[dict, str, Path, None] = None, strict_critical: bool = True
+    ):
         t = DecisionThresholds.from_settings(None)
 
         if thresholds is not None:
@@ -30,6 +35,7 @@ class DecisionEngine:
                 if path.exists():
                     try:
                         import yaml
+
                         with open(path, encoding="utf-8") as f:
                             data = yaml.safe_load(f) or {}
                         thresholds = self._flatten_yaml(data)
@@ -49,16 +55,15 @@ class DecisionEngine:
                         continue
                     try:
                         fields[name] = type(base)(
-                            name=base.name, accept=float(v),
+                            name=base.name,
+                            accept=float(v),
                             review_factor=getattr(base, "review_factor", 0.9),
                             critical=base.critical,
                         )
                     except (TypeError, ValueError):
                         continue
                 valid = ("face_similarity", "liveness", "antispoof", "ocr_confidence")
-                t = DecisionThresholds(
-                    **{**{k: getattr(t, k) for k in valid}, **fields}
-                )
+                t = DecisionThresholds(**{**{k: getattr(t, k) for k in valid}, **fields})
 
         self.thresholds = t
         self._engine = UnifiedDecisionEngine(t, strict_critical=strict_critical)

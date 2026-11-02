@@ -1,9 +1,12 @@
 """Face verification via insightface (buffalo_l)."""
+
 from __future__ import annotations
+
 import logging
 from typing import Optional
-import numpy as np
+
 import cv2
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +18,7 @@ class FaceVerificationService:
 
     def __init__(self, model_name: str = "buffalo_l", det_thresh: float = 0.5):
         from insightface.app import FaceAnalysis
+
         self.modality = "face_similarity"
         self.det_thresh = det_thresh
         self._app = FaceAnalysis(name=model_name, providers=["CPUExecutionProvider"])
@@ -39,8 +43,9 @@ class FaceVerificationService:
                     break
         if not faces:
             return None
-        faces = sorted(faces, key=lambda f: (f.bbox[2] - f.bbox[0]) * (f.bbox[3] - f.bbox[1]),
-                       reverse=True)
+        faces = sorted(
+            faces, key=lambda f: (f.bbox[2] - f.bbox[0]) * (f.bbox[3] - f.bbox[1]), reverse=True
+        )
         return faces[0].normed_embedding
 
     @staticmethod
@@ -67,8 +72,8 @@ class FaceVerificationService:
                 "detection_failed": True,
             }
 
-        cos = float(np.dot(e1, e2))                         # in [-1, 1]
-        score = float(np.clip((cos + 1.0) / 2.0, 0.0, 1.0)) # → [0, 1]
+        cos = float(np.dot(e1, e2))  # in [-1, 1]
+        score = float(np.clip((cos + 1.0) / 2.0, 0.0, 1.0))  # → [0, 1]
         # ارجع كل المفاتيح المحتملة لضمان التوافق مع أي مستدعٍ
         return {
             "face_similarity": score,

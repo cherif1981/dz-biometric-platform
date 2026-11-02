@@ -1,12 +1,17 @@
 """AI decision engine — backward compatible, auto-loads YAML thresholds."""
+
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Optional
 
 from ...core.decision_policy import (
-    UnifiedDecisionEngine, DecisionThresholds, CriterionThreshold,
-    DecisionResult, Decision, CriterionStatus,
+    CriterionStatus,
+    CriterionThreshold,
+    Decision,
+    DecisionResult,
+    DecisionThresholds,
+    UnifiedDecisionEngine,
 )
 
 __all__ = ["AIDecisionEngine", "DecisionEngine", "DecisionResult", "Decision", "CriterionStatus"]
@@ -19,6 +24,7 @@ def _load_yaml_thresholds(path: str) -> Optional[dict]:
         return None
     try:
         import yaml
+
         data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
     except Exception:
         return None
@@ -55,13 +61,15 @@ class AIDecisionEngine:
 
         # 2) طبّق قيم YAML على العتبات (إن وُجدت)
         if yaml_data:
+
             def _from_yaml(name, yaml_key, fallback):
                 val = yaml_data.get(yaml_key)
                 if val is None:
                     return fallback
                 try:
                     return CriterionThreshold(
-                        name=name, accept=float(val),
+                        name=name,
+                        accept=float(val),
                         review_factor=getattr(fallback, "review_factor", 0.9),
                         critical=fallback.critical,
                     )
@@ -69,10 +77,15 @@ class AIDecisionEngine:
                     return fallback
 
             base = DecisionThresholds(
-                face_similarity=_from_yaml("face_similarity", "face_similarity", base.face_similarity),
+                face_similarity=_from_yaml(
+                    "face_similarity", "face_similarity", base.face_similarity
+                ),
                 liveness=_from_yaml("liveness", "liveness", base.liveness),
-                antispoof=_from_yaml("antispoof", "antispoofing",
-                                     _from_yaml("antispoof", "antispoofing_accept", base.antispoof)),
+                antispoof=_from_yaml(
+                    "antispoof",
+                    "antispoofing",
+                    _from_yaml("antispoof", "antispoofing_accept", base.antispoof),
+                ),
                 ocr_confidence=_from_yaml("ocr_confidence", "ocr_confidence", base.ocr_confidence),
             )
 
@@ -88,7 +101,8 @@ class AIDecisionEngine:
                 return fallback
             try:
                 return CriterionThreshold(
-                    name=name, accept=float(accept),
+                    name=name,
+                    accept=float(accept),
                     review_factor=getattr(fallback, "review_factor", 0.9),
                     critical=fallback.critical,
                 )
