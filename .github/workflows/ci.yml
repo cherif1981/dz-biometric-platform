@@ -51,8 +51,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libgl1 libglib2.0-0
 
-      - name: Install OpenCV (version stable épinglée)
-        run: pip install "opencv-python-headless==4.6.0.66"
+      - name: Uninstall conflicting OpenCV packages
+        run: |
+          pip uninstall -y opencv-python opencv-python-headless opencv-contrib-python opencv-contrib-python-headless || true
+
+      - name: Install OpenCV contrib (CascadeClassifier)
+        run: pip install "opencv-contrib-python-headless==4.6.0.66"
+
+      - name: Verify CascadeClassifier
+        run: python -c "import cv2; assert hasattr(cv2, 'CascadeClassifier'), 'CascadeClassifier still missing'; print('CascadeClassifier OK')"
 
       - name: Install deps
         run: |
