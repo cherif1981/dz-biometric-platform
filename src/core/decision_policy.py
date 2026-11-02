@@ -99,7 +99,8 @@ class DecisionThresholds:
 
     @classmethod
     def from_settings(cls, settings=None) -> "DecisionThresholds":
-        g = lambda k, d: getattr(settings, k, d) if settings is not None else d
+        def g(k, d):
+            return getattr(settings, k, d) if settings is not None else d
         return cls(
             face_similarity=CriterionThreshold(
                 "face_similarity",
