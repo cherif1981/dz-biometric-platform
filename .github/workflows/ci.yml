@@ -51,9 +51,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libgl1 libglib2.0-0
 
-      - name: Uninstall conflicting OpenCV packages
-        run: |
-          pip uninstall -y opencv-python opencv-python-headless opencv-contrib-python opencv-contrib-python-headless || true
 
       - name: Install OpenCV contrib (CascadeClassifier)
         run: pip install "opencv-contrib-python-headless==4.6.0.66"
@@ -61,59 +58,63 @@ jobs:
       - name: Verify CascadeClassifier
         run: python -c "import cv2; assert hasattr(cv2, 'CascadeClassifier'), 'CascadeClassifier still missing'; print('CascadeClassifier OK')"
 
-      - name: Purge all OpenCV variants
-        run: |
-          pip uninstall -y opencv-python opencv-python-headless opencv-contrib-python opencv-contrib-python-headless || true
-          pip cache purge || true
 
       - name: Install OpenCV contrib (with CascadeClassifier)
         run: pip install --no-cache-dir "opencv-contrib-python-headless==4.6.0.66"
 
-      - name: Verify CascadeClassifier (fail fast)
-        run: |
-          python - <<'PY'
-          import cv2, sys
-          print("cv2 version:", cv2.__version__)
-          print("cv2 file:", cv2.__file__)
-          if not hasattr(cv2, "CascadeClassifier"):
-              print("ERROR: CascadeClassifier missing", file=sys.stderr)
-              sys.exit(1)
-          # اختبر تحميل cascade فعلي
-          path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-          clf = cv2.CascadeClassifier(path)
-          if clf.empty():
-              print("ERROR: cascade file empty", file=sys.stderr)
-              sys.exit(1)
-          print("CascadeClassifier OK")
-          PY
 
       - name: Purge any OpenCV variant (avoid cv2 shadowing)
         run: |
           pip uninstall -y opencv-python opencv-python-headless opencv-contrib-python opencv-contrib-python-headless || true
           pip cache purge || true
 
-      - name: Install OpenCV (modern, cp311 wheel, numpy 2.x compatible)
-        run: |
-          pip install --no-cache-dir "opencv-contrib-python-headless>=4.10.0,<5" "numpy>=1.26,<3"
 
-      - name: Verify CascadeClassifier + haarcascades
-        run: |
-          python - <<'PY'
-          import sys, cv2
-          print("cv2 version:", cv2.__version__)
-          print("cv2 file:", cv2.__file__)
-          assert hasattr(cv2, "CascadeClassifier"), "CascadeClassifier missing"
-          path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-          clf = cv2.CascadeClassifier(path)
-          assert not clf.empty(), f"cascade empty: {path}"
-          print("OK: CascadeClassifier + haarcascades working")
-          PY
 
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pytest pytest-asyncio httpx pyyaml loguru onnxruntime numpy opencv-contrib-python-headless==4.6.0.66
+
+      - name: Purge all OpenCV variants (before requirements)
+        run: |
+          pip uninstall -y opencv-python opencv-python-headless opencv-contrib-python opencv-contrib-python-headless || true
+          pip cache purge || true
+
+      - name: Install OpenCV AFTER requirements (wins conflicts)
+        run: |
+          pip install --no-cache-dir "opencv-contrib-python-headless>=4.10,<5" "numpy>=1.26,<3"
+
+      - name: DEBUG — what is cv2 really?
+        run: |
+          echo "=== pip list (opencv/numpy) ==="
+          pip list | grep -Ei "opencv|numpy" || true
+          echo
+          echo "=== files named cv2 in repo (shadowing check) ==="
+          find . -name "cv2.py" -o -name "cv2" -type d 2>/dev/null | grep -v "/\." || echo "none"
+          echo
+          echo "=== import cv2 ==="
+          python -c "import cv2; print('version:', cv2.__version__); print('file:', cv2.__file__)"
+          echo
+          echo "=== CascadeClassifier present? ==="
+          python -c "import cv2; print('has CascadeClassifier:', hasattr(cv2, 'CascadeClassifier'))"
+          echo
+          echo "=== first 20 public attrs of cv2 ==="
+          python -c "import cv2; print(sorted([a for a in dir(cv2) if not a.startswith('_')])[:20])"
+          echo
+          echo "=== haarcascades path ==="
+          python -c "import cv2; print('haarcascades:', cv2.data.haarcascades)"
+
+      - name: Verify CascadeClassifier (strict)
+        run: |
+          python - <<'PY'
+          import sys, cv2
+          assert hasattr(cv2, "CascadeClassifier"), "CascadeClassifier missing"
+          path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+          clf = cv2.CascadeClassifier(path)
+          assert not clf.empty(), f"cascade empty: {path}"
+          print("OK: CascadeClassifier + haarcascades working")
+          PY
 
       - name: Verify TestClient import
         run: python -c "from fastapi.testclient import TestClient; print('TestClient OK')"
