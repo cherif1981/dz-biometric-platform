@@ -1,3 +1,13 @@
+# SECURITY NOTE (2026-11):
+# FORCE_REVIEW is the policy default. Do NOT lower it based on synthetic
+# attacks (blur/noise) — they underestimate the true attack surface.
+# APCER/BPCER must be measured on real presentation attacks per
+# ISO/IEC 30107-3 before relaxing this policy.
+#
+# STATUS: this module (decide_multimodal + sanity + blink) is NOT called
+# from the main verification path (src/services/antispoofing_service.py).
+# It exists as a parallel implementation. Wiring it in should be a
+# separate PR, and must fail-closed on any missing/errored signal.
 """Safe decision gate - FORCE_REVIEW.
 
 No local model achieves AUC >= 0.85 on real attack data.
