@@ -24,6 +24,7 @@ SCALE = 2.7
 # No hardcoded default: if the config is missing or malformed, we refuse to start.
 def _load_real_class_index() -> int:
     import pathlib
+
     import yaml
     yaml_p = pathlib.Path("/content/dz-biometric-platform/config/security.yaml")
     if not yaml_p.exists():
@@ -119,6 +120,7 @@ def _verify_model_integrity(model_path: str) -> None:
     """
     import hashlib
     import pathlib
+
     import yaml
 
     yaml_p = pathlib.Path("/content/dz-biometric-platform/config/security.yaml")
@@ -148,6 +150,7 @@ def _verify_model_integrity(model_path: str) -> None:
         )
 
 from enum import Enum
+
 
 class PADState(str, Enum):
     VERIFIED    = "VERIFIED"

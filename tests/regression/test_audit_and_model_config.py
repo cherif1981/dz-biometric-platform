@@ -1,5 +1,6 @@
 """Regression tests for audit fail-closed and model config integrity."""
 import os
+
 import pytest
 
 
