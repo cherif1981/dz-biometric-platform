@@ -122,3 +122,13 @@ def test_liveness_guard_behavior():
         def check(self): return {"spoof": True, "score": 0.1, "error": None}
     make(Fake3, False, True)
     assert Fake3().check()["decision"] == "REJECT"
+
+
+def test_decision_policy_gated_on_model_verified():
+    """POLICY must not become TWO_THRESHOLD unless MODEL_VERIFIED=true."""
+    path = "anti_spoof/decision.py"
+    if not os.path.exists(path):
+        pytest.skip(f"{path} not present")
+    src = open(path, encoding="utf-8").read()
+    assert "MODEL_VERIFIED" in src, "decision.py missing MODEL_VERIFIED gate"
+    assert "or not MODEL_VERIFIED" in src, "POLICY not gated on MODEL_VERIFIED"
