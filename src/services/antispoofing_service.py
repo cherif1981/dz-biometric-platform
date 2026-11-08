@@ -15,7 +15,20 @@ except Exception:
 MODEL_URLS = [
     "https://github.com/yakhyo/face-anti-spoofing/releases/download/weights/MiniFASNetV2.onnx",
 ]
-MODEL_PATH = "/content/models/MiniFASNetV2.onnx"
+# Portable model path: env var > Colab default > cwd fallback.
+# This lets CI and local tests point to a model wherever it's convenient.
+def _resolve_model_path() -> str:
+    import os as _os
+    env = _os.environ.get("MODEL_PATH")
+    if env:
+        return env
+    colab = "/content/models/MiniFASNetV2.onnx"
+    if _os.path.isdir(_os.path.dirname(colab)):
+        return colab
+    return _os.path.abspath("MiniFASNetV2.onnx")
+
+
+MODEL_PATH = _resolve_model_path()
 YUNET_URL = "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx"
 YUNET_PATH = "/content/models/face_detection_yunet_2023mar.onnx"
 INPUT_SIZE = (80, 80)

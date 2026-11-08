@@ -1,10 +1,30 @@
+import os
+
 """Regression guard against reintroducing the [0,1] bug."""
 import numpy as np
-import pytest
 import onnxruntime as ort
+import pytest
 
-from anti_spoof.preprocess import preprocess, liveness_from_output, LIVE_INDEX
-from anti_spoof.decision import decide, ModelStatus, Decision
+from anti_spoof.decision import Decision, ModelStatus, decide
+from anti_spoof.preprocess import LIVE_INDEX, liveness_from_output, preprocess
+
+# ── Model availability guard ──
+# Some CI workflows (ci.yml, tests.yml) do not download the ONNX model.
+# Skip ONNX-dependent tests rather than fail collection with a confusing
+# NoSuchFile from onnxruntime.
+_MODEL_PATH_CANDIDATES = [
+    os.environ.get("MODEL_PATH"),
+    "/content/models/MiniFASNetV2.onnx",
+    "MiniFASNetV2.onnx",
+]
+_MODEL_AVAILABLE = any(p and os.path.exists(p) for p in _MODEL_PATH_CANDIDATES)
+
+skipif_no_model = pytest.mark.skipif(
+    not _MODEL_AVAILABLE,
+    reason="ONNX model MiniFASNetV2.onnx unavailable "
+           "(set MODEL_PATH or download it; security.yml does download it)",
+)
+
 
 MODEL = "MiniFASNetV2.onnx"
 
@@ -19,10 +39,12 @@ def _score(s, im):
     return liveness_from_output(out)
 
 
+@skipif_no_model
 def test_black_rejected(session):
     assert _score(session, np.zeros((200, 200, 3), np.uint8)) < 0.1
 
 
+@skipif_no_model
 def test_white_not_accepted(session):
     assert _score(session, np.full((200, 200, 3), 255, np.uint8)) < 0.5
 
