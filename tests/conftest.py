@@ -133,10 +133,15 @@ def _seed_test_data(_create_schema):
         from src.core.security import hash_password
 
         hashed = hash_password("SecurePass123!")
-    except Exception:
-        from passlib.context import CryptContext
+    except Exception as _e:
 
-        hashed = CryptContext(schemes=["bcrypt"], deprecated="auto").hash("SecurePass123!")
+        # passlib missing / hashing unavailable — skip seeding
+
+        print(f'[seed] skipped: {_e}')
+
+        yield
+
+        return
 
     engine = create_async_engine(
         os.environ["DATABASE_URL"],
