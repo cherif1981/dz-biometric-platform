@@ -20,7 +20,24 @@ YUNET_URL = "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection
 YUNET_PATH = "/content/models/face_detection_yunet_2023mar.onnx"
 INPUT_SIZE = (80, 80)
 SCALE = 2.7
-REAL_CLASS_INDEX = 1
+# real_class_index is loaded from config/security.yaml (single source of truth).
+# No hardcoded default: if the config is missing or malformed, we refuse to start.
+def _load_real_class_index() -> int:
+    import pathlib
+
+    import yaml
+    yaml_p = pathlib.Path("/content/dz-biometric-platform/config/security.yaml")
+    if not yaml_p.exists():
+        raise RuntimeError(
+            "security.yaml missing: cannot determine real_class_index; refusing to start"
+        )
+    cfg = yaml.safe_load(yaml_p.read_text(encoding="utf-8")) or {}
+    idx = (cfg.get("antispoofing", {}).get("model", {}) or {}).get("real_class_index")
+    if idx is None:
+        raise RuntimeError(
+            "real_class_index missing in security.yaml; refusing to start"
+        )
+    return int(idx)
 
 # ── عتبات القرار (اضبطها حسب بياناتك) ──
 # ما بينهما => مراجعة يدوية
@@ -97,25 +114,31 @@ class YuNetDetector:
 
 
 def _verify_model_integrity(model_path: str) -> None:
-    """
-    يتحقق من SHA256 النموذج ضد القيمة في security.yaml.
-    يرفض التشغيل إن كان الملف قد تلاعب به أحد.
+    """يتحقق من SHA256 النموذج ضد القيمة في security.yaml.
+
+    Fail-closed: if security.yaml is missing or sha256 is empty, refuse to load.
     """
     import hashlib
     import pathlib
 
-    expected = None
-    yaml_p = pathlib.Path("/content/dz-biometric-platform/config/security.yaml")
-    if yaml_p.exists():
-        try:
-            import yaml
+    import yaml
 
-            cfg = yaml.safe_load(yaml_p.read_text(encoding="utf-8")) or {}
-            expected = (cfg.get("antispoofing", {}).get("model", {}).get("sha256") or "").strip()
-        except Exception:
-            pass
+    yaml_p = pathlib.Path("/content/dz-biometric-platform/config/security.yaml")
+    if not yaml_p.exists():
+        raise RuntimeError(
+            "security.yaml missing: cannot verify model integrity; refusing to load model"
+        )
+    try:
+        cfg = yaml.safe_load(yaml_p.read_text(encoding="utf-8")) or {}
+    except Exception as e:
+        raise RuntimeError(f"security.yaml unreadable: {e}") from e
+
+    expected = (cfg.get("antispoofing", {}).get("model", {}).get("sha256") or "").strip()
     if not expected:
-        return  # لا تحقق مُهيَّأ
+        raise RuntimeError(
+            "sha256 missing in security.yaml: cannot verify model integrity; refusing to load model"
+        )
+
     h = hashlib.sha256()
     with open(model_path, "rb") as f:
         for chunk in iter(lambda: f.read(1 << 20), b""):
@@ -123,11 +146,11 @@ def _verify_model_integrity(model_path: str) -> None:
     actual = h.hexdigest()
     if actual != expected:
         raise RuntimeError(
-            f"❌ تلاعب بنموذج مكافحة الانتحال! متوقع: {expected[:16]}..., حصلنا: {actual[:16]}..."
+            f"تلاعب بنموذج مكافحة الانتحال! متوقع: {expected[:16]}..., حصلنا: {actual[:16]}..."
         )
 
-
 from enum import Enum
+
 
 class PADState(str, Enum):
     VERIFIED    = "VERIFIED"
@@ -154,6 +177,7 @@ class AntiSpoofingService:
         self.threshold_accept = float(threshold_accept)
         _download(MODEL_URLS[0], MODEL_PATH, 100_000)
         _verify_model_integrity(MODEL_PATH)
+        self.real_class_index = _load_real_class_index()
         self.session = ort.InferenceSession(MODEL_PATH, providers=["CPUExecutionProvider"])
         self.state = PADState.VERIFIED if self.session is not None else PADState.HEURISTIC
         self.input_name = self.session.get_inputs()[0].name
@@ -206,7 +230,7 @@ class AntiSpoofingService:
             return self._result(0.0, "REJECT", f"inference failed: {e}", self.detector.name)
 
         probs = _softmax(logits)
-        real_score = float(probs[REAL_CLASS_INDEX])
+        real_score = float(probs[self.real_class_index])
         decision = self._decide(real_score)
 
         # ── بناء النتيجة ──

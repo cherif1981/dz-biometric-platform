@@ -17,6 +17,14 @@ class VerificationStatus(str, Enum):
     MANUAL_REVIEW = "MANUAL_REVIEW"
 
 
+class AuditUnavailableError(RuntimeError):
+    """Raised when the audit DB cannot persist a decision.
+
+    Per SECURITY.md: no decision may be issued without a durable audit record.
+    """
+    pass
+
+
 @dataclass
 class VerificationResult:
     status: VerificationStatus
@@ -183,7 +191,8 @@ class VerificationEngine:
                 AuditRecord(None, time.time(), st.value, conf, fs, ls, asc, ocr, reasons, ip)
             )
         except Exception as e:
-            logger.warning(f"audit: {e}")
+            logger.error(f"audit: {e}")
+            raise AuditUnavailableError(f"AUDIT_FAILED:{e}") from e
 
         # Phase 4: build unified AI report
         try:
