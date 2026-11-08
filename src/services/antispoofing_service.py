@@ -7,6 +7,11 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 
+# -- Security policy: do not weaken without documented scientific validation --
+FORCE_REVIEW = os.getenv('FORCE_REVIEW', 'true').lower() == 'true'
+MODEL_VERIFIED = os.getenv('MODEL_VERIFIED', 'false').lower() == 'true'
+
+
 try:
     from src.services import metrics as _metrics
 except Exception:
@@ -235,3 +240,25 @@ class AntiSpoofingService:
 # توافق خلفي: الكود القديم (verification_service.py) يستورد AntiSpoofing
 # ═══════════════════════════════════════════════════════════════════
 AntiSpoofing = AntiSpoofingService
+
+
+# -- Safety net: enforce FORCE_REVIEW on AntiSpoofingService public methods --
+def _install_antispoof_guard(cls):
+    import functools
+    for name in list(vars(cls).keys()):
+        if name.startswith("_"):
+            continue
+        attr = getattr(cls, name)
+        if not callable(attr):
+            continue
+        @functools.wraps(attr)
+        def wrapper(self, *a, __orig=attr, **kw):
+            r = __orig(self, *a, **kw)
+            if isinstance(r, dict) and r.get("decision") == "ACCEPT" \
+                    and (FORCE_REVIEW or not MODEL_VERIFIED):
+                r = {**r, "decision": "FORCE_REVIEW"}
+            return r
+        setattr(cls, name, wrapper)
+
+_install_antispoof_guard(AntiSpoofingService)
+print("[guard] installed on AntiSpoofingService public methods")
