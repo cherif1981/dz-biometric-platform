@@ -1,13 +1,49 @@
 """كاشف رمشة — OpenCV Haar (يعمل على Python 3.13، بلا MediaPipe)."""
 import cv2
 
-_face = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+_face = None
+
+_face_lock = __import__("threading").Lock()
+
+
+
+def _get_face_classifier():
+
+    """Lazy init: avoids failing at import time if cv2 lacks CascadeClassifier."""
+
+    global _face
+
+    if _get_face_classifier() is not None:
+
+        return _get_face_classifier()
+
+    with _face_lock:
+
+        if _get_face_classifier() is None:
+
+            if not hasattr(cv2, "CascadeClassifier"):
+
+                raise RuntimeError(
+
+                    "cv2.CascadeClassifier missing — install opencv-python-headless "
+
+                    "with objdetect support (or opencv-contrib-python)"
+
+                )
+
+            _face = cv2.CascadeClassifier(
+
+                cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+
+            )
+
+    return _get_face_classifier()
 _eye = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_eye.xml")
 
 
 def _eyes_in_frame(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = _face.detectMultiScale(gray, 1.1, 5, minSize=(80, 80))
+    faces = _get_face_classifier().detectMultiScale(gray, 1.1, 5, minSize=(80, 80))
     if len(faces) == 0:
         return 0
     x, y, w, h = max(faces, key=lambda f: f[2] * f[3])
