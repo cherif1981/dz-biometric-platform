@@ -1,5 +1,5 @@
 """Adapter to unify anti-spoofing service outputs."""
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 def normalize_antispoof_result(raw: Any) -> Dict[str, Any]:

@@ -5,14 +5,14 @@ Replaces the placeholder that returned fixed values.
 Security principle: absence of face or model failure MUST NOT be treated as success.
 """
 
+# -- Security policy: do not weaken without documented scientific validation --
+import os as _os
 from typing import Dict, Optional
 
 import cv2
 import numpy as np
 import onnxruntime as ort
 
-# -- Security policy: do not weaken without documented scientific validation --
-import os as _os
 FORCE_REVIEW = _os.getenv('FORCE_REVIEW', 'true').lower() == 'true'
 MODEL_VERIFIED = _os.getenv('MODEL_VERIFIED', 'false').lower() == 'true'
 

@@ -134,6 +134,7 @@ def _verify_model_integrity(model_path: str) -> None:
 
 from enum import Enum
 
+
 class PADState(str, Enum):
     VERIFIED    = "VERIFIED"
     LOADED      = "LOADED"

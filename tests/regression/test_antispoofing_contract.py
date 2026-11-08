@@ -1,6 +1,7 @@
 """Regression tests for anti-spoofing security contracts."""
 import os
 import re
+
 import pytest
 
 

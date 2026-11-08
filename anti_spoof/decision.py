@@ -3,10 +3,10 @@
 No local model achieves AUC >= 0.85 on real attack data.
 All HEURISTIC decisions go to REVIEW. Never ACCEPT.
 """
-from enum import Enum
-
 # -- Security policy: never bypass FORCE_REVIEW unless model is scientifically verified --
 import os as _os
+from enum import Enum
+
 MODEL_VERIFIED = _os.getenv('MODEL_VERIFIED', 'false').lower() == 'true'
 
 
@@ -48,8 +48,8 @@ def decide(liveness, status):
     return Decision.REVIEW
 
 
-from .sanity import sanity_check
 from .blink import detect_blink
+from .sanity import sanity_check
 
 
 def decide_multimodal(frames, pad_score, pad_status):
