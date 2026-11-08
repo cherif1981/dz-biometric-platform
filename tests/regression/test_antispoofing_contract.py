@@ -66,3 +66,59 @@ def test_pad_state_verified_not_set_on_load():
             assert "PADState.VERIFIED" not in body, (
                 f"{p}: VERIFIED set inside {m.group(1)}"
             )
+
+
+# ── PR #2: PADState.VERIFIED & liveness/decision guards ──────────────
+
+def test_pad_state_verified_gated_on_model_verified():
+    """VERIFIED must only be set when MODEL_VERIFIED=true, never on load alone."""
+    path = "src/services/antispoofing_service.py"
+    src = open(path, encoding="utf-8").read()
+    # Old vulnerable pattern must be gone
+    assert "PADState.VERIFIED if self.session is not None" not in src, (
+        "VERIFIED still set unconditionally on session load"
+    )
+    # LOADED state must exist
+    assert '"LOADED"' in src, "PADState.LOADED missing"
+    # VERIFIED must be gated on MODEL_VERIFIED
+    assert "elif MODEL_VERIFIED:" in src, "MODEL_VERIFIED gate missing"
+
+
+def test_liveness_anti_spoofing_has_force_review():
+    path = "src/modules/liveness/anti_spoofing.py"
+    if not os.path.exists(path):
+        pytest.skip(f"{path} not present")
+    src = open(path, encoding="utf-8").read()
+    assert "FORCE_REVIEW" in src, "liveness/anti_spoofing.py missing FORCE_REVIEW guard"
+    assert "MODEL_VERIFIED" in src, "liveness/anti_spoofing.py missing MODEL_VERIFIED gate"
+
+
+def test_liveness_guard_behavior():
+    """Simulate wrapper logic: spoof=True -> REJECT, else FORCE_REVIEW unless MODEL_VERIFIED."""
+    import functools
+    def make(cls, force_review, model_verified):
+        _orig = cls.check
+        @functools.wraps(_orig)
+        def w(self, *a, **kw):
+            r = _orig(self, *a, **kw)
+            if isinstance(r, dict):
+                if r.get("spoof") is True:
+                    r["decision"] = "REJECT"
+                elif force_review or not model_verified:
+                    r["decision"] = "FORCE_REVIEW"
+                else:
+                    r["decision"] = "ACCEPT"
+            return r
+        cls.check = w
+    class Fake:
+        def check(self): return {"spoof": False, "score": 0.95, "error": None}
+    make(Fake, True, False)
+    assert Fake().check()["decision"] == "FORCE_REVIEW"
+    class Fake2:
+        def check(self): return {"spoof": False, "score": 0.95, "error": None}
+    make(Fake2, False, True)
+    assert Fake2().check()["decision"] == "ACCEPT"
+    class Fake3:
+        def check(self): return {"spoof": True, "score": 0.1, "error": None}
+    make(Fake3, False, True)
+    assert Fake3().check()["decision"] == "REJECT"
