@@ -1,5 +1,9 @@
 # tests/conftest.py — نسخة نظيفة كاملة
-import os, pathlib, tempfile, sys, asyncio
+import asyncio
+import os
+import pathlib
+import sys
+import tempfile
 
 # ═══════════════════════════════════════════════════════════════════
 # 1) اضبط DATABASE_URL قبل أي استيراد من src
@@ -19,10 +23,20 @@ _REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-import pytest
 import urllib.request
+
 import cv2
 import numpy as np
+import pytest
+
+
+def _has_sqlalchemy() -> bool:
+    try:
+        import sqlalchemy  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -30,6 +44,9 @@ import numpy as np
 # ═══════════════════════════════════════════════════════════════════
 @pytest.fixture(scope="session", autouse=True)
 def _create_schema():
+    if not _has_sqlalchemy():
+        yield
+        return
     from sqlalchemy.ext.asyncio import create_async_engine
     from sqlalchemy.pool import StaticPool
 
@@ -80,8 +97,12 @@ def _create_schema():
 # ═══════════════════════════════════════════════════════════════════
 @pytest.fixture(scope="session", autouse=True)
 def _seed_test_data(_create_schema):
-    from sqlalchemy import select, inspect as sa_inspect
-    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+    if not _has_sqlalchemy():
+        yield
+        return
+    from sqlalchemy import inspect as sa_inspect
+    from sqlalchemy import select
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
     from sqlalchemy.pool import StaticPool
 
     User = None
@@ -204,6 +225,7 @@ def antispoof_service():
 @pytest.fixture(scope="function")
 def client():
     from fastapi.testclient import TestClient
+
     from src.main import app
 
     with TestClient(app) as c:
