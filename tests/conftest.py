@@ -226,9 +226,10 @@ def real_face_bytes() -> bytes:
     return p.read_bytes()
 
 
-@requires_cv2
 @pytest.fixture(scope="session")
 def blank_image_bytes() -> bytes:
+    if not (_HAS_CV2 and _HAS_NUMPY):
+        pytest.skip('opencv-python-headless and numpy are required')
     img = np.full((300, 300, 3), 200, dtype=np.uint8)
     ok, buf = cv2.imencode(".jpg", img)
     assert ok
