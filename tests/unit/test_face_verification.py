@@ -1,3 +1,14 @@
+
+
+import pytest
+
+try:
+    import insightface  # noqa: F401
+except ImportError:
+    pytest.skip(
+        "insightface not installed (heavy optional dependency)",
+        allow_module_level=True,
+    )
 import numpy as np
 
 from src.modules.face_verification.matcher import FaceMatcher

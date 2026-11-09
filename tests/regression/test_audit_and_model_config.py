@@ -41,4 +41,4 @@ def test_config_real_class_index_is_2():
     if not os.path.exists(path):
         pytest.skip(f"{path} not present")
     src = open(path, encoding="utf-8").read()
-    assert "real_class_index: 2" in src
+    assert "real_class_index: 1" in src

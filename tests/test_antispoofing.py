@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from src.core.thresholds import get_thresholds, reset_cache
@@ -6,8 +7,8 @@ from src.services.antispoofing_service import AntiSpoofingService
 
 def test_real_face_is_accepted_or_reviewed(antispoof_service, real_face_bytes):
     r = antispoof_service.check(real_face_bytes)
-    assert r["decision"] in ("ACCEPT", "REVIEW"), f"face rejected: {r}"
-    assert r["is_live"] == (r["decision"] == "ACCEPT")
+    assert r["decision"] in ("ACCEPT", "REVIEW", "FORCE_REVIEW"), f"face rejected: {r}"
+    assert r["is_live"] == (r["decision"] in ("ACCEPT", "FORCE_REVIEW"))
     assert 0.0 <= r["antispoofing_score"] <= 1.0
 
 
@@ -46,7 +47,10 @@ def test_three_decision_bands_are_consistent(antispoof_service, real_face_bytes)
     if score < THRESHOLD_REJECT:
         expected = "REJECT"
     elif score >= THRESHOLD_ACCEPT:
-        expected = "ACCEPT"
+        # After PR #1, FORCE_REVIEW policy overrides ACCEPT for unverified models
+        force_review = os.environ.get("FORCE_REVIEW", "true").lower() == "true"
+        model_verified = os.environ.get("MODEL_VERIFIED", "false").lower() == "true"
+        expected = "ACCEPT" if (model_verified and not force_review) else "FORCE_REVIEW"
     else:
         expected = "REVIEW"
     assert antispoof_service.check(real_face_bytes)["decision"] == expected
