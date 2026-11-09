@@ -25,9 +25,31 @@ if str(_REPO_ROOT) not in sys.path:
 
 import urllib.request
 
-import cv2
-import numpy as np
 import pytest
+
+try:
+    import numpy as np
+    _HAS_NUMPY = True
+except ImportError:
+    np = None
+    _HAS_NUMPY = False
+
+try:
+    import cv2
+    _HAS_CV2 = True
+except ImportError:
+    cv2 = None
+    _HAS_CV2 = False
+
+requires_cv2 = pytest.mark.skipif(
+    not (_HAS_CV2 and _HAS_NUMPY),
+    reason="opencv-python-headless and numpy are required",
+)
+
+requires_numpy = pytest.mark.skipif(
+    not _HAS_NUMPY,
+    reason="numpy is required",
+)
 
 
 def _has_sqlalchemy() -> bool:
@@ -204,6 +226,7 @@ def real_face_bytes() -> bytes:
     return p.read_bytes()
 
 
+@requires_cv2
 @pytest.fixture(scope="session")
 def blank_image_bytes() -> bytes:
     img = np.full((300, 300, 3), 200, dtype=np.uint8)
