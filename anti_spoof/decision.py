@@ -3,7 +3,12 @@
 No local model achieves AUC >= 0.85 on real attack data.
 All HEURISTIC decisions go to REVIEW. Never ACCEPT.
 """
+# -- Security policy: never bypass FORCE_REVIEW unless model is scientifically verified --
+import os as _os
 from enum import Enum
+
+MODEL_VERIFIED = _os.getenv('MODEL_VERIFIED', 'false').lower() == 'true'
+
 
 
 class ModelStatus(str, Enum):
@@ -31,7 +36,7 @@ MODEL_EVALUATIONS = {
 }
 MIN_ACCEPTABLE_AUC = 0.85
 BEST_AUC = max(MODEL_EVALUATIONS.values())
-POLICY = "FORCE_REVIEW" if BEST_AUC < MIN_ACCEPTABLE_AUC else "TWO_THRESHOLD"
+POLICY = ("FORCE_REVIEW" if (BEST_AUC < MIN_ACCEPTABLE_AUC or not MODEL_VERIFIED) else "TWO_THRESHOLD")
 
 
 def decide(liveness, status):
@@ -43,8 +48,8 @@ def decide(liveness, status):
     return Decision.REVIEW
 
 
-from .sanity import sanity_check
 from .blink import detect_blink
+from .sanity import sanity_check
 
 
 def decide_multimodal(frames, pad_score, pad_status):

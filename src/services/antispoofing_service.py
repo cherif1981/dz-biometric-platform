@@ -7,6 +7,11 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 
+# -- Security policy: do not weaken without documented scientific validation --
+FORCE_REVIEW = os.getenv('FORCE_REVIEW', 'true').lower() == 'true'
+MODEL_VERIFIED = os.getenv('MODEL_VERIFIED', 'false').lower() == 'true'
+
+
 try:
     from src.services import metrics as _metrics
 except Exception:
@@ -167,6 +172,7 @@ from enum import Enum
 
 class PADState(str, Enum):
     VERIFIED    = "VERIFIED"
+    LOADED      = "LOADED"
     HEURISTIC   = "HEURISTIC"
     UNAVAILABLE = "UNAVAILABLE"
 
@@ -192,7 +198,12 @@ class AntiSpoofingService:
         _verify_model_integrity(MODEL_PATH)
         self.real_class_index = _load_real_class_index()
         self.session = ort.InferenceSession(MODEL_PATH, providers=["CPUExecutionProvider"])
-        self.state = PADState.VERIFIED if self.session is not None else PADState.HEURISTIC
+        if self.session is None:
+            self.state = PADState.HEURISTIC
+        elif MODEL_VERIFIED:
+            self.state = PADState.VERIFIED
+        else:
+            self.state = PADState.LOADED
         self.input_name = self.session.get_inputs()[0].name
         self.detector = YuNetDetector()
         print(
@@ -272,3 +283,25 @@ class AntiSpoofingService:
 # توافق خلفي: الكود القديم (verification_service.py) يستورد AntiSpoofing
 # ═══════════════════════════════════════════════════════════════════
 AntiSpoofing = AntiSpoofingService
+
+
+# -- Safety net: enforce FORCE_REVIEW on AntiSpoofingService public methods --
+def _install_antispoof_guard(cls):
+    import functools
+    for name in list(vars(cls).keys()):
+        if name.startswith("_"):
+            continue
+        attr = getattr(cls, name)
+        if not callable(attr):
+            continue
+        @functools.wraps(attr)
+        def wrapper(self, *a, __orig=attr, **kw):
+            r = __orig(self, *a, **kw)
+            if isinstance(r, dict) and r.get("decision") == "ACCEPT" \
+                    and (FORCE_REVIEW or not MODEL_VERIFIED):
+                r = {**r, "decision": "FORCE_REVIEW"}
+            return r
+        setattr(cls, name, wrapper)
+
+_install_antispoof_guard(AntiSpoofingService)
+print("[guard] installed on AntiSpoofingService public methods")

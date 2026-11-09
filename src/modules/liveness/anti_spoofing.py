@@ -5,11 +5,17 @@ Replaces the placeholder that returned fixed values.
 Security principle: absence of face or model failure MUST NOT be treated as success.
 """
 
+# -- Security policy: do not weaken without documented scientific validation --
+import os as _os
 from typing import Dict, Optional
 
 import cv2
 import numpy as np
 import onnxruntime as ort
+
+FORCE_REVIEW = _os.getenv('FORCE_REVIEW', 'true').lower() == 'true'
+MODEL_VERIFIED = _os.getenv('MODEL_VERIFIED', 'false').lower() == 'true'
+
 
 
 class AntiSpoofing:
@@ -88,3 +94,28 @@ class AntiSpoofing:
         real_prob = float(probs[0, 1])
         is_spoof = real_prob < self.threshold
         return {"spoof": is_spoof, "score": real_prob, "error": None}
+
+
+# -- Safety net: force FORCE_REVIEW on AntiSpoofing.check output --
+def _install_liveness_guard(cls):
+    import functools
+    _orig = getattr(cls, "check", None)
+    if _orig is None:
+        return
+    @functools.wraps(_orig)
+    def wrapper(self, *a, **kw):
+        r = _orig(self, *a, **kw)
+        if not isinstance(r, dict):
+            return r
+        spoof = r.get("spoof")
+        if spoof is True:
+            r["decision"] = "REJECT"
+        elif FORCE_REVIEW or not MODEL_VERIFIED:
+            r["decision"] = "FORCE_REVIEW"
+        else:
+            r["decision"] = "ACCEPT"
+        return r
+    cls.check = wrapper
+    print("[guard] installed on AntiSpoofing.check")
+
+_install_liveness_guard(AntiSpoofing)
