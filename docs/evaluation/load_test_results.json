@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-11-10T15:50:27.091543+00:00",
+  "target": "mock_kyc_backend",
+  "note": "Synthetic backend \u2014 validates harness, NOT production performance",
+  "scenarios": {
+    "smoke": {
+      "users": 10,
+      "rps": 2.1,
+      "p50": 2200,
+      "p95": 3700,
+      "p99": 4000,
+      "failures": 0
+    },
+    "baseline": {
+      "users": 50,
+      "rps": 9.0,
+      "p50": 2200,
+      "p95": 3900,
+      "p99": 4000,
+      "failures": 0
+    },
+    "target_load": {
+      "users": 100,
+      "rps": 18.0,
+      "p50": 2200,
+      "p95": 3800,
+      "p99": 4000,
+      "failures": 0
+    }
+  },
+  "slo": {
+    "p95_max_ms": 8000,
+    "error_rate_max": 0.005
+  },
+  "verdict": "harness_validated",
+  "next": "repeat on staging with real models"
+}

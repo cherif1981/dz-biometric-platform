@@ -23,3 +23,18 @@ sample_data/
 
 # ONNX models (downloaded at runtime by CI workflows)
 *.onnx
+
+# Generated test data
+tests/data/
+_backup_*/
+
+# Phase 5 additions
+.ipynb_checkpoints/
+*.pt
+*.pth
+.vscode/
+.idea/
+.coverage
+htmlcov/
+.dvc/cache/
+.dvc/tmp/
