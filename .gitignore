@@ -23,3 +23,17 @@ sample_data/
 
 # ONNX models (downloaded at runtime by CI workflows)
 *.onnx
+
+# Colab / local backup artifacts
+_backup_*/
+.ipynb_checkpoints/
+# Models & data
+MiniFASNetV2.onnx
+*.pt
+*.pth
+# IDE
+.vscode/
+.idea/
+# Test / coverage
+.coverage
+htmlcov/

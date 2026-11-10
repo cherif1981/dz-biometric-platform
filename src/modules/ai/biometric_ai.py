@@ -231,7 +231,7 @@ class BiometricAI:
             score = float(external_result.get("score", 0.0))
             return AntiSpoofResult(
                 score=score,
-                is_live=score >= 0.50,
+                is_live=_derive_is_live_from_decision(score),
                 method=external_result.get("method", "external"),
                 details=external_result,
             )
@@ -270,7 +270,7 @@ class BiometricAI:
 
         return AntiSpoofResult(
             score=score,
-            is_live=score >= 0.50,
+            is_live=_derive_is_live_from_decision(score),
             method="heuristic_v1",
             details={
                 "moire": round(moire_score, 4),

@@ -25,20 +25,20 @@ MODE = "redis" if REDIS_URL else "fakeredis"
 limiter = Limiter(key_func=get_remote_address,
                   storage_uri=REDIS_URL or "memory://", default_limits=[])
 
-class PADState(str, Enum):
+class JobState(str, Enum):
     INITIATED="INITIATED"; CHALLENGE_ISSUED="CHALLENGE_ISSUED"
     PAD_EVALUATING="PAD_EVALUATING"; PAD_PASSED="PAD_PASSED"
     PAD_FAILED="PAD_FAILED"; MATCHING="MATCHING"
     ACCEPTED="ACCEPTED"; REJECTED="REJECTED"; TERMINATED="TERMINATED"
 
 TRANSITIONS = {
-    PADState.INITIATED:        {PADState.CHALLENGE_ISSUED, PADState.TERMINATED},
-    PADState.CHALLENGE_ISSUED: {PADState.PAD_EVALUATING,   PADState.TERMINATED},
-    PADState.PAD_EVALUATING:   {PADState.PAD_PASSED, PADState.PAD_FAILED, PADState.TERMINATED},
-    PADState.PAD_PASSED:       {PADState.MATCHING, PADState.TERMINATED},
-    PADState.MATCHING:         {PADState.ACCEPTED, PADState.REJECTED, PADState.TERMINATED},
-    PADState.PAD_FAILED: set(), PADState.ACCEPTED: set(),
-    PADState.REJECTED:   set(), PADState.TERMINATED: set(),
+    JobState.INITIATED:        {JobState.CHALLENGE_ISSUED, JobState.TERMINATED},
+    JobState.CHALLENGE_ISSUED: {JobState.PAD_EVALUATING,   JobState.TERMINATED},
+    JobState.PAD_EVALUATING:   {JobState.PAD_PASSED, JobState.PAD_FAILED, JobState.TERMINATED},
+    JobState.PAD_PASSED:       {JobState.MATCHING, JobState.TERMINATED},
+    JobState.MATCHING:         {JobState.ACCEPTED, JobState.REJECTED, JobState.TERMINATED},
+    JobState.PAD_FAILED: set(), JobState.ACCEPTED: set(),
+    JobState.REJECTED:   set(), JobState.TERMINATED: set(),
 }
 class StateErr(Exception): pass
 
@@ -52,16 +52,16 @@ def _audit(event_type, **kw):
         raise HTTPException(500, f"audit failure: {e}")
 
 class Session:
-    def __init__(self, j, n):
-        self.job_id=j; self.nonce=n; self.state=PADState.INITIATED
+    def __init__(self, job_id, nonce):
+        self.job_id=job_id; self.nonce=nonce; self.state=JobState.INITIATED
         self.pad_score=None; self.receipt=None
     def transition(self, new):
         if new not in TRANSITIONS.get(self.state, set()):
             raise StateErr(f"{self.state.value}->{new.value}")
         old = self.state; self.state = new; return old
     def is_terminal(self):
-        return self.state in {PADState.PAD_FAILED, PADState.ACCEPTED,
-                              PADState.REJECTED, PADState.TERMINATED}
+        return self.state in {JobState.PAD_FAILED, JobState.ACCEPTED,
+                              JobState.REJECTED, JobState.TERMINATED}
 
 def save(s):
     R.set(f"sess:{s.job_id}", json.dumps({
@@ -126,7 +126,7 @@ def info():
 @limiter.limit(RATE_LIMIT)
 def challenge(request: Request):
     s = Session(str(uuid.uuid4()), str(uuid.uuid4()))
-    s.transition(PADState.CHALLENGE_ISSUED); save(s)
+    s.transition(JobState.CHALLENGE_ISSUED); save(s)
     _audit("CHALLENGE_ISSUED", job_id=s.job_id, nonce=s.nonce,
            metadata={"ip": request.client.host if request.client else None})
     return {"job_id":s.job_id,"nonce":s.nonce}
@@ -148,7 +148,7 @@ def submit(req: SubmitReq):
 
     # نقطة الالتزام بالتزامن: انتقال ذري (TOCTOU-safe)
     result, current = atomic_transition(
-        req.job_id, PADState.CHALLENGE_ISSUED.value, PADState.PAD_EVALUATING.value)
+        req.job_id, JobState.CHALLENGE_ISSUED.value, JobState.PAD_EVALUATING.value)
     if result == "not_found":
         raise HTTPException(404, "unknown job")
     if result == "state_mismatch":
@@ -166,14 +166,14 @@ def submit(req: SubmitReq):
 
     try: score = run_pad(req.image_b64.encode(), req.failure_mode)
     except Exception as e:
-        s.transition(PADState.TERMINATED); save(s)
+        s.transition(JobState.TERMINATED); save(s)
         _audit("PAD_ERROR", job_id=s.job_id, nonce=s.nonce,
                metadata={"error": str(e)})
         raise HTTPException(503, str(e))
 
     s.pad_score = score
     if score < PAD_THRESHOLD:
-        s.transition(PADState.PAD_FAILED); save(s)
+        s.transition(JobState.PAD_FAILED); save(s)
         _audit("PAD_FAILED", job_id=s.job_id, nonce=s.nonce,
                pad_score=score, decision="REJECTED",
                metadata={"threshold": PAD_THRESHOLD})
@@ -189,15 +189,15 @@ def submit(req: SubmitReq):
                            decision="ACCEPTED", pad_score=score,
                            receipt_hash=receipt_hash)
     except Exception as e:
-        s.state = PADState.TERMINATED
+        s.state = JobState.TERMINATED
         try: save(s)
         except: pass
         raise HTTPException(500, f"audit failure at commit point: {e}")
 
-    s.transition(PADState.PAD_PASSED)
-    s.transition(PADState.MATCHING)
+    s.transition(JobState.PAD_PASSED)
+    s.transition(JobState.MATCHING)
     s.receipt = receipt
-    s.transition(PADState.ACCEPTED)
+    s.transition(JobState.ACCEPTED)
     save(s)
     return {"decision": s.state.value, "receipt": s.receipt}
 
@@ -210,3 +210,9 @@ def verify_receipt(req: RecReq):
            metadata={"valid": ok})
     if not ok: raise HTTPException(401, "invalid")
     return {"valid": True}
+
+
+# Backwards-compat alias: external callers (tests)
+# still use the old name.  New code MUST use JobState —
+# the model-level PADState lives in anti_spoof.decision.
+PADState = JobState  # noqa: N816

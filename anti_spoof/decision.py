@@ -11,7 +11,7 @@ MODEL_VERIFIED = _os.getenv('MODEL_VERIFIED', 'false').lower() == 'true'
 
 
 
-class ModelStatus(str, Enum):
+class PADState(str, Enum):
     VERIFIED = "VERIFIED"
     HEURISTIC = "HEURISTIC"
     UNAVAILABLE = "UNAVAILABLE"
@@ -41,9 +41,9 @@ POLICY = ("FORCE_REVIEW" if (BEST_AUC < MIN_ACCEPTABLE_AUC or not MODEL_VERIFIED
 
 def decide(liveness, status):
     """Every request goes to REVIEW until a model achieves AUC >= 0.85."""
-    if liveness is None or status == ModelStatus.UNAVAILABLE:
+    if liveness is None or status == PADState.UNAVAILABLE:
         return Decision.REVIEW
-    if status == ModelStatus.HEURISTIC or POLICY == "FORCE_REVIEW":
+    if status == PADState.HEURISTIC or POLICY == "FORCE_REVIEW":
         return Decision.REVIEW
     return Decision.REVIEW
 
@@ -59,11 +59,18 @@ def decide_multimodal(frames, pad_score, pad_status):
     ok, reason = sanity_check(frames[0])
     if not ok:
         return Decision.REJECT, f"sanity:{reason}"
-    if pad_score is None or pad_status == ModelStatus.UNAVAILABLE:
+    if pad_score is None or pad_status == PADState.UNAVAILABLE:
         return Decision.REVIEW, "pad_unavailable"
     blinked, _ = detect_blink(frames)
     if not blinked:
         return Decision.REJECT, "no_blink_static_attack"
-    if pad_score >= 0.85 and pad_status == ModelStatus.VERIFIED:
+    # FORCE_REVIEW policy MUST gate every path to ACCEPT — no exceptions.
+    if POLICY == "FORCE_REVIEW":
+        return Decision.REVIEW, f"policy_force_review:pad={pad_score:.3f}"
+    if pad_score >= 0.85 and pad_status == PADState.VERIFIED:
         return Decision.ACCEPT, "all_layers_passed"
     return Decision.REVIEW, f"pad_borderline:{pad_score:.3f}"
+
+
+# Backwards-compatible alias
+ModelStatus = PADState
