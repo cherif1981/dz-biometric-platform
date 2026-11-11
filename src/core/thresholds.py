@@ -35,6 +35,20 @@ _ENV_OVERRIDES = {
 
 
 class Thresholds:
+    # PAD thresholds لم تعد تُقرأ من هنا. مصدرها الوحيد: الإثبات الموقّع.
+    _PAD_FORBIDDEN = frozenset({
+        "antispoofing", "antispoofing_accept", "antispoofing_reject",
+    })
+
+    def __getattribute__(self, name):
+        if name in Thresholds._PAD_FORBIDDEN:
+            raise RuntimeError(
+                f"Thresholds.{name} is no longer supported. "
+                f"PAD threshold comes from src.pad.service.get_pad_service()"
+                f".evaluate(...).threshold. See SECURITY.md."
+            )
+        return object.__getattribute__(self, name)
+
     def __init__(self, data: Dict):
         missing = [k for k in _REQUIRED if k not in data]
         if missing:
@@ -49,24 +63,9 @@ class Thresholds:
 
         self.face_similarity = float(data["face_similarity"])
         self.liveness = float(data["liveness"])
-        self.antispoofing = float(data["antispoofing"])
-        self.antispoofing_reject = float(data["antispoofing_reject"])
-        self.antispoofing_accept = float(data["antispoofing_accept"])
         self.ocr_confidence = float(data["ocr_confidence"])
 
         # Cross-validation: three-way policy must satisfy reject < accept
-        if not (self.antispoofing_reject < self.antispoofing_accept):
-            raise ValueError(
-                f"antispoofing thresholds invalid: must satisfy "
-                f"reject < accept, got reject={self.antispoofing_reject}, "
-                f"accept={self.antispoofing_accept}"
-            )
-
-    def as_dict(self) -> Dict[str, float]:
-        return {k: getattr(self, k) for k in _REQUIRED}
-
-    def __repr__(self) -> str:
-        return f"Thresholds({self.as_dict()})"
 
 
 @lru_cache(maxsize=1)
