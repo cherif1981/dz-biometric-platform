@@ -1,0 +1,83 @@
+{
+  "date": "2026-11-11",
+  "model": "MiniFASNetV2",
+  "model_path": "anti_spoof/models/MiniFASNetV2.onnx",
+  "test_set": "SFAS demo samples (4 files, 2 real + 2 attack; _result variants are not independent)",
+  "samples": {
+    "real": [
+      {
+        "file": "image_T1.jpg",
+        "liveness": 0.997,
+        "dist": [
+          0.0,
+          0.997,
+          0.003
+        ]
+      },
+      {
+        "file": "image_T1_result.jpg",
+        "liveness": 0.9917,
+        "dist": [
+          0.0,
+          0.992,
+          0.008
+        ]
+      }
+    ],
+    "attack": [
+      {
+        "file": "image_F1.jpg",
+        "liveness": 0.5381,
+        "dist": [
+          0.064,
+          0.538,
+          0.398
+        ]
+      },
+      {
+        "file": "image_F1_result.jpg",
+        "liveness": 0.7708,
+        "dist": [
+          0.024,
+          0.771,
+          0.205
+        ]
+      },
+      {
+        "file": "image_F2.jpg",
+        "liveness": 0.9936,
+        "dist": [
+          0.0,
+          0.994,
+          0.006
+        ]
+      },
+      {
+        "file": "image_F2_result.jpg",
+        "liveness": 0.9831,
+        "dist": [
+          0.0,
+          0.983,
+          0.017
+        ]
+      }
+    ]
+  },
+  "summary": {
+    "real_mean": 0.9944,
+    "real_std": 0.0027,
+    "attack_mean": 0.8214,
+    "attack_std": 0.1862,
+    "gap": 0.173,
+    "overlap": true,
+    "overlap_evidence": "min(real)=0.9917 < max(attack)=0.9936",
+    "best_achievable_acer": 0.125,
+    "best_threshold_t": 0.983,
+    "apcer_at_best": 0.25,
+    "bpcer_at_best": 0.0
+  },
+  "verdict": "DEGENERATE",
+  "decision": "REPLACE_MODEL",
+  "action": "PADState remains FORCE_REVIEW. Auto-accept stays disabled. Collect diverse attack data (print, replay_phone, replay_laptop) and prepare DeepPixBiS replacement.",
+  "cross_reference": "Consistent with evaluation/eval_pad_msu_mfsd.json (near-identical scores on real and attack)."
+}
