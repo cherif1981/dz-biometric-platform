@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "kind": "pad_evaluation_failure_record",
+  "date": "2026-11-11",
+  "model": {
+    "file": "MiniFASNetV2.onnx",
+    "sha256": null
+  },
+  "evaluation": {
+    "report_path": "evaluation/diagnostics/pad_diagnosis_2026-11-11.json",
+    "report_sha256": "9e9f24a8d926e9ca9ac222ef0261eadece813ab62b9563b431519a13e8d89001",
+    "apcer": 0.25,
+    "bpcer": 0.0,
+    "acer": 0.125,
+    "max_apcer": 0.05,
+    "gate": "FAILED",
+    "reason": "score overlap between real and attack; no threshold separates classes",
+    "overlap_evidence": "min(real)=0.9917 < max(attack)=0.9936"
+  },
+  "consequence": {
+    "attestation_issued": false,
+    "pad_state_expected": "LOADED",
+    "auto_accept": "DISABLED"
+  },
+  "next_action": "Collect diverse attack data (print, replay_phone, replay_laptop) and re-evaluate. Do not issue attestation until APCER<=0.05 and BPCER<=0.01 on a separate eval set."
+}
