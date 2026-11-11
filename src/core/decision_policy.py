@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Optional
 
@@ -83,7 +83,8 @@ class DecisionThresholds:
 
     @classmethod
     def from_settings(cls, settings=None) -> "DecisionThresholds":
-        g = lambda k, d: getattr(settings, k, d) if settings is not None else d
+        def g(k, d):
+            return getattr(settings, k, d) if settings is not None else d
         return cls(
             face_similarity=CriterionThreshold(
                 "face_similarity", g("FACE_THRESHOLD", 0.75),

@@ -1,86 +1,48 @@
-"""واجهة توافق: تفوّض القرار إلى UnifiedDecisionEngine.
-
-يقبل:
-- dict: {name: threshold} أو {name: {'accept': ...}}
-- str/Path: مسار ملف YAML
-- None: عتبات افتراضية
-"""
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Optional, Union
+from dataclasses import dataclass
 
-from .decision_policy import (
-    UnifiedDecisionEngine, DecisionThresholds, DecisionResult,
-    Decision, CriterionStatus,
-)
+from src.pad.contract import Decision as PADDecision
+from src.pad.contract import PADInput, PADResult
+from src.pad.service import get_pad_service
 
-__all__ = ["DecisionEngine", "DecisionResult", "Decision", "CriterionStatus"]
+
+@dataclass
+class DecisionResult:
+    decision: PADDecision
+    pad: PADResult
+    reasons: tuple[str, ...]
 
 
 class DecisionEngine:
-    def __init__(self, thresholds: Union[dict, str, Path, None] = None,
-                 strict_critical: bool = True):
-        t = DecisionThresholds.from_settings(None)
+    """منسّق القرار. لا يحسب PAD — يستقبله من src.pad.service."""
 
-        if thresholds is not None:
-            # مسار YAML → حمّله وأسطحه
-            if isinstance(thresholds, (str, Path)):
-                path = Path(thresholds)
-                if path.exists():
-                    try:
-                        import yaml
-                        with open(path, encoding="utf-8") as f:
-                            data = yaml.safe_load(f) or {}
-                        thresholds = self._flatten_yaml(data)
-                    except Exception:
-                        thresholds = None
-                else:
-                    thresholds = None
+    def evaluate(
+        self,
+        image_bgr,
+        *,
+        request_id: str,
+        source: str,
+        face_similarity: float,
+        ocr_confidence: float,
+        policy,
+    ) -> DecisionResult:
+        pad = get_pad_service().evaluate(
+            PADInput(image_bgr=image_bgr, request_id=request_id, source=source))
 
-            # dict → استخدمه
-            if isinstance(thresholds, dict) and thresholds:
-                alias = {"face": "face_similarity", "ocr": "ocr_confidence"}
-                fields = {}
-                for k, v in thresholds.items():
-                    name = alias.get(k, k)
-                    base = getattr(t, name, None)
-                    if base is None:
-                        continue
-                    try:
-                        fields[name] = type(base)(
-                            name=base.name, accept=float(v),
-                            review_factor=getattr(base, "review_factor", 0.9),
-                            critical=base.critical,
-                        )
-                    except (TypeError, ValueError):
-                        continue
-                valid = ("face_similarity", "liveness", "antispoof", "ocr_confidence")
-                t = DecisionThresholds(
-                    **{**{k: getattr(t, k) for k in valid}, **fields}
-                )
+        # REJECT من PAD يوقف كل شيء
+        if pad.decision == PADDecision.REJECT:
+            return DecisionResult(PADDecision.REJECT, pad, pad.reasons)
 
-        self.thresholds = t
-        self._engine = UnifiedDecisionEngine(t, strict_critical=strict_critical)
-        self.last_result: Optional[DecisionResult] = None
+        # REVIEW من PAD يمنع ACCEPT مهما كانت بقية المعايير
+        if pad.decision == PADDecision.REVIEW:
+            return DecisionResult(PADDecision.REVIEW, pad, pad.reasons)
 
-    @staticmethod
-    def _flatten_yaml(data: dict) -> dict:
-        flat = {}
-        for k, v in (data or {}).items():
-            if isinstance(v, dict):
-                for sub_k in ("accept", "threshold", "min", "value"):
-                    if sub_k in v and isinstance(v[sub_k], (int, float)):
-                        flat[k] = float(v[sub_k])
-                        break
-            elif isinstance(v, (int, float)):
-                flat[k] = float(v)
-        return flat
-
-    def decide(self, scores: dict) -> DecisionResult:
-        self.last_result = self._engine.decide(scores)
-        return self.last_result
-
-    def score(self, scores: dict) -> float:
-        vals = [float(v) for v in scores.values() if v is not None]
-        return sum(vals) / len(vals) if vals else 0.0
+        # ACCEPT من PAD فقط: نكمل للمعايير الأخرى
+        if policy is None:
+            return DecisionResult(PADDecision.ACCEPT, pad, pad.reasons)
+        other = policy.evaluate(
+            {"face_similarity": face_similarity, "ocr_confidence": ocr_confidence},
+            pad_result=pad,
+        )
+        return DecisionResult(other, pad, pad.reasons)

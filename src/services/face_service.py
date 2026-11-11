@@ -1,9 +1,11 @@
 """Face verification via insightface (buffalo_l)."""
 from __future__ import annotations
+
 import logging
 from typing import Optional
-import numpy as np
+
 import cv2
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
