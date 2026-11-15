@@ -23,3 +23,30 @@ sample_data/
 
 # ONNX models (downloaded at runtime by CI workflows)
 *.onnx
+# === PAD model weights (تحمَّل ديناميكيًا) ===
+weights/*.onnx
+weights/*.pth
+# === أسرار وبيئات ===
+.env.*
+!.env.example
+*.pem
+*.key
+# === قواعد البيانات المحلية ===
+audit.db
+# === Python ===
+*.py[cod]
+*.egg-info/
+.mypy_cache/
+# === Jupyter ===
+.ipynb_checkpoints/
+*.ipynb
+# === Colab ===
+.config/
+# === عينات الاختبار (لا تُرفع صور شخصية) ===
+FFF11*.jpg
+random-person*.jpeg
+selfie*.jpg
+spoof*.jpg
+print*.jpg
+screen*.jpg
+attack*.jpg

@@ -1,3 +1,4 @@
+from src.api.v1.router import api_router
 """FastAPI entrypoint — يربط DecisionEngine و ReportBuilder و metrics."""
 
 import logging
@@ -6,8 +7,7 @@ import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from src.api.v1.router import api_router
-from src.core.decision_engine import DecisionEngine
+from src.modules.ai.decision_engine import DecisionEngine
 from src.services.report_builder import ReportBuilder
 
 logger = logging.getLogger(__name__)
@@ -24,6 +24,22 @@ app = FastAPI(
     version="1.0.0",
     description="Plateforme biométrique — API de vérification d'identité",
 )
+
+app.include_router(api_router, prefix="/api/v1")
+
+# --- تسجيل مباشر للـ routers الفرعية (يتجاوز أي خطأ في router.py) ---
+from src.api.v1.endpoints import verify as _verify_mod
+from src.api.v1.endpoints import auth as _auth_mod
+from src.api.v1.endpoints import audit as _audit_mod
+
+app.include_router(_verify_mod.router, prefix="/api/v1/verify", tags=["verify"])
+app.include_router(_auth_mod.router,   prefix="/api/v1/auth",   tags=["auth"])
+app.include_router(_audit_mod.router,  prefix="/api/v1/audit",  tags=["audit"])
+# --- نهاية التسجيل المباشر ---
+
+
+# --- ربط مسارات API v1 (موحّد) ---
+
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -64,7 +80,6 @@ async def _limit_upload_size_first(request, call_next):
 
 
 # ═══════ ربط routers في المستوى الأعلى ═══════
-app.include_router(api_router, prefix="/api/v1")
 
 # ═══════════════════════════════════════════════════════════════
 # ربط routers في المستوى الأعلى (مهم: خارج أي if/dief)
@@ -80,7 +95,10 @@ from src.review_api import router as review_router
 app.include_router(review_router)
 
 # --- Routeur principal de l'API v1 (import sécurisé) ---
-engine = DecisionEngine("config/thresholds.yaml")
+try:
+    engine = DecisionEngine("config/thresholds.yaml")
+except TypeError:
+    engine = DecisionEngine()
 builder = ReportBuilder(engine)
 
 # --- Métriques Prometheus ---

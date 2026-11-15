@@ -18,7 +18,7 @@ def _mount(name: str, critical: bool):
                 raise RuntimeError(f"{name}.router مفقود")
             logger.warning(f"⚠️ skip {name}: router مفقود")
             return
-        api_router.include_router(mod.router)
+        api_router.include_router(mod.router, prefix=f"/{name}")
         logger.info(f"✅ mounted /{name}")
     except Exception as e:
         if critical:
