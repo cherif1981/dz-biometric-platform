@@ -1,23 +1,22 @@
 """مسار التحقق الموحد.
 
-PAD في وضع المراقبة (monitor-only):
-  - predict_liveness يُستدعى للقياس والتسجيل
-  - النتيجة تُعاد في liveness_score + liveness_warning
-  - لكنها لا تؤثر على القرار (لأن anti-spoof-mn3 يفشل في كشف print/replay/mask)
-  - القرار يعتمد حصريًا على face matching
-
-TODO قبل الإنتاج: استبدال PAD بـ CDCN++/DeepPixBiS وتفعيل القرار.
+PAD عبر src.pad.service (خدمة موثقة تُصدر قرارًا أمنيًا):
+  - get_pad_service().evaluate() يُنتج PADResult (decision + state)
+  - لا يمكن إصدار ACCEPT بدون PAD VERIFIED + face مقبول
+  - UNAVAILABLE / HEURISTIC / LOADED → REVIEW (fail-closed)
+  - PAD REJECT → REJECT (هجوم مؤكد)
 """
 from __future__ import annotations
-import hashlib, time
+import base64, hashlib, time
 from typing import Literal, Optional
+import numpy as np
 import yaml
 from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel, Field
 
 router = APIRouter(tags=["verify"])
-PADState = Literal["VERIFIED", "HEURISTIC", "UNAVAILABLE"]
+PADState = Literal["VERIFIED", "LOADED", "HEURISTIC", "UNAVAILABLE"]
 Decision = Literal["ACCEPT", "REVIEW", "REJECT"]
 _CFG = None
 
@@ -66,6 +65,45 @@ def _record_audit(*, decision, pad_state, modality, user_hash, reason="", extras
         return None
 
 
+def _decode_base64_image(b64: str):
+    """base64 → BGR numpy. None عند الفشل."""
+    try:
+        img_bytes = base64.b64decode(b64)
+        arr = np.frombuffer(img_bytes, np.uint8)
+        try:
+            import cv2
+            return cv2.imdecode(arr, cv2.IMREAD_COLOR)
+        except ImportError:
+            from PIL import Image
+            import io
+            img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+            return np.array(img)[:, :, ::-1]
+    except Exception as e:
+        logger.warning(f"[verify] selfie decode failed: {e}")
+        return None
+
+
+def _evaluate_pad(selfie_b64: str, request_id: str):
+    """يستدعي الخدمة الموثقة. (decision, state_str, liveness, reasons)."""
+    try:
+        from src.pad.service import get_pad_service
+        from src.pad.contract import PADInput
+    except Exception as e:
+        return None, "UNAVAILABLE", None, (f"import failed: {e}",)
+
+    image_bgr = _decode_base64_image(selfie_b64)
+    if image_bgr is None:
+        return None, "UNAVAILABLE", None, ("selfie decode failed",)
+
+    try:
+        inp = PADInput(image_bgr=image_bgr, request_id=request_id, source="verify_api")
+        result = get_pad_service().evaluate(inp)
+        return (result.decision, result.state.value, result.liveness, result.reasons)
+    except Exception as e:
+        logger.error(f"[verify] PAD evaluate failed: {e}")
+        return None, "UNAVAILABLE", None, (f"evaluate failed: {e}",)
+
+
 @router.post("/", response_model=VerifyResponse)
 async def verify_endpoint(payload: VerifyRequest) -> VerifyResponse:
     t0 = time.time()
@@ -73,20 +111,17 @@ async def verify_endpoint(payload: VerifyRequest) -> VerifyResponse:
     face_accept = float(cfg.get("face_accept", cfg.get("face_similarity", 0.5668)))
     face_reject = float(cfg.get("face_reject", 0.2371))
 
-    # ============ 1) PAD — وضع المراقبة فقط ============
-    live: Optional[float] = None
-    try:
-        from src.pad.onnx_liveness import predict_liveness
-        live = predict_liveness(payload.selfie)
-        logger.info(f"[verify] PAD (monitor only) liveness={live:.3f}")
-    except Exception as e:
-        logger.warning(f"[verify] PAD failed: {e}")
-        live = None
+    user_hash = hashlib.sha256(payload.selfie[:32].encode()).hexdigest()[:16]
+    request_id = f"{user_hash}-{int(t0 * 1000)}"
 
-    # في وضع المراقبة: pad_state ثابت UNAVAILABLE، لا يؤثر على القرار
-    pad_state: PADState = "UNAVAILABLE"
+    # ============ 1) PAD عبر الخدمة الموحدة ============
+    pad_decision, pad_state, liveness, pad_reasons = _evaluate_pad(payload.selfie, request_id)
+    logger.info(
+        f"[verify] PAD state={pad_state} decision={pad_decision} "
+        f"reasons={pad_reasons[:2] if pad_reasons else ()}"
+    )
 
-    # ============ 2) Face matching — يقرر النتيجة ============
+    # ============ 2) Face matching ============
     face: Optional[float] = None
     try:
         from src.pad.face_matcher import similarity
@@ -94,27 +129,41 @@ async def verify_endpoint(payload: VerifyRequest) -> VerifyResponse:
     except Exception as e:
         logger.error(f"face: {e}")
 
-    # ============ 3) القرار (face فقط، لأن PAD في المراقبة) ============
-    if face is None:
+    # ============ 3) قرار مركّب — PAD أولًا، face ثانيًا ============
+    from src.pad.contract import Decision as PADDecision
+
+    if pad_decision is None:
+        decision = "REVIEW"
+        reason = f"PAD unavailable ({pad_reasons[0] if pad_reasons else 'unknown'}) → review (fail-closed)"
+    elif pad_decision == PADDecision.REJECT:
         decision = "REJECT"
-        reason = "face not verifiable (fail-closed)"
-    elif face >= face_accept:
-        decision = "ACCEPT"
-        reason = f"face={face:.3f} >= {face_accept} (PAD monitor-only)"
-    elif face < face_reject:
-        decision = "REJECT"
-        reason = f"face={face:.3f} < {face_reject} (impostor)"
+        reason = f"PAD reject: {pad_reasons[0] if pad_reasons else 'attack detected'}"
+    elif pad_decision == PADDecision.REVIEW:
+        decision = "REVIEW"
+        reason = f"PAD review: {pad_reasons[0] if pad_reasons else 'uncertain'}"
+    elif pad_decision == PADDecision.ACCEPT:
+        if face is None:
+            decision = "REJECT"
+            reason = "face not verifiable (fail-closed)"
+        elif face >= face_accept:
+            decision = "ACCEPT"
+            reason = f"PAD verified + face={face:.3f} >= {face_accept}"
+        elif face < face_reject:
+            decision = "REJECT"
+            reason = f"PAD verified but face={face:.3f} < {face_reject} (impostor)"
+        else:
+            decision = "REVIEW"
+            reason = f"PAD verified but face={face:.3f} in gray zone [{face_reject}, {face_accept})"
     else:
         decision = "REVIEW"
-        reason = f"face={face:.3f} gray zone [{face_reject}, {face_accept})"
+        reason = f"unexpected PAD decision: {pad_decision}"
 
-    # ============ 4) Audit ============
-    user_hash = hashlib.sha256(payload.selfie[:32].encode()).hexdigest()[:16]
+    # ============ 4) Audit + حماية fail-closed إضافية ============
     audit_id = _record_audit(
         decision=decision, pad_state=pad_state, modality=payload.modality,
         user_hash=user_hash, reason=reason,
-        extras={"live": live, "face": face, "ms": int((time.time()-t0)*1000),
-                "pad_mode": "monitor_only"},
+        extras={"live": liveness, "face": face, "ms": int((time.time()-t0)*1000),
+                "pad_reasons": list(pad_reasons or [])},
     )
     if decision == "ACCEPT" and audit_id is None:
         logger.error("ACCEPT without audit → REVIEW (fail-closed)")
@@ -123,6 +172,6 @@ async def verify_endpoint(payload: VerifyRequest) -> VerifyResponse:
 
     return VerifyResponse(
         decision=decision, pad_state=pad_state, face_score=face,
-        liveness_score=live, reason=reason, audit_id=audit_id,
-        liveness_warning=True,   # دائمًا في وضع المراقبة
+        liveness_score=liveness, reason=reason, audit_id=audit_id,
+        liveness_warning=(pad_state != "VERIFIED"),
     )
