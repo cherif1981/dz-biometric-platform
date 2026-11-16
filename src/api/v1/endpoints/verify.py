@@ -3,7 +3,8 @@
 PAD عبر src.pad.service (خدمة موثقة تُصدر قرارًا أمنيًا):
   - get_pad_service().evaluate() يُنتج PADResult (decision + state)
   - لا يمكن إصدار ACCEPT بدون PAD VERIFIED + face مقبول
-  - UNAVAILABLE / HEURISTIC / LOADED → REVIEW (fail-closed)
+  - UNAVAILABLE → REJECT (fail-closed, no model)
+  - HEURISTIC / LOADED → REVIEW (fail-closed, unverified model)
   - PAD REJECT → REJECT (هجوم مؤكد)
 """
 from __future__ import annotations
