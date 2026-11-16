@@ -3,7 +3,6 @@
 > ## ⚠️ تصحيح موثّق: رقم AUC في هذا الملف القديم غير قابل للتكرار
 >
 > الرقم `0.9753` المذكور سابقًا **لا يمكن إعادة إنتاجه** بأي معالجة معقولة
-> على بيانات متاحة. أفضل نتيجة قابلة للتكرار: **AUC ≈ 0.82**.
 >
 > **السبب الجذري**: الكود السابق كان يمرر `[0, 1]` بدل `[0, 255]`، مما أدى
 > إلى انهيار الإشارة. التصحيح في `anti_spoof/preprocess.py`.
@@ -19,10 +18,8 @@
 >
 > **رقم AUC = 0.9753 المذكور سابقًا في هذا الملف غير قابل للتكرار.**
 > بعد اختبار شامل (3 إعدادات preprocessing × 5 صيغ scoring × مجموعتَي بيانات)
-> لم تتجاوز أفضل نتيجة AUC = 0.82 على بيانات LFW.
 >
 > **السبب الجذري**: الكود السابق كان يمرر `[0, 1]` بدل `[0, 255]` إلى النموذج،
-> مما أدى إلى انهيار الإشارة (AUC ~0.55 لكل الصيغ). التصحيح في
 > `anti_spoof/preprocess.py`.
 >
 > **الحالة الحالية**: `FORCE_REVIEW` — كل طلب يذهب لمراجعة بشرية.
@@ -39,7 +36,6 @@
 > - المشكلة الموثقة سابقًا (درجة 0.99 لكل المدخلات): **تم تصحيحها** — كانت في
 >   المعالجة `[0,1]` بدل `[0,255]`، و `p[0]` بدل `p[1]`.
 > - النموذج الحالي (`MiniFASNetV2`) **غير موثوق** على بيانات حقيقية
->   (AUC=0.64 على بيانات Kaggle).
 > - التفاصيل الكاملة: [SECURITY.md](SECURITY.md).
 > - شروط الترقية إلى VERIFIED موثقة في `SECURITY.md`.
 
@@ -79,7 +75,6 @@
 | المقياس | القيمة |
 |---|---|
 | **EER** | **4.07%** |
-| ROC-AUC | 0.9753 |
 | FAR @ EER | 4.27% |
 | FRR @ EER | 3.88% |
 | معدل فشل الكشف | **18.0%** |
@@ -246,3 +241,18 @@ MIT License.
 - إثبات أن MiniFASNetV2 يُصنّف كل شيء «live»
 - توثيق عقد الأمان (VERIFIED / HEURISTIC / UNAVAILABLE)
 - تحديد أولويات التصحيح
+
+## Evaluation status
+
+**This system has NOT been formally evaluated.** No reproducible PAD or
+face-match metrics exist in the repository today. `eval_scores.json`
+contains 300 ground-truth records with `face_score = None` — meaning the
+model was never actually run on them.
+
+See [EVAL.md](./EVAL.md) for the canonical evaluation report and the
+incident that invalidated earlier numbers (`eval_report_via_engine.json`
+showed EER = 0.5, a degenerate result caused by `None → 0.5` defaulting).
+
+Do **not** cite AUC, APCER, BPCER, or EER numbers from git history or
+issues unless they appear in an updated `EVAL.md` dated after model
+re-evaluation.

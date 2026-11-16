@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-28",
+  "policy": "FORCE_REVIEW",
+  "readme_0_9753": {
+    "reproducible": false,
+    "best_achievable": 0.82
+  },
+  "best_config": {
+    "preprocessing": "imagenet",
+    "scoring": "1-(p1+p2)",
+    "auc_lfw": 0.8201
+  },
+  "decision": "ALL requests → human review"
+}

@@ -1,3 +1,15 @@
+# Canonical Evaluation Report
+
+> **Status:** This is the **single source of truth** for evaluation metrics.
+> README, issues, and commit messages should link here, never duplicate numbers.
+> Last reviewed: 2026-11-16
+>
+> **Current state:** System not evaluated. See "الحالة الحالية" below.
+> No AUC, APCER, BPCER, or EER numbers are valid until the model is re-run
+> on real scores (not `None`) and the resulting `eval_scores.json` is
+> committed alongside the report.
+
+---
 
 ## ⚠️ حالة التقييم الحالية: لم يُقيَّم النظام بعد
 
