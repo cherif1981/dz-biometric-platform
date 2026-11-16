@@ -50,3 +50,13 @@ spoof*.jpg
 print*.jpg
 screen*.jpg
 attack*.jpg
+
+*.onnx.data
+*.tflite
+anti_spoof/models/
+anti_spoof/attestation/*.json
+
+# Model artifacts (not tracked)
+*.pt
+*.pth
+weights/
