@@ -1,8 +1,8 @@
 """AI Report Builder — تقرير موحد من كل طبقات AI."""
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any
 
 from loguru import logger
 
@@ -15,15 +15,15 @@ class AIReport:
     """تقرير موحد للتحقق."""
 
     decision: str
-    risk: Dict[str, Any]
-    face: Dict[str, Any] = field(default_factory=dict)
-    liveness: Dict[str, Any] = field(default_factory=dict)
-    antispoof: Dict[str, Any] = field(default_factory=dict)
-    document: Dict[str, Any] = field(default_factory=dict)
-    models: Dict[str, str] = field(default_factory=dict)
-    thresholds: Dict[str, Any] = field(default_factory=dict)
+    risk: dict[str, Any]
+    face: dict[str, Any] = field(default_factory=dict)
+    liveness: dict[str, Any] = field(default_factory=dict)
+    antispoof: dict[str, Any] = field(default_factory=dict)
+    document: dict[str, Any] = field(default_factory=dict)
+    models: dict[str, str] = field(default_factory=dict)
+    thresholds: dict[str, Any] = field(default_factory=dict)
     reasons: list = field(default_factory=list)
-    meta: Dict[str, Any] = field(default_factory=dict)
+    meta: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return {
@@ -58,12 +58,12 @@ class ReportBuilder:
     def build(
         self,
         decision_result,  # DecisionResult
-        signals: Dict[str, float],
+        signals: dict[str, float],
         doc_analysis=None,  # DocumentAnalysis
         face_quality=None,  # FaceQualityResult
         liveness_result=None,  # LivenessResult
         antispoof_result=None,  # AntiSpoofResult
-        extra_meta: Optional[Dict[str, Any]] = None,
+        extra_meta: dict[str, Any] | None = None,
     ) -> AIReport:
         risk = decision_result.risk
 

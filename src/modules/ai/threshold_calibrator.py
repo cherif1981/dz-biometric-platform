@@ -3,7 +3,6 @@
 import json
 import os
 from dataclasses import dataclass
-from typing import List, Optional
 
 import numpy as np
 from loguru import logger
@@ -58,8 +57,8 @@ class ThresholdCalibrator:
 
     def calibrate(
         self,
-        positive_scores: List[float],
-        negative_scores: List[float],
+        positive_scores: list[float],
+        negative_scores: list[float],
         target_far: float = 0.001,
     ) -> CalibrationResult:
         pos = np.asarray(positive_scores, dtype=float)
@@ -109,7 +108,7 @@ class ThresholdCalibrator:
         logger.info(f"Saved calibration → {path}")
 
     @staticmethod
-    def load(path: str) -> Optional[dict]:
+    def load(path: str) -> dict | None:
         if not os.path.exists(path):
             return None
         with open(path, encoding="utf-8") as f:

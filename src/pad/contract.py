@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Protocol
+from typing import Protocol
 
 import numpy as np
 
@@ -31,12 +31,12 @@ class PADInput:
 class PADResult:
     decision: Decision
     state: PADState
-    liveness: Optional[float]
-    threshold: Optional[float]
+    liveness: float | None
+    threshold: float | None
     reasons: tuple[str, ...]
     request_id: str
     source: str
-    model_sha_prefix: Optional[str]
+    model_sha_prefix: str | None
     preprocess_version: str
 
 

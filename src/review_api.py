@@ -2,7 +2,6 @@
 
 import uuid
 from datetime import datetime, timezone
-from typing import List
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -14,7 +13,7 @@ _reviews: dict = {}
 class ReviewItem(BaseModel):
     decision_id: str
     scores: dict
-    reasons: List[str] = []
+    reasons: list[str] = []
 
 
 class ReviewDecision(BaseModel):

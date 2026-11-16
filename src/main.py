@@ -3,7 +3,6 @@ from src.api.v1.router import api_router
 """FastAPI entrypoint — يربط DecisionEngine و ReportBuilder و metrics."""
 
 import logging
-import os
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel

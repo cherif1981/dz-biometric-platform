@@ -4,7 +4,6 @@ import os
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional
 
 _THIS = Path(__file__).resolve()
 
@@ -26,7 +25,7 @@ class Settings:
     security_yaml: Path
     pad_model_path: Path
     pad_attest_dir: Path
-    pad_attest_key_b64: Optional[str]
+    pad_attest_key_b64: str | None
     database_url: str
     debug: bool
 

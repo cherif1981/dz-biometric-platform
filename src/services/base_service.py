@@ -1,4 +1,3 @@
-from typing import Dict
 
 
 class BaseVerificationService:
@@ -9,5 +8,5 @@ class BaseVerificationService:
 
     modality: str = "unknown"
 
-    def verify(self, payload: Dict) -> Dict[str, float]:
+    def verify(self, payload: dict) -> dict[str, float]:
         raise NotImplementedError

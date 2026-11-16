@@ -151,20 +151,3 @@ def get_pad_service() -> PADPort:
 
 _session = None
 
-def _get_session():
-    global _session
-    if _session is None:
-            providers=["CPUExecutionProvider"],
-        )
-    return _session
-
-def predict_liveness(image_bgr: np.ndarray) -> float:
-    """يرجع احتمال أن الوجه حي (0..1)."""
-    import cv2
-    inp = _get_session().get_inputs()[0]
-    h, w = int(inp.shape[2]), int(inp.shape[3])
-    arr = cv2.resize(image_bgr, (w, h)).astype(np.float32) / 255.0
-    arr = np.transpose(arr, (2, 0, 1))[None, ...]
-    out = _get_session().run(None, {inp.name: arr})[0]
-    p = np.exp(out - out.max()) / np.exp(out - out.max()).sum()
-    return float(p[0][1])

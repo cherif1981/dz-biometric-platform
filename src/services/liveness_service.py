@@ -5,18 +5,18 @@ Liveness service — thin wrapper around the passive liveness detector.
 - Fail-closed: any error -> is_live=False.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from src.core.thresholds import get_thresholds
 from src.modules.liveness.passive import PassiveLiveness
 
 
 class LivenessService:
-    def __init__(self, threshold: Optional[float] = None, *args, **kwargs):
+    def __init__(self, threshold: float | None = None, *args, **kwargs):
         self.threshold = threshold if threshold is not None else get_thresholds().liveness
         self._detector = PassiveLiveness()
 
-    def check(self, image_bytes: bytes) -> Dict[str, Any]:
+    def check(self, image_bytes: bytes) -> dict[str, Any]:
         try:
             result = self._detector.predict(image_bytes)
             return {

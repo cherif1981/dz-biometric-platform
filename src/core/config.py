@@ -1,5 +1,4 @@
 from functools import lru_cache
-from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -29,8 +28,8 @@ class Settings(BaseSettings):
     # These fields are kept as OPTIONAL overrides only; when None, callers MUST
     # read from src.core.thresholds.get_thresholds(). Never hardcode defaults
     # here again — that's what caused the 0.45 vs 0.5668 drift.
-    FACE_MATCH_THRESHOLD: Optional[float] = None
-    LIVENESS_THRESHOLD: Optional[float] = None
+    FACE_MATCH_THRESHOLD: float | None = None
+    LIVENESS_THRESHOLD: float | None = None
     OCR_LANGS: list[str] = ["ar", "fr", "en"]
 
     CORS_ORIGINS: list[str] = ["*"]

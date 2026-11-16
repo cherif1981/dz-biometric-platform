@@ -149,7 +149,7 @@ class RedisBackend:
         self.r = client
         self._script = self.r.register_script(self.LUA_SCRIPT)
 
-    def hit(self, key: str, window: float, limit: int) -> "RateLimitDecision":
+    def hit(self, key: str, window: float, limit: int) -> RateLimitDecision:
         import time
 
         now = time.time()

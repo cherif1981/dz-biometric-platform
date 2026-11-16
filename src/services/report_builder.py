@@ -1,6 +1,5 @@
-from dataclasses import asdict
 from datetime import datetime, timezone
-from typing import Any, Dict
+from typing import Any
 
 from src.core.decision_engine import DecisionEngine, DecisionResult
 
@@ -14,7 +13,7 @@ class ReportBuilder:
     def __init__(self, decision_engine: DecisionEngine):
         self.engine = decision_engine
 
-    def build(self, subject_id: str, scores: Dict[str, float]) -> Dict[str, Any]:
+    def build(self, subject_id: str, scores: dict[str, float]) -> dict[str, Any]:
         decision: DecisionResult = self.engine.decide(scores)
 
         return {

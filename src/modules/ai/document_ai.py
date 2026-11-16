@@ -1,8 +1,7 @@
 """Document AI — تصنيف، جودة، كشف تلاعب، استخراج حقول."""
 
 import re
-from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass, field
 
 import cv2
 import numpy as np
@@ -17,9 +16,9 @@ class DocumentAnalysis:
     type_confidence: float = 0.0
     quality_score: float = 0.0
     tampering_probability: float = 0.0
-    extracted_fields: Dict[str, str] = field(default_factory=dict)
+    extracted_fields: dict[str, str] = field(default_factory=dict)
     field_consistency: float = 0.0
-    reasons: List[str] = field(default_factory=list)
+    reasons: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
@@ -66,7 +65,7 @@ class DocumentAI:
 
     # ==================== الواجهة العامة ====================
     def analyze(self, image_bytes: bytes) -> DocumentAnalysis:
-        reasons: List[str] = []
+        reasons: list[str] = []
 
         # 1. فك ترميز الصورة
         img = self._decode(image_bytes)
@@ -208,7 +207,7 @@ class DocumentAI:
         except Exception:
             return 0.0
 
-    def _extract_fields(self, image_bytes: bytes) -> Dict[str, str]:
+    def _extract_fields(self, image_bytes: bytes) -> dict[str, str]:
         """يستدعي OCR service ويستخرج حقولاً منظمة."""
         result = self.ocr.extract(image_bytes) if hasattr(self.ocr, "extract") else {}
         # OCR service قد يعيد {"fields": {...}} أو مباشرة dict
@@ -226,7 +225,7 @@ class DocumentAI:
                 normalized[key] = val
         return normalized
 
-    def _check_consistency(self, fields: Dict[str, str], doc_type: str) -> float:
+    def _check_consistency(self, fields: dict[str, str], doc_type: str) -> float:
         """قياس اكتمال + صحة صيغة الحقول."""
         if not fields:
             return 0.0

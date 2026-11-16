@@ -1,7 +1,6 @@
 """إعدادات مركزية — ترفض أي قيمة افتراضية أو غير آمنة."""
 
 import os
-from typing import Any
 
 INSECURE_VALUES = {
     "secret",

@@ -15,7 +15,6 @@ Design:
 
 import os
 from pathlib import Path
-from typing import Dict, Optional
 
 from src.core.thresholds import get_thresholds
 from src.modules.liveness.anti_spoofing import AntiSpoofing
@@ -23,7 +22,7 @@ from src.modules.liveness.anti_spoofing import AntiSpoofing
 _MODEL_ENV = "ANTISPOOF_MODEL_PATH"
 _DEFAULT_MODEL = Path("models/MiniFASNetV2.onnx")
 
-_detector: Optional[AntiSpoofing] = None
+_detector: AntiSpoofing | None = None
 
 
 def _model_path() -> Path:
@@ -52,7 +51,7 @@ class PassiveLiveness:
     Replaces the previous heuristic. Fail-closed on every error path.
     """
 
-    def predict(self, image_bytes: bytes) -> Dict:
+    def predict(self, image_bytes: bytes) -> dict:
         # Fail-closed: capture ALL failures as is_live=False.
         try:
             detector = _get_detector()

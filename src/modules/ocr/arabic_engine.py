@@ -10,7 +10,6 @@ def _reader():
 
 class ArabicEngine:
     def read(self, image_bytes_or_array) -> dict:
-        import numpy as np
 
         from src.modules.document_reader.preprocessing import to_cv2
 

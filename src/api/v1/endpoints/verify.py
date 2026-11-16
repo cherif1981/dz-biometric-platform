@@ -12,7 +12,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import time
-from typing import Literal, Optional
+from typing import Literal
 
 import numpy as np
 import yaml
@@ -50,10 +50,10 @@ class VerifyRequest(BaseModel):
 class VerifyResponse(BaseModel):
     decision: Decision
     pad_state: PADState
-    face_score: Optional[float] = None
-    liveness_score: Optional[float] = None
-    reason: Optional[str] = None
-    audit_id: Optional[str] = None
+    face_score: float | None = None
+    liveness_score: float | None = None
+    reason: str | None = None
+    audit_id: str | None = None
     liveness_warning: bool = False
 
 
@@ -128,7 +128,7 @@ async def verify_endpoint(payload: VerifyRequest) -> VerifyResponse:
     )
 
     # ============ 2) Face matching ============
-    face: Optional[float] = None
+    face: float | None = None
     try:
         from src.pad.face_matcher import similarity
         face = similarity(payload.selfie, payload.document)

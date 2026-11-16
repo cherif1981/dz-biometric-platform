@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional
 
 
 class RiskLevel(str, Enum):
@@ -28,7 +27,7 @@ class RiskScore:
 
     score: float
     level: RiskLevel
-    components: Dict[str, float] = field(default_factory=dict)
+    components: dict[str, float] = field(default_factory=dict)
     model_version: str = "1.0.0"
     threshold_version: str = "1.0.0"
 
@@ -48,8 +47,8 @@ class DecisionResult:
 
     decision: Decision
     risk: RiskScore
-    reasons: List[str] = field(default_factory=list)
-    raw_scores: Dict[str, float] = field(default_factory=dict)
+    reasons: list[str] = field(default_factory=list)
+    raw_scores: dict[str, float] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return {

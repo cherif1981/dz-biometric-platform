@@ -1,23 +1,23 @@
 import json
 import sqlite3
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any
 
 DB_PATH = "/tmp/dz_biometric.db"
 
 
 @dataclass
 class AuditRecord:
-    id: Optional[int]
+    id: int | None
     timestamp: float
     status: str
     confidence: float
-    face_similarity: Optional[float]
-    liveness_score: Optional[float]
-    antispoof_score: Optional[float]
-    ocr_fields: Dict[str, Any]
+    face_similarity: float | None
+    liveness_score: float | None
+    antispoof_score: float | None
+    ocr_fields: dict[str, Any]
     reasons: list
-    client_ip: Optional[str] = None
+    client_ip: str | None = None
 
 
 class AuditDB:

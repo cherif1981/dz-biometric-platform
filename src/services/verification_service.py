@@ -1,7 +1,7 @@
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from loguru import logger
 
@@ -22,21 +22,20 @@ class AuditUnavailableError(RuntimeError):
 
     Per SECURITY.md: no decision may be issued without a durable audit record.
     """
-    pass
 
 
 @dataclass
 class VerificationResult:
     status: VerificationStatus
     confidence: float
-    face_similarity: Optional[float] = None
-    liveness_score: Optional[float] = None
-    antispoof_score: Optional[float] = None
-    ocr_fields: Dict[str, Any] = field(default_factory=dict)
-    reasons: List[str] = field(default_factory=list)
-    scores: Dict[str, float] = field(default_factory=dict)
-    audit_id: Optional[int] = None
-    ai_report: Optional[Dict[str, Any]] = None
+    face_similarity: float | None = None
+    liveness_score: float | None = None
+    antispoof_score: float | None = None
+    ocr_fields: dict[str, Any] = field(default_factory=dict)
+    reasons: list[str] = field(default_factory=list)
+    scores: dict[str, float] = field(default_factory=dict)
+    audit_id: int | None = None
+    ai_report: dict[str, Any] | None = None
 
 
 class VerificationEngine:
@@ -50,7 +49,6 @@ class VerificationEngine:
             ReportBuilder,
             RiskEngine,
         )
-        from src.services.antispoofing_service import AntiSpoofing
         from src.services.audit_db import AuditDB
         from src.services.face_service import FaceVerificationService as FaceService
         from src.services.liveness_service import LivenessService

@@ -7,7 +7,6 @@ Security principle: absence of face or model failure MUST NOT be treated as succ
 
 # -- Security policy: do not weaken without documented scientific validation --
 import os as _os
-from typing import Dict, Optional
 
 import cv2
 import numpy as np
@@ -35,7 +34,7 @@ class AntiSpoofing:
             cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
         )
 
-    def _detect_face(self, image: np.ndarray) -> Optional[list]:
+    def _detect_face(self, image: np.ndarray) -> list | None:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         faces = self.face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4)
         if len(faces) == 0:
@@ -63,7 +62,7 @@ class AntiSpoofing:
         face = np.expand_dims(face, axis=0)
         return face
 
-    def check(self, image_bytes: bytes) -> Dict:
+    def check(self, image_bytes: bytes) -> dict:
         try:
             nparr = np.frombuffer(image_bytes, np.uint8)
             image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)

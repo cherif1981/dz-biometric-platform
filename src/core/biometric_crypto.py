@@ -16,18 +16,17 @@ import base64
 import logging
 import os
 import secrets
-from typing import Optional
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 logger = logging.getLogger(__name__)
 
 _AAD = b"biometric:v1"
-_KEY: Optional[bytes] = None
+_KEY: bytes | None = None
 _WARNED_NO_KEY = False
 
 
-def _load_key() -> Optional[bytes]:
+def _load_key() -> bytes | None:
     """Load 32-byte key from env or secrets file. Cache it."""
     global _KEY, _WARNED_NO_KEY
     if _KEY is not None:

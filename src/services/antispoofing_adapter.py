@@ -1,8 +1,8 @@
 """Adapter to unify anti-spoofing service outputs."""
-from typing import Any, Dict
+from typing import Any
 
 
-def normalize_antispoof_result(raw: Any) -> Dict[str, Any]:
+def normalize_antispoof_result(raw: Any) -> dict[str, Any]:
     if raw is None:
         return {"score": 0.0, "is_real": False, "decision": "REJECT"}
     if not isinstance(raw, dict):

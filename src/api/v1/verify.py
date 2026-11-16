@@ -1,4 +1,3 @@
-from typing import Optional
 
 from fastapi import APIRouter, File, Form, Request, UploadFile
 
@@ -20,8 +19,8 @@ async def verify_identity(
     request: Request,
     id_image: UploadFile = File(...),
     selfie: UploadFile = File(...),
-    full_name: Optional[str] = Form(None),
-    nin: Optional[str] = Form(None),
+    full_name: str | None = Form(None),
+    nin: str | None = Form(None),
 ):
     ib = await id_image.read()
     sb = await selfie.read()

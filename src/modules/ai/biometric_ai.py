@@ -1,8 +1,7 @@
 """Biometric AI — Quality/Liveness/AntiSpoof موحد ومفصول عن Similarity."""
 
-import io
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any
 
 import cv2
 import numpy as np
@@ -42,7 +41,7 @@ class LivenessResult:
     score: float = 0.0
     is_real: bool = False
     method: str = "heuristic_v1"
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -52,7 +51,7 @@ class AntiSpoofResult:
     score: float = 0.0
     is_live: bool = False
     method: str = "heuristic_v1"
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 class BiometricAI:
@@ -168,7 +167,7 @@ class BiometricAI:
     def check_liveness(
         self,
         image_bytes: bytes,
-        external_result: Optional[Dict[str, Any]] = None,
+        external_result: dict[str, Any] | None = None,
     ) -> LivenessResult:
         """
         إن مُرّرت external_result من خدمة Liveness الحالية، يستخدمها.
@@ -225,7 +224,7 @@ class BiometricAI:
     def check_antispoof(
         self,
         image_bytes: bytes,
-        external_result: Optional[Dict[str, Any]] = None,
+        external_result: dict[str, Any] | None = None,
     ) -> AntiSpoofResult:
         if external_result is not None:
             score = float(external_result.get("score", 0.0))

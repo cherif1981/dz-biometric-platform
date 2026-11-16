@@ -2,23 +2,22 @@ import random
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Dict, List
 
 
 @dataclass
 class Challenge:
     session_id: str
-    actions: List[str]
+    actions: list[str]
     created_at: float
-    completed: List[str] = field(default_factory=list)
+    completed: list[str] = field(default_factory=list)
     frames_analyzed: int = 0
 
 
 @dataclass
 class ChallengeResult:
     passed: bool
-    completed: List[str]
-    missing: List[str]
+    completed: list[str]
+    missing: list[str]
     confidence: float
     reason: str = ""
 
@@ -28,7 +27,7 @@ class ChallengeResponseLiveness:
     SESSION_TTL = 60
 
     def __init__(self, actions_per_challenge: int = 2):
-        self.sessions: Dict[str, Challenge] = {}
+        self.sessions: dict[str, Challenge] = {}
         self.n_actions = actions_per_challenge
 
     def new_challenge(self):
@@ -48,13 +47,7 @@ class ChallengeResponseLiveness:
         for a in s.actions:
             if a in s.completed:
                 continue
-            if a == "blink" and features.get("ear", 1.0) < 0.15:
-                s.completed.append(a)
-            elif a == "turn_left" and features.get("yaw", 0) < -20:
-                s.completed.append(a)
-            elif a == "turn_right" and features.get("yaw", 0) > 20:
-                s.completed.append(a)
-            elif a == "smile" and features.get("mouth_ratio", 0) > 0.35:
+            if a == "blink" and features.get("ear", 1.0) < 0.15 or a == "turn_left" and features.get("yaw", 0) < -20 or a == "turn_right" and features.get("yaw", 0) > 20 or a == "smile" and features.get("mouth_ratio", 0) > 0.35:
                 s.completed.append(a)
             elif a == "nod":
                 p = features.get("pitch_history", [])

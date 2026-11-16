@@ -11,7 +11,6 @@ Rules:
 import os
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict
 
 import yaml
 
@@ -49,7 +48,7 @@ class Thresholds:
             )
         return object.__getattribute__(self, name)
 
-    def __init__(self, data: Dict):
+    def __init__(self, data: dict):
         missing = [k for k in _REQUIRED if k not in data]
         if missing:
             raise ValueError(f"thresholds.yaml: missing required keys {missing}")

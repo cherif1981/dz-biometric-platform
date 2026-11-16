@@ -6,7 +6,6 @@ from __future__ import annotations
 import base64
 import io
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 from PIL import Image
@@ -15,7 +14,7 @@ _session = None
 DEFAULT_WEIGHTS = Path(__file__).parent.parent.parent / "weights" / "anti-spoof-mn3.onnx"
 
 
-def _get_session(weights_path: Optional[str] = None):
+def _get_session(weights_path: str | None = None):
     global _session
     if _session is None:
         import onnxruntime as ort
@@ -41,7 +40,7 @@ def _decode(x) -> Image.Image:
     return Image.open(io.BytesIO(raw)).convert("RGB")
 
 
-def predict_liveness(image, weights_path: Optional[str] = None) -> float:
+def predict_liveness(image, weights_path: str | None = None) -> float:
     """0..1 — أعلى = أكثر حيوية. preprocessing: pm1 ([-1,1])."""
     import cv2
     session = _get_session(weights_path)
@@ -58,7 +57,7 @@ def predict_liveness(image, weights_path: Optional[str] = None) -> float:
     return float(probs[1])  # [fake, real] → real
 
 
-def warm_up(weights_path: Optional[str] = None):
+def warm_up(weights_path: str | None = None):
     try:
         _get_session(weights_path)
         return True, "ok"

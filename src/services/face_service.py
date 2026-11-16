@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 import cv2
 import numpy as np
@@ -13,7 +12,7 @@ logger = logging.getLogger(__name__)
 class FaceVerificationService:
     """1:1 face verification: insightface embeddings + cosine similarity."""
 
-    _instance: Optional["FaceVerificationService"] = None
+    _instance: FaceVerificationService | None = None
 
     def __init__(self, model_name: str = "buffalo_l", det_thresh: float = 0.5):
         from insightface.app import FaceAnalysis
@@ -24,12 +23,12 @@ class FaceVerificationService:
         logger.info(f"FaceVerificationService ready | model={model_name} | det_thresh={det_thresh}")
 
     @classmethod
-    def get(cls) -> "FaceVerificationService":
+    def get(cls) -> FaceVerificationService:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
 
-    def _embed(self, img: np.ndarray) -> Optional[np.ndarray]:
+    def _embed(self, img: np.ndarray) -> np.ndarray | None:
         """Extract normalized embedding; pads tightly-cropped faces (LFW-style)."""
         faces = self._app.get(img)
         if not faces:
@@ -46,7 +45,7 @@ class FaceVerificationService:
         return faces[0].normed_embedding
 
     @staticmethod
-    def _decode(b: bytes) -> Optional[np.ndarray]:
+    def _decode(b: bytes) -> np.ndarray | None:
         arr = np.frombuffer(b, np.uint8)
         return cv2.imdecode(arr, cv2.IMREAD_COLOR)
 

@@ -2,7 +2,6 @@
 Field-level encryption for sensitive biometric data using Fernet.
 """
 
-import base64
 import json
 import os
 

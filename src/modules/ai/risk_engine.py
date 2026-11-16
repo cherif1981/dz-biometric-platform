@@ -1,6 +1,5 @@
 """AI Risk Engine — يحول الإشارات إلى risk_score موزون."""
 
-from typing import Dict, Optional
 
 from loguru import logger
 
@@ -45,7 +44,7 @@ class RiskEngine:
 
     def __init__(
         self,
-        weights: Optional[Dict[str, float]] = None,
+        weights: dict[str, float] | None = None,
         model_version: str = "1.0.0",
         threshold_version: str = "1.0.0",
     ):
@@ -72,7 +71,7 @@ class RiskEngine:
                 return lvl
         return RiskLevel.CRITICAL
 
-    def compute(self, signals: Dict[str, float]) -> RiskScore:
+    def compute(self, signals: dict[str, float]) -> RiskScore:
         """
         Args:
             signals: dict {اسم الإشارة: القيمة بين 0 و 1}
@@ -90,7 +89,7 @@ class RiskEngine:
                 threshold_version=self.threshold_version,
             )
 
-        risk_components: Dict[str, float] = {}
+        risk_components: dict[str, float] = {}
         total_risk = 0.0
         total_weight_used = 0.0
 

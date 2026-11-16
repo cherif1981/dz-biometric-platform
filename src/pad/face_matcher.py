@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import base64
 import io
-from typing import Optional
 
 import numpy as np
 from PIL import Image
@@ -37,7 +36,7 @@ def _largest_face(faces):
     return max(faces, key=lambda f: (f.bbox[2]-f.bbox[0])*(f.bbox[3]-f.bbox[1]))
 
 
-def _embed(img) -> Optional[np.ndarray]:
+def _embed(img) -> np.ndarray | None:
     import cv2
     arr = _decode(img)
     if arr.ndim == 2:
@@ -62,7 +61,6 @@ def _embed(img) -> Optional[np.ndarray]:
 
     # محاولة 3: استخدام الصورة كقص وجه مع محاولة إيجاد المعالم (LFW مقصوصة مسبقًا)
     try:
-        from insightface.utils import face_align
         # نضيف هامشًا أبيض حول الصورة، فقد تعمل مع الكاشف
         pad = int(max(h, w) * 0.3)
         padded = cv2.copyMakeBorder(bgr, pad, pad, pad, pad, cv2.BORDER_CONSTANT, value=(255,255,255))
@@ -75,7 +73,7 @@ def _embed(img) -> Optional[np.ndarray]:
     return None
 
 
-def similarity(a, b) -> Optional[float]:
+def similarity(a, b) -> float | None:
     ea, eb = _embed(a), _embed(b)
     if ea is None or eb is None:
         return None

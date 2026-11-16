@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 from ...core.decision_policy import (
     CriterionStatus,
@@ -13,10 +12,10 @@ from ...core.decision_policy import (
     UnifiedDecisionEngine,
 )
 
-__all__ = ["AIDecisionEngine", "DecisionEngine", "DecisionResult", "Decision", "CriterionStatus"]
+__all__ = ["AIDecisionEngine", "CriterionStatus", "Decision", "DecisionEngine", "DecisionResult"]
 
 
-def _load_yaml_thresholds(path: str) -> Optional[dict]:
+def _load_yaml_thresholds(path: str) -> dict | None:
     """يقرأ config/thresholds.yaml ويُرجع dict مسطّحاً."""
     p = Path(path)
     if not p.exists():
@@ -43,13 +42,13 @@ class AIDecisionEngine:
 
     def __init__(
         self,
-        min_face_similarity: Optional[float] = None,
-        min_liveness: Optional[float] = None,
-        min_antispoof: Optional[float] = None,
-        min_ocr_confidence: Optional[float] = None,
-        review_max_risk: Optional[float] = None,
-        max_tampering: Optional[float] = None,
-        thresholds_path: Optional[str] = "config/thresholds.yaml",
+        min_face_similarity: float | None = None,
+        min_liveness: float | None = None,
+        min_antispoof: float | None = None,
+        min_ocr_confidence: float | None = None,
+        review_max_risk: float | None = None,
+        max_tampering: float | None = None,
+        thresholds_path: str | None = "config/thresholds.yaml",
         **extra,
     ):
         base = DecisionThresholds.from_settings(None)
@@ -106,7 +105,7 @@ class AIDecisionEngine:
             ocr_confidence=_build("ocr_confidence", min_ocr_confidence, base.ocr_confidence),
         )
         self._engine = UnifiedDecisionEngine(self.thresholds)
-        self.last_result: Optional[DecisionResult] = None
+        self.last_result: DecisionResult | None = None
 
     @property
     def min_face_similarity(self) -> float:

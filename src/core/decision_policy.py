@@ -17,7 +17,6 @@ import json
 import logging
 from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 POLICY_VERSION = "1.1.0"
@@ -46,7 +45,7 @@ class CriterionThreshold:
     """
     name: str
     accept: float
-    review: Optional[float] = None
+    review: float | None = None
     review_factor: float = 0.9
     critical: bool = True
 
@@ -82,7 +81,7 @@ class DecisionThresholds:
                 ("face_similarity", "liveness", "antispoof", "ocr_confidence")}
 
     @classmethod
-    def from_settings(cls, settings=None) -> "DecisionThresholds":
+    def from_settings(cls, settings=None) -> DecisionThresholds:
         def g(k, d):
             return getattr(settings, k, d) if settings is not None else d
         return cls(
@@ -104,12 +103,12 @@ class DecisionThresholds:
 @dataclass
 class CriterionResult:
     name: str
-    score: Optional[float]
+    score: float | None
     status: CriterionStatus
     accept_threshold: float
     review_threshold: float
     critical: bool
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
@@ -143,7 +142,7 @@ class UnifiedDecisionEngine:
         self.thresholds = thresholds
         self.strict_critical = strict_critical
 
-    def decide(self, scores: dict, request_id: Optional[str] = None) -> DecisionResult:
+    def decide(self, scores: dict, request_id: str | None = None) -> DecisionResult:
         criteria, reasons = [], []
         has_review = has_critical_fail = False
 

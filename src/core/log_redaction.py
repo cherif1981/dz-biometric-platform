@@ -6,13 +6,12 @@ prove that all sensitive data is actually protected" applies to logs too.
 
 import hashlib
 import re
-from typing import Optional
 
 _HEX_LIKE = re.compile(r"\b[0-9a-f]{32,}\b", re.IGNORECASE)
 _B64_LIKE = re.compile(r"\b[A-Za-z0-9+/]{40,}={0,2}\b")
 
 
-def mask_subject(subject_id: Optional[str]) -> str:
+def mask_subject(subject_id: str | None) -> str:
     """Return a stable short hash of subject_id (for correlation without exposure)."""
     if not subject_id:
         return "<none>"
