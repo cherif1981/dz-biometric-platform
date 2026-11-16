@@ -8,8 +8,12 @@ PAD عبر src.pad.service (خدمة موثقة تُصدر قرارًا أمني
   - PAD REJECT → REJECT (هجوم مؤكد)
 """
 from __future__ import annotations
-import base64, hashlib, time
+
+import base64
+import hashlib
+import time
 from typing import Literal, Optional
+
 import numpy as np
 import yaml
 from fastapi import APIRouter
@@ -75,8 +79,9 @@ def _decode_base64_image(b64: str):
             import cv2
             return cv2.imdecode(arr, cv2.IMREAD_COLOR)
         except ImportError:
-            from PIL import Image
             import io
+
+            from PIL import Image
             img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
             return np.array(img)[:, :, ::-1]
     except Exception as e:
@@ -87,8 +92,8 @@ def _decode_base64_image(b64: str):
 def _evaluate_pad(selfie_b64: str, request_id: str):
     """يستدعي الخدمة الموثقة. (decision, state_str, liveness, reasons)."""
     try:
-        from src.pad.service import get_pad_service
         from src.pad.contract import PADInput
+        from src.pad.service import get_pad_service
     except Exception as e:
         return None, "UNAVAILABLE", None, (f"import failed: {e}",)
 

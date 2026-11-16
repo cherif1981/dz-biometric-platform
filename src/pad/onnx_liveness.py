@@ -2,9 +2,12 @@
 Preprocessing: RGB, [0,255] → resize → /255 → (x-0.5)/0.5 = [-1,1].
 """
 from __future__ import annotations
-import base64, io
+
+import base64
+import io
 from pathlib import Path
 from typing import Optional
+
 import numpy as np
 from PIL import Image
 

@@ -154,8 +154,6 @@ _session = None
 def _get_session():
     global _session
     if _session is None:
-        _session = ort.InferenceSession(
-            MINIFASNET_ONNX,
             providers=["CPUExecutionProvider"],
         )
     return _session

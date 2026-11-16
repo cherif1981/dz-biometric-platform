@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+
 router = APIRouter(tags=["database"])
 
 @router.get("/health")

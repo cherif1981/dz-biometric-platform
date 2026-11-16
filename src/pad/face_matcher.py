@@ -1,7 +1,10 @@
 """InsightFace matcher with upscale fallback for small/aligned crops."""
 from __future__ import annotations
-import base64, io
+
+import base64
+import io
 from typing import Optional
+
 import numpy as np
 from PIL import Image
 
