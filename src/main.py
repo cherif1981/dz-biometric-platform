@@ -27,15 +27,6 @@ app = FastAPI(
 
 app.include_router(api_router, prefix="/api/v1")
 
-# --- تسجيل مباشر للـ routers الفرعية (يتجاوز أي خطأ في router.py) ---
-from src.api.v1.endpoints import verify as _verify_mod
-from src.api.v1.endpoints import auth as _auth_mod
-from src.api.v1.endpoints import audit as _audit_mod
-
-app.include_router(_verify_mod.router, prefix="/api/v1/verify", tags=["verify"])
-app.include_router(_auth_mod.router,   prefix="/api/v1/auth",   tags=["auth"])
-app.include_router(_audit_mod.router,  prefix="/api/v1/audit",  tags=["audit"])
-# --- نهاية التسجيل المباشر ---
 
 
 # --- ربط مسارات API v1 (موحّد) ---

@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 from loguru import logger
 
-LOG_DIR = pathlib.Path("/content/dz-biometric-platform/logs")
+LOG_DIR = pathlib.Path("logs")
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 LOG_FILE = LOG_DIR / "verification_audit.jsonl"
 

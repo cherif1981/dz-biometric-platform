@@ -27,7 +27,7 @@ def _resolve_model_path() -> str:
     env = _os.environ.get("MODEL_PATH")
     if env:
         return env
-    colab = "/content/models/MiniFASNetV2.onnx"
+    colab = "models/MiniFASNetV2.onnx"
     if _os.path.isdir(_os.path.dirname(colab)):
         return colab
     return _os.path.abspath("MiniFASNetV2.onnx")
@@ -35,7 +35,7 @@ def _resolve_model_path() -> str:
 
 MODEL_PATH = _resolve_model_path()
 YUNET_URL = "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx"
-YUNET_PATH = "/content/models/face_detection_yunet_2023mar.onnx"
+YUNET_PATH = "models/face_detection_yunet_2023mar.onnx"
 INPUT_SIZE = (80, 80)
 SCALE = 2.7
 # real_class_index is loaded from config/security.yaml (single source of truth).
@@ -44,7 +44,7 @@ def _load_real_class_index() -> int:
     import pathlib
 
     import yaml
-    yaml_p = pathlib.Path("/content/dz-biometric-platform/config/security.yaml")
+    yaml_p = pathlib.Path("config/security.yaml")
     if not yaml_p.exists():
         raise RuntimeError(
             "security.yaml missing: cannot determine real_class_index; refusing to start"
@@ -141,7 +141,7 @@ def _verify_model_integrity(model_path: str) -> None:
 
     import yaml
 
-    yaml_p = pathlib.Path("/content/dz-biometric-platform/config/security.yaml")
+    yaml_p = pathlib.Path("config/security.yaml")
     if not yaml_p.exists():
         raise RuntimeError(
             "security.yaml missing: cannot verify model integrity; refusing to load model"

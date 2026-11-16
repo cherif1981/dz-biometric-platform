@@ -8,7 +8,7 @@ from typing import Any
 
 import yaml
 
-DEFAULT_PATH = "/content/dz-biometric-platform/config/security.yaml"
+DEFAULT_PATH = "config/security.yaml"
 
 
 def _env_override(cfg: dict, path: str, env: str, cast=str) -> None:

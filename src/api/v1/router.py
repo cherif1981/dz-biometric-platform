@@ -5,9 +5,9 @@ from loguru import logger
 api_router = APIRouter()
 
 # وحدات حرجة — يجب أن تُحمَّل أو نفشل صراحةً
-CRITICAL = ["auth"]
+CRITICAL = ["auth", "verify"]
 # وحدات اختيارية — تُتخطى عند غياب التبعيات
-OPTIONAL = ["identity", "ocr", "face", "verify", "database", "audit"]
+OPTIONAL = ["identity", "ocr", "face", "database", "audit"]
 
 
 def _mount(name: str, critical: bool):
